@@ -1,0 +1,19 @@
+/* Empty. Add your own CSS if you like */
+
+span {
+	color: #5a3802;
+}
+
+h1 {
+	font-weight: bold;
+	color: #fea203;
+}
+.etapaTitle {
+	font-weight: bold;
+	color: #fea203;
+}
+
+.etapaLocation{
+	color: #7d5d43;
+	font-weight: bold;
+}
