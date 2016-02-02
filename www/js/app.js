@@ -6,7 +6,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', [ 'ionic','ionic.service.core',  'starter.controllers', 'ionic.service.push','ngCordova' ])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform,$rootScope) {
 	$ionicPlatform.ready(function() {
 		// Hide the accessory bar by default (remove this to show the accessory
 		// bar above the keyboard
@@ -19,6 +19,52 @@ angular.module('starter', [ 'ionic','ionic.service.core',  'starter.controllers'
 		if (window.StatusBar) {
 			// org.apache.cordova.statusbar required
 			StatusBar.styleDefault();
+		}
+		// kick off the platform web client
+		try {
+			Ionic.io();
+			console.log("vai registrar pushes");
+			$rootScope.onRegistered = function(pushToken) {
+				try {
+					console.log("Got Token onRegister: " + pushToken.token + " ");
+					var ionicUser = Ionic.User.current();
+					if (ionicUser.id) {
+						console.log("setting token to user");
+						ionicUser.addPushToken(pushToken.token);
+						ionicUser.save().then(function() {
+							console.log("token setado")
+						}, function(data) {
+							console.log("erro ao setar token!" + data)
+						});
+					}
+
+				} catch (e) {
+					console.log("erro regi " + e.message);
+				}
+
+			};
+			var push = new Ionic.Push({
+				"onNotification" : function(notification) {
+					var payload = notification.payload;
+					console.log(notification, payload);
+					var idMsg = Math.round((Math.random() * 10000));
+//					$cordovaLocalNotification.schedule({
+//						id : idMsg,
+//						title : notification.title,
+//						text : notification.message,
+//						icon : 'file://img/full.png',
+//					}).then(function(result) {
+//						console.log("resultado " + result);
+//					});
+				},
+				"onRegister" : $rootScope.onRegistered
+
+			});
+
+			push.register();
+		} catch (e) {
+			console.log("erro Ionic.Push " + e.message);
+
 		}
 	});
 })
@@ -74,7 +120,8 @@ angular.module('starter', [ 'ionic','ionic.service.core',  'starter.controllers'
 		url : '/profile',
 		views : {
 			'menuContent' : {
-				templateUrl : 'templates/profile.html'
+				templateUrl : 'templates/profile.html',
+				controller : 'ProfileCtrl',
 			}
 		}
 	})
