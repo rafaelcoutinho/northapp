@@ -102,7 +102,8 @@ angular.module('starter', [ 'ionic','ionic.service.core',  'starter.controllers'
 		url : '/ranking',
 		views : {
 			'menuContent' : {
-				templateUrl : 'templates/ranking.html'
+				templateUrl : 'templates/ranking.html',
+				controller:'RankingCtrl'
 			}
 		}
 	})

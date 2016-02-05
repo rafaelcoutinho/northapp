@@ -1,23 +1,36 @@
-<ion-view view-title="Etapa"> <ion-content>
-<div class="list card">
 
-  <div class="item item-avatar">
-    <img src="{{etapa.img}}">
-    <h2>{{etapa.title}}</h2>
-    <p>{{etapa.date}}</p>
-  </div>
+<ion-view view-title="Etapa">
 
-  <div class="item item-body">
-    <img class="full-image" src="{{etapa.imgFull}}">
-    <p>
-      {{etapa.descFull}}
-    </p>
-    <p>
-      <a href="#" class="subdued">Resultados</a>
-      <a href="#" class="subdued">Fotos</a>
-      <a href="#" class="subdued">Como chegar</a>
-    </p>
-  </div>
+<div class=" tabs-top  ">
+	<div class="tabs">
+		<a class="tab-item active" href="#"> <i class="icon ion-home"></i>
+			Test
+		</a> <a class="tab-item" href="#"> <i class="icon ion-star"></i>
+			Favorites
+		</a> <a class="tab-item" href="#"> <i class="icon ion-gear-a"></i>
+			Settings
+		</a>
+	</div>
+</div>
+<ion-content>
+
+<div class="list card" style="margin-top: 50px">
+
+	<div class="item item-avatar">
+		<img src="{{etapa.img}}">
+		<h2>{{etapa.title}}</h2>
+		<p>{{etapa.date}}</p>
+	</div>
+
+	<div class="item item-body">
+		<img class="full-image" src="{{etapa.imgFull}}">
+		<p>{{etapa.descFull}}</p>
+		<p>
+			<a href="#" class="subdued">Resultados</a> <a href="#"
+				class="subdued">Fotos</a> <a href="#" class="subdued">Como
+				chegar</a>
+		</p>
+	</div>
 
 </div>
 

@@ -142,9 +142,10 @@ angular.module('starter.controllers', [ 'ionic', 'ngCordova', 'ngStorage'
 	};
 }).controller('ProfileCtrl', function($scope, $cordovaFacebook, loginService) {
 	$scope.user = loginService.getUser();
-	
+
 	$scope.getfbinfo = function() {
-		$cordovaFacebook.api("me", [ "email","user_friends"]).then(function(success) {
+		$cordovaFacebook.api("me", [ "email", "user_friends"
+		]).then(function(success) {
 			// success
 			console.log("public " + JSON.stringify(success));
 			$scope.logUserIn(success);
@@ -158,7 +159,7 @@ angular.module('starter.controllers', [ 'ionic', 'ngCordova', 'ngStorage'
 	}
 	$scope.doLoginFB = function() {
 
-		$cordovaFacebook.login([ "public_profile",  "email"
+		$cordovaFacebook.login([ "public_profile", "email"
 		]).then(function(user) {
 			console.log("sucesso " + JSON.stringify(user));
 			if (user.email) {
@@ -187,75 +188,158 @@ angular.module('starter.controllers', [ 'ionic', 'ngCordova', 'ngStorage'
 		$scope.user = loginService.getUser();
 	};
 
-})
-
-.controller('EtapasCtrl', function($scope, $stateParams) {
-	console.log("entrou")
-	$scope.etapas = [ {
-		title : '1a. Etapa',
-		location : 'Jarinu/SP',
-		desc : 'Parque Danape',
-		date : '21/02/16',
-		id : 1,
-		img : 'img/random/trek01.png',
-		imgFull : 'img/random/trek01_full.png',
-		descFull : 'Foi dada a largada para o maior Enduro a Pé do Brasil! A primeira etapa da COPA NORTH de Enduro a Pé 2016 acontece no dia 21 de fevereiro. E dessa vez quem recebe a prova de abertura é o Parque D\'Anape, na cidade de Jarinu.'
-	}, {
-		title : '2a. Etapa',
-		location : 'Local a definir',
-		desc : '',
-		date : '03/04/16',
-		id : 2,
-		img : 'img/random/trek02.png'
-	}, {
-		title : '3a. Etapa',
-		location : 'Local a definir',
-		desc : 'Night Trekking',
-		date : '14/05/16',
-		id : 3,
-		img : 'img/random/night.png'
-	}, {
-		title : '4a. Etapa',
-		location : 'Local a definir',
-		desc : 'Sem equipamentos',
-		date : '19/06/16',
-		id : 4,
-		img : 'img/random/etapaTemp.png'
-	}, {
-		title : '5a. Etapa',
-		location : 'Local a definir',
-		desc : 'Enduro Julino',
-		date : '31/07/16',
-		id : 5,
-		img : 'img/random/etapaTemp.png'
-	}, {
-		title : '6a. Etapa',
-		location : 'Local a definir',
-		desc : '',
-		date : '18/09/16',
-		id : 6,
-		img : 'img/random/etapaTemp.png'
-	}, {
-		title : '7a. Etapa',
-		location : 'Local a definir',
-		desc : 'Enduro noturno halloween',
-		date : '22/10/16',
-		id : 7,
-		img : 'img/random/etapaTemp.png'
-	}, {
-		title : '8a. Etapa',
-		location : 'Local a definir',
-		desc : 'Sem equipamentos',
-		date : '27/11/16',
-		id : 8,
-		img : 'img/random/etapaTemp.png'
+}).factory('EtapasService', function($http, $localStorage) {
+	return {
+		query : function() {
+			var etapas = [ {
+				title : '1a. Etapa',
+				location : 'Jarinu/SP',
+				desc : 'Parque Danape',
+				date : '21/02/16',
+				id : 1,
+				img : 'img/random/trek01.png',
+				imgFull : 'img/random/trek01_full.png',
+				descFull : 'Foi dada a largada para o maior Enduro a Pé do Brasil! A primeira etapa da COPA NORTH de Enduro a Pé 2016 acontece no dia 21 de fevereiro. E dessa vez quem recebe a prova de abertura é o Parque D\'Anape, na cidade de Jarinu.'
+			}, {
+				title : '2a. Etapa',
+				location : 'Local a definir',
+				desc : '',
+				date : '03/04/16',
+				id : 2,
+				img : 'img/random/trek02.png'
+			}, {
+				title : '3a. Etapa',
+				location : 'Local a definir',
+				desc : 'Night Trekking',
+				date : '14/05/16',
+				id : 3,
+				img : 'img/random/night.png'
+			}, {
+				title : '4a. Etapa',
+				location : 'Local a definir',
+				desc : 'Sem equipamentos',
+				date : '19/06/16',
+				id : 4,
+				img : 'img/random/etapaTemp.png'
+			}, {
+				title : '5a. Etapa',
+				location : 'Local a definir',
+				desc : 'Enduro Julino',
+				date : '31/07/16',
+				id : 5,
+				img : 'img/random/etapaTemp.png'
+			}, {
+				title : '6a. Etapa',
+				location : 'Local a definir',
+				desc : '',
+				date : '18/09/16',
+				id : 6,
+				img : 'img/random/etapaTemp.png'
+			}, {
+				title : '7a. Etapa',
+				location : 'Local a definir',
+				desc : 'Enduro noturno halloween',
+				date : '22/10/16',
+				id : 7,
+				img : 'img/random/etapaTemp.png'
+			}, {
+				title : '8a. Etapa',
+				location : 'Local a definir',
+				desc : 'Sem equipamentos',
+				date : '27/11/16',
+				id : 8,
+				img : 'img/random/etapaTemp.png'
+			}
+			];
+			return etapas;
+		}
 	}
 
-	];
+}).controller('EtapasCtrl', function($scope, $stateParams, EtapasService) {
+	console.log("entrou")
+	$scope.etapas = EtapasService.query();
 	if ($stateParams.id) {
 		$scope.etapa = $scope.etapas[$stateParams.id - 1];
 	}
 })
 
-.controller('PlaylistCtrl', function($scope, $stateParams) {
+.controller('RankingCtrl', function($scope, $stateParams, EtapasService) {
+	$scope.etapas = EtapasService.query();
+	$scope.currEtapaIndex = 0;
+	$scope.expandedEquipe = -1;
+	$scope.showEquipeDetails = function(equipe) {
+		return $scope.expandedEquipe == equipe.name;
+	}
+	$scope.expandDetails = function(equipe) {
+		$scope.expandedEquipe = equipe.name;
+	}
+
+	$scope.nextEtapa = function() {
+		$scope.currEtapaIndex++;
+	}
+	$scope.previousEtapa = function() {
+		if ($scope.currEtapaIndex > 0) {
+			$scope.currEtapaIndex--;
+		}
+	}
+	$scope.getCurrentEtapa = function(equipe) {
+		return equipe.points[$scope.currEtapaIndex];
+	}
+	$scope.getCurrentEtapaName = function() {
+		return $scope.etapas[$scope.currEtapaIndex].title;
+	};
+	$scope.results = [ {
+		name : "Anta",
+		pics:['spengler.jpg','venkman.jpg'],
+		points : [ {
+			position : 20,
+			etapaId : 1,
+			points : 1.96
+		}, {
+			position : 2,
+			etapaId : 2,
+			points : 17
+		}
+		],
+		total : {
+			position : 1,
+			points : 102
+		}
+	}, {
+		name : "TTT",
+		pics:['stantz.jpg','winston.jpg','tully.jpg'],
+		points : [ {
+			position : 19,
+			etapaId : 1,
+			points : 2.0
+		}, {
+			position : 3,
+			etapaId : 2,
+			points : 15
+		}
+		],
+		total : {
+			position : 2,
+			points : 100
+		}
+	}, {
+		name : "CuméQé",
+		pics:['slimer.jpg'],
+		points : [ {
+			position : 99,
+			etapaId : 1,
+			points : 0.0
+		}, {
+			position : 98,
+			etapaId : 2,
+			points : 1.0
+		}
+		],
+		total : {
+			position : 99,
+			points : -1
+		}
+	}
+	];
+
 });

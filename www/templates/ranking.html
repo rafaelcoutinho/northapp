@@ -1,5 +1,46 @@
-<ion-view view-title="Ranking">
-  <ion-content>
-    <h1>Ranking</h1>
-  </ion-content>
-</ion-view>
+<ion-view view-title="Ranking"> <ion-content>
+<style>
+.avatarImage {
+	max-width: 40px;
+	max-height: 40px;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+}
+</style>
+<div class="row">
+	<div class="col col-10">
+		<button class="button button-stable icon-right ion-chevron-left"
+			ng-click="previousEtapa()" style="min-width: 0px; height: 100%;"></button>
+	</div>
+	<div class="col col-80">
+		<div class="row">
+			<div class="col col-top col-10"></div>
+			<div class="col col-top col-25">Equipe A</div>
+			<div class="col col-top">Pontos {{getCurrentEtapaName()}}</div>
+			<div class="col col-top">Total</div>
+		</div>
+		<div ng-repeat="equipe in results" ng-click="expandDetails(equipe)">
+
+			<div class="row">
+				<div class="col col-demo col-10">{{equipe.total.position}}</div>
+				<div class="col col-demo col-25">{{equipe.name}}</div>
+				<div class="col col-demo">{{getCurrentEtapa(equipe).points}}</div>
+				<div class="col col-demo">{{equipe.total.points}}</div>
+			</div>
+			<div class="row responsive-sm" ng-show="showEquipeDetails(equipe)">
+				<div class="col">
+					
+					<img class="avatarImage" ng-repeat="pic in equipe.pics" 
+						ng-src="http://ionicframework.com/img/docs/{{pic}}">
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<div class="col col-10">
+		<button class="button button-stable icon-right ion-chevron-right"
+			ng-click="nextEtapa()" style="min-width: 0px; height: 100%;"></button>
+	</div>
+</div>
+</ion-content> </ion-view>
