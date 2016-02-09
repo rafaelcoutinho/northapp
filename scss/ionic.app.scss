@@ -1,0 +1,47 @@
+/*
+To customize the look and feel of Ionic, you can override the variables
+in ionic's _variables.scss file.
+
+For example, you might change some of the default colors:
+
+$light:                           #fff !default;
+$stable:                          #f8f8f8 !default;
+$positive:                        #387ef5 !default;
+$calm:                            #11c1f3 !default;
+$balanced:                        #33cd5f !default;
+$energized:                       #ffc900 !default;
+$assertive:                       #ef473a !default;
+$royal:                           #886aea !default;
+$dark:                            #444 !default;
+*/
+$balanced:                        #7FA332 !default;
+$button-balanced-text:            #fff !default;
+$menu-bg:                         #fff !default;
+$base-background-color:            $menu-bg; 
+$item-divider-bg:                   #F5A81C !default;
+$item-divider-color:              #fff;
+$card-body-bg:                      #7FA332;
+
+
+$big-bg:      'http://www.northbrasil.com.br/northbrasil/img/bgDestaque.gif';
+// The path for our ionicons font files, relative to the built CSS in www/css
+$ionicons-font-path: "../lib/ionic/fonts" !default;
+
+.scroll-bg {
+  background: url($big-bg) no-repeat center center fixed;
+  background-size: cover;
+}
+ion-side-menu a.item{
+    background-color: #7FA332;
+    color:#fff;
+}
+ .avatarImage {
+                max-width: 40px;
+                max-height: 40px;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+            }
+// Include all of Ionic
+@import "www/lib/ionic/scss/ionic";
+

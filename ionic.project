@@ -1,4 +1,12 @@
 {
   "name": "NorthApp",
-  "app_id": "a6241020"
+  "app_id": "a6241020",
+  "gulpStartupTasks": [
+    "sass",
+    "watch"
+  ],
+  "watchPatterns": [
+    "www/**/*",
+    "!www/lib/**/*"
+  ]
 }

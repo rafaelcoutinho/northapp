@@ -1,10 +1,12 @@
 # Specifies intentionally untracked files to ignore when using Git
 # http://git-scm.com/docs/gitignore
 
+www/css/ionic.app.css
+www/css/ionic.app.min.css
 node_modules/
 platforms/
 plugins/
-scss/
+
 hooks/
 resources/android/
 resources/ios/
