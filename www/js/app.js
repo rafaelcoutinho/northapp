@@ -92,6 +92,46 @@ angular.module('starter', ['ionic', 'ionic.service.core', 'starter.controllers',
                     }
                 }
             })
+             .state('app.etapaGrid', {
+                url: '/etapa/:id/grid',
+
+                views: {
+                    'menuContent': {
+                        controller: 'EtapasCtrl',
+                        templateUrl: 'templates/etapa.grid.html'
+                    }
+                }
+            })
+            .state('app.etapaLocation', {
+                url: '/etapa/:id/location',
+
+                views: {
+                    'menuContent': {
+                        controller: 'EtapasCtrl',
+                        templateUrl: 'templates/etapa.location.html'
+                    }
+                }
+            })
+            .state('app.etapaResults', {
+                url: '/etapa/:id/results',
+
+                views: {
+                    'menuContent': {
+                        controller: 'EtapasCtrl',
+                        templateUrl: 'templates/etapa.results.html'
+                    }
+                }
+            })
+            .state('app.etapaPictures', {
+                url: '/etapa/:id/pictures',
+
+                views: {
+                    'menuContent': {
+                        controller: 'EtapasCtrl',
+                        templateUrl: 'templates/etapa.pictures.html'
+                    }
+                }
+            })
             .state('app.ranking', {
                 url: '/ranking',
                 views: {

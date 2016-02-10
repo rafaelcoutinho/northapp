@@ -257,19 +257,29 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
             }
         }
 
-    }).controller('EtapasCtrl', function ($scope, $stateParams, EtapasService) {
-        console.log("entrou")
-        $scope.openMaps=function(etapa){
+    }).controller('EtapasCtrl', function ($scope, $stateParams, EtapasService,$location,$ionicBackdrop, $timeout, $rootScope) {
+        
+        console.log("entrou",$stateParams.id)
+        $scope.tabstemplate="templates/etapa.tabs.html";
+        $scope.isTab=function(val){
+            console.log(val,$location);
+            if($location.path().indexOf(val)>-1){
+                return " active";
+            }
+            return "";
+        }
+       
+        $scope.etapas = EtapasService.query();
+        if ($stateParams.id) {
+            $scope.etapa = $scope.etapas[$stateParams.id - 1];
+        }
+         $scope.openMaps=function(etapa){
             var location = "48.356860,17.011106";
             if(ionic.Platform.isIOS()) {
                 window.open('waze://?ll=' + location + '&navigate=yes');
             } else if (ionic.Platform.isAndroid()) {   
                 window.open('geo:' + location + '?&q=' + location);
             }
-        }
-        $scope.etapas = EtapasService.query();
-        if ($stateParams.id) {
-            $scope.etapa = $scope.etapas[$stateParams.id - 1];
         }
     })
 
