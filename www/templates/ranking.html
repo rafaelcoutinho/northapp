@@ -11,32 +11,30 @@
                 <option>Turismo</option>
             </select>
         </label>
-
-        <div class="row">
-            <div class="col col-10">
-                <button class="button button-stable icon-right ion-chevron-left" ng-click="previousEtapa()" style="min-width: 0px; "></button>
+         <label class="item item-input item-select">
+            <div class="input-label">
+                Ranking
             </div>
-            <div class="col col-80" style="font-size:23px;height: 100%;">
-                {{getCurrentEtapaName()}}
-            </div>
-            <div class="col col-10">
-                <button class="button button-stable icon-right ion-chevron-right" ng-click="nextEtapa()" style="min-width: 0px; height: 100%;"></button>
-            </div>
-        </div>
+            <select>
+                <option>2016</option>
+                <option>1o Turno</option>
+                <option>2o Turno</option>                
+            </select>
+        </label>
+        
         <div class="list card">
 
             <div class="row">
                 <div class="col col-top col-10">#</div>
-                <div class="col col-top col-25">Equipe</div>
-                <div class="col col-top">Total</div>
-                <div class="col col-top">Pontos</div>
+                <div class="col col-top col-50">Equipe</div>
+                <div class="col col-top col-33">Pontos</div>                
             </div>
             <a class="item " ng-repeat="equipe in results" href="#">
                 <div class="row">
                     <div class="col col-demo col-10">{{equipe.total.position}}</div>
-                    <div class="col col-demo col-25" style="    font-size: 18px; font-weight: bold; color: #F5A81C;">{{equipe.name}}</div>
-                    <div class="col col-demo">{{equipe.total.points}}</div>
-                    <div class="col col-demo">{{getCurrentEtapa(equipe).points}}</div>
+                    <div class="col col-demo col-50" style=" font-size: 18px; font-weight: bold; color: #F5A81C;">{{equipe.name}}</div>
+                    <div class="col col-demo col-33">{{equipe.total.points}}</div>
+                    
                 </div>
 
                 <img class="avatarImage" style="float:right;" ng-repeat="pic in equipe.pics" ng-src="http://ionicframework.com/img/docs/{{pic}}">

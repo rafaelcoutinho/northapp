@@ -1,5 +1,4 @@
-angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
-])
+angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'])
 
     .controller('AppCtrl', function ($scope, $ionicModal, $ionicPlatform, $timeout, $ionicPush, $cordovaLocalNotification) {
 
@@ -77,7 +76,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
         };
     })
     .controller('TeamCtrl', function ($scope) {
-        $scope.pics = ['http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_678.JPG','http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_665.JPG'];
+        $scope.pics = ['http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_678.JPG', 'http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_665.JPG'];
     })
     .controller('HighlightCtrl', function ($scope) {
 
@@ -190,14 +189,72 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
             $scope.user = loginService.getUser();
         };
 
-    }).factory('EtapasService', function ($http, $localStorage) {
+    })
+    .factory('GridService', function ($http, $localStorage) {
+        return {
+            query: function () {
+                var grid = [
+                    {
+                        time: 1456052400000,
+                        team: {
+                            name: "Anta"
+                        }
+                    },
+                    {
+                        time: 1456052460000,
+                        team: {
+                            name: "Associação Sabesp"
+                        }
+                    },
+                    {
+                        time: 1456052520000,
+                        team: {
+                            name: "TTT"
+                        }
+                    }
+                ]
+                return grid;
+            },
+            queryPreGrid: function () {
+                var grid = [{
+
+                    team: {
+                        name: "CALANGO NA TRILHA	"
+                    }
+                },
+                    {
+
+                        team: {
+                            name: "TENTEQUELESENTEFESTES"
+                        }
+                    },
+                    {
+
+                        team: {
+                            name: "C.S.I. NA TRILHA"
+                        }
+                    }
+                ]
+                return grid;
+            },
+
+        }
+    })
+
+    .factory('EtapasService', function ($http, $localStorage) {
         return {
             query: function () {
                 var etapas = [{
                     title: '1a. Etapa',
-                    location: 'Jarinu/SP',
-		    address:'Rod. Edgard Máximo Zambotto - Fim de Campo, Jarinu - SP, 13240-000',
-                    desc: 'Parque Danape',
+                    location: {
+                        name: "Parque D'Anape",
+                        address: 'Rod. Edgard Máximo Zambotto - Fim de Campo, Jarinu - SP, 13240-000',
+                        coords: '-23.1127309,-46.721765',
+                        phone: '(11) 4016-4060',
+                        website: 'www.parquedanape.com.br',
+                        desc: "<p>Para quem quiser se hospedar no local do evento, o PARQUE D'ANAPE dispões de confortáveis acomodações.</p><p>Entre em contato diretamente com o PARQUE D'ANAPE e consulte valores e condições. A dica é reservar com antecedência, pois a vagas costumam ser disputadas no finais de semana.</p> <p> A 45 minutos da saída de São Paulo o PARQUE D'ANAPE oferece uma ampla e variada estrutura, hotel com apartamentos confortáveis, pesqueiro no sitema pesque-pague, lanchonetes e restaurante com a melhorcomida mineira da região.</p>"
+                    },
+
                     date: '21/02/16',
                     id: 1,
                     img: 'img/random/trek01.png',
@@ -206,7 +263,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
                 }, {
                         title: '2a. Etapa',
                         location: 'Local a definir',
-			address:'-23.1127309,-46.721765',
+
                         desc: '',
                         date: '03/04/16',
                         id: 2,
@@ -259,30 +316,46 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
             }
         }
 
-    }).controller('EtapasCtrl', function ($scope, $stateParams, EtapasService,$location,$ionicBackdrop, $timeout, $rootScope) {
-        
-        console.log("entrou",$stateParams.id)
-        $scope.tabstemplate="templates/etapa.tabs.html";
-        $scope.isTab=function(val){
-            console.log(val,$location);
-            if($location.path().indexOf(val)>-1){
+    }).controller('EtapasCtrl', function ($scope, $stateParams, EtapasService, $location, $ionicBackdrop, $timeout, $rootScope,$cordovaInAppBrowser, GridService) {
+
+        console.log("entrou", $stateParams.id)
+        $scope.tabstemplate = "templates/etapa.tabs.html";
+        $scope.isTab = function (val) {
+            console.log(val, $location);
+            if ($location.path().indexOf(val) > -1) {
                 return " active";
             }
             return "";
         }
-       
+
         $scope.etapas = EtapasService.query();
         if ($stateParams.id) {
             $scope.etapa = $scope.etapas[$stateParams.id - 1];
+            $scope.grid = GridService.query();
+            $scope.preGrid = GridService.queryPreGrid();
         }
-         $scope.maps=function(etapa){
-		console.log("maps");
-            if(ionic.Platform.isIOS()) {
-		console.log("ios");
-                window.open('waze://?ll=' + etapa.address + '&navigate=yes');
-            } else if (ionic.Platform.isAndroid()) {   
-		console.log("android");
-                window.open('geo:' + etapa.address + '?&q=' +etapa.address);
+        $scope.tel = function (phone) {
+            window.open('tel:' + phone);
+        }
+        $scope.web = function (website) {
+
+           $cordovaInAppBrowser.open('http://'+website, '_blank')
+      .then(function(event) {
+        // success
+      })
+      .catch(function(event) {
+        // error
+      });
+
+        }
+        $scope.maps = function (etapa) {
+            console.log("maps");
+            if (ionic.Platform.isIOS()) {
+                console.log("ios");
+                window.open('waze://?ll=' + etapa.location.address + '&navigate=yes');
+            } else if (ionic.Platform.isAndroid()) {
+                console.log("android");
+                window.open('geo:' + etapa.location.coords + '?&q=' + etapa.location.address);
             }
         }
     })
