@@ -196,6 +196,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
                 var etapas = [{
                     title: '1a. Etapa',
                     location: 'Jarinu/SP',
+		    address:'Rod. Edgard Máximo Zambotto - Fim de Campo, Jarinu - SP, 13240-000',
                     desc: 'Parque Danape',
                     date: '21/02/16',
                     id: 1,
@@ -205,6 +206,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
                 }, {
                         title: '2a. Etapa',
                         location: 'Local a definir',
+			address:'-23.1127309,-46.721765',
                         desc: '',
                         date: '03/04/16',
                         id: 2,
@@ -273,12 +275,14 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
         if ($stateParams.id) {
             $scope.etapa = $scope.etapas[$stateParams.id - 1];
         }
-         $scope.openMaps=function(etapa){
-            var location = "48.356860,17.011106";
+         $scope.maps=function(etapa){
+		console.log("maps");
             if(ionic.Platform.isIOS()) {
-                window.open('waze://?ll=' + location + '&navigate=yes');
+		console.log("ios");
+                window.open('waze://?ll=' + etapa.address + '&navigate=yes');
             } else if (ionic.Platform.isAndroid()) {   
-                window.open('geo:' + location + '?&q=' + location);
+		console.log("android");
+                window.open('geo:' + etapa.address + '?&q=' +etapa.address);
             }
         }
     })
