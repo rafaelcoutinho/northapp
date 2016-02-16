@@ -1,4 +1,4 @@
-angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'])
+angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services'])
 
     .controller('AppCtrl', function ($scope, $ionicModal, $ionicPlatform, $timeout, $ionicPush, $cordovaLocalNotification) {
 
@@ -190,56 +190,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'])
         };
 
     })
-    .factory('GridService', function ($http, $localStorage) {
-        return {
-            query: function () {
-                var grid = [
-                    {
-                        time: 1456052400000,
-                        team: {
-                            name: "Anta"
-                        }
-                    },
-                    {
-                        time: 1456052460000,
-                        team: {
-                            name: "Associação Sabesp"
-                        }
-                    },
-                    {
-                        time: 1456052520000,
-                        team: {
-                            name: "TTT"
-                        }
-                    }
-                ]
-                return grid;
-            },
-            queryPreGrid: function () {
-                var grid = [{
 
-                    team: {
-                        name: "CALANGO NA TRILHA	"
-                    }
-                },
-                    {
-
-                        team: {
-                            name: "TENTEQUELESENTEFESTES"
-                        }
-                    },
-                    {
-
-                        team: {
-                            name: "C.S.I. NA TRILHA"
-                        }
-                    }
-                ]
-                return grid;
-            },
-
-        }
-    })
 
     .factory('EtapasService', function ($http, $localStorage) {
         return {
@@ -316,7 +267,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'])
             }
         }
 
-    }).controller('EtapasCtrl', function ($scope, $stateParams, EtapasService, $location, $ionicBackdrop, $timeout, $rootScope,$cordovaInAppBrowser, GridService) {
+    }).controller('EtapasCtrl', function ($scope, $stateParams, EtapasService, $location, $ionicBackdrop, $timeout, $rootScope,$ionicHistory, $cordovaInAppBrowser, GridService) {
 
         console.log("entrou", $stateParams.id)
         $scope.tabstemplate = "templates/etapa.tabs.html";
@@ -339,23 +290,29 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'])
         }
         $scope.web = function (website) {
 
-           $cordovaInAppBrowser.open('http://'+website, '_blank')
-      .then(function(event) {
-        // success
-      })
-      .catch(function(event) {
-        // error
-      });
+            $cordovaInAppBrowser.open('http://' + website, '_blank')
+                .then(function (event) {
+                    // success
+                })
+                .catch(function (event) {
+                    // error
+                });
 
         }
         $scope.maps = function (etapa) {
             console.log("maps");
             if (ionic.Platform.isIOS()) {
                 console.log("ios");
-                window.open('waze://?ll=' + etapa.location.address + '&navigate=yes');
+                window.open('waze://?ll=' + encodeURI(etapa.location.address )+ '&navigate=yes');
             } else if (ionic.Platform.isAndroid()) {
                 console.log("android");
-                window.open('geo:' + etapa.location.coords + '?&q=' + etapa.location.address);
+                if (etapa.location.coords != null) {
+                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.coords),"_system");
+                } else {
+                    $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.address,"_system");
+                }
+            } else {
+                window.open('geo:' +encodeURI( etapa.location.coords) + '?&q=' + encodeURI(etapa.location.address));
             }
         }
     })
