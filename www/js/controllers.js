@@ -208,10 +208,21 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             return "";
         }
 
-        $scope.etapas = EtapasService.query();
+        $scope.etapas = EtapasService.query(function(){
+             for (var index = 0; index < $scope.etapas.length; index++) {
+                var element = $scope.etapas[index];
+                if(element.id==$stateParams.id){
+                    $scope.etapa = element;
+                    break;
+                }
+                
+            }
+        });
         if ($stateParams.id) {
-            console.log("Etapa is here")
-            $scope.etapa = $scope.etapas[$stateParams.id - 1];
+            console.log("Etapa is here",$scope.etapas.length)
+            // $scope.etapa = EtapasService.get({id:$stateParams.id});
+           
+            
             $scope.gridInfo = GridService.query();
 
         }
