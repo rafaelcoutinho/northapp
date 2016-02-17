@@ -179,10 +179,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             console.log("pegou usuario user " + JSON.stringify(user))
             var localUser = {
                 email: user.email,
-                name: user.name,
+                "name": user.name,
                 fbId: user.id,
                 image: "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128",
-                id: user.id
+                "id": user.id
 
             }
             loginService.setUser(localUser);
@@ -192,88 +192,17 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
 
-    .factory('EtapasService', function ($http, $localStorage) {
-        return {
-            query: function () {
-                var etapas = [{
-                    title: '1a. Etapa',
-                    location: {
-                        name: "Parque D'Anape",
-                        address: 'Rod. Edgard Máximo Zambotto - Fim de Campo, Jarinu - SP, 13240-000',
-                        coords: '-23.1127309,-46.721765',
-                        phone: '(11) 4016-4060',
-                        website: 'www.parquedanape.com.br',
-                        desc: "<p>Para quem quiser se hospedar no local do evento, o PARQUE D'ANAPE dispões de confortáveis acomodações.</p><p>Entre em contato diretamente com o PARQUE D'ANAPE e consulte valores e condições. A dica é reservar com antecedência, pois a vagas costumam ser disputadas no finais de semana.</p> <p> A 45 minutos da saída de São Paulo o PARQUE D'ANAPE oferece uma ampla e variada estrutura, hotel com apartamentos confortáveis, pesqueiro no sitema pesque-pague, lanchonetes e restaurante com a melhorcomida mineira da região.</p>"
-                    },
-
-                    date: '21/02/16',
-                    id: 1,
-                    img: 'img/random/trek01.png',
-                    imgFull: 'img/random/trek01_full.png',
-                    descFull: 'Foi dada a largada para o maior Enduro a Pé do Brasil! A primeira etapa da COPA NORTH de Enduro a Pé 2016 acontece no dia 21 de fevereiro. E dessa vez quem recebe a prova de abertura é o Parque D\'Anape, na cidade de Jarinu.'
-                }, {
-                        title: '2a. Etapa',
-                        location: 'Local a definir',
-
-                        desc: '',
-                        date: '03/04/16',
-                        id: 2,
-                        img: 'img/random/trek02.png'
-                    }, {
-                        title: '3a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Night Trekking',
-                        date: '14/05/16',
-                        id: 3,
-                        img: 'img/random/night.png'
-                    }, {
-                        title: '4a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Sem equipamentos',
-                        date: '19/06/16',
-                        id: 4,
-                        img: 'img/random/etapaTemp.png'
-                    }, {
-                        title: '5a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Enduro Julino',
-                        date: '31/07/16',
-                        id: 5,
-                        img: 'img/random/etapaTemp.png'
-                    }, {
-                        title: '6a. Etapa',
-                        location: 'Local a definir',
-                        desc: '',
-                        date: '18/09/16',
-                        id: 6,
-                        img: 'img/random/etapaTemp.png'
-                    }, {
-                        title: '7a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Enduro noturno halloween',
-                        date: '22/10/16',
-                        id: 7,
-                        img: 'img/random/etapaTemp.png'
-                    }, {
-                        title: '8a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Sem equipamentos',
-                        date: '27/11/16',
-                        id: 8,
-                        img: 'img/random/etapaTemp.png'
-                    }
-                ];
-                return etapas;
-            }
+    .controller('EtapasCtrl', function ($scope, $stateParams, EtapasService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, GridService) {
+        $scope.currTab = "details";
+        $scope.tabstemplate = "templates/etapa.tabs.html";
+        $scope.setTab = function (tabName) {
+            $scope.currTab = tabName;
         }
 
-    }).controller('EtapasCtrl', function ($scope, $stateParams, EtapasService, $location, $ionicBackdrop, $timeout, $rootScope,$ionicHistory, $cordovaInAppBrowser, GridService) {
 
-        console.log("entrou", $stateParams.id)
-        $scope.tabstemplate = "templates/etapa.tabs.html";
         $scope.isTab = function (val) {
-            console.log(val, $location);
-            if ($location.path().indexOf(val) > -1) {
+
+            if ($scope.currTab == val) {
                 return " active";
             }
             return "";
@@ -281,9 +210,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
         $scope.etapas = EtapasService.query();
         if ($stateParams.id) {
+            console.log("Etapa is here")
             $scope.etapa = $scope.etapas[$stateParams.id - 1];
-            $scope.grid = GridService.query();
-            $scope.preGrid = GridService.queryPreGrid();
+            $scope.gridInfo = GridService.query();
+
         }
         $scope.tel = function (phone) {
             window.open('tel:' + phone);
@@ -303,16 +233,16 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             console.log("maps");
             if (ionic.Platform.isIOS()) {
                 console.log("ios");
-                window.open('waze://?ll=' + encodeURI(etapa.location.address )+ '&navigate=yes');
+                window.open('waze://?ll=' + encodeURI(etapa.location.address) + '&navigate=yes');
             } else if (ionic.Platform.isAndroid()) {
                 console.log("android");
                 if (etapa.location.coords != null) {
-                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.coords),"_system");
+                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.coords), "_system");
                 } else {
-                    $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.address,"_system");
+                    $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.address, "_system");
                 }
             } else {
-                window.open('geo:' +encodeURI( etapa.location.coords) + '?&q=' + encodeURI(etapa.location.address));
+                window.open('geo:' + encodeURI(etapa.location.coords) + '?&q=' + encodeURI(etapa.location.address));
             }
         }
     })
@@ -343,7 +273,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             return $scope.etapas[$scope.currEtapaIndex].title;
         };
         $scope.results = [{
-            name: "Anta",
+            "name": "Anta",
             pics: ['spengler.jpg', 'venkman.jpg'],
             points: [{
                 position: 20,
@@ -360,7 +290,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 points: 102
             }
         }, {
-                name: "TTT",
+                "name": "TTT",
                 pics: ['stantz.jpg', 'winston.jpg', 'tully.jpg'],
                 points: [{
                     position: 19,
@@ -377,7 +307,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     points: 100
                 }
             }, {
-                name: "CuméQé",
+                "name": "CuméQé",
                 pics: ['slimer.jpg'],
                 points: [{
                     position: 99,

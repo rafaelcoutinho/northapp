@@ -2,24 +2,166 @@
     <div>
         <ng-include src="tabstemplate" />
     </div>
-    
-    <ion-content class="scroll-bg">
 
-        <div class="list card" style="margin-top: 50px">
+    <ion-view view-title="Etapa" ng-show="currTab == 'details'" ng-cloak>
+        <ion-content class="scroll-bg">
 
-            <div class="item item-avatar">
-                <img src="{{etapa.img}}">
-                <h2>{{etapa.title}}</h2>
-                <p>{{etapa.date}}</p>
+            <div class="list card" style="margin-top: 50px">
+
+                <div class="item item-avatar">
+                    <img src="{{etapa.img}}">
+                    <h2>{{etapa.title}}</h2>
+                    <p>{{etapa.date|date:'shortDate'}}</p>
+                </div>
+
+                <div class="item item-body">
+                    <img class="full-image" src="{{etapa.imgFull}}">
+                    <p>{{etapa.descFull}}</p>
+
+                </div>
+
             </div>
 
-            <div class="item item-body">
-                <img class="full-image" src="{{etapa.imgFull}}">
-                <p>{{etapa.descFull}}</p>
-               
+        </ion-content>
+    </ion-view>
+    <ion-view view-title="Etapa" ng-show="currTab == 'pictures'" ng-cloak>
+
+        <ion-content class="scroll-bg">
+
+            <div class="list card" style="margin-top: 50px">
+
+                <div class="item item-avatar">
+                    <img src="{{etapa.img}}">
+                    <h2>{{etapa.title}}</h2>
+                    <p>{{etapa.date|date:'shortDate'}}</p>
+                </div>
+
+                <div class="item item-body">
+                    Fotos
+                </div>
+
             </div>
 
-        </div>
+        </ion-content>
+    </ion-view>
+    <ion-view view-title="Resultados" ng-show="currTab == 'results'" ng-cloak>
 
-    </ion-content>
+
+
+        <ion-content class="scroll-bg" style="margin-top: 50px">
+            <label class="item item-input item-select">
+                <div class="input-label">
+                    Categoria
+                </div>
+                <select>
+                    <option>Graduados Pró</option>
+                    <option>Graduados</option>
+                    <option>Trekkers</option>
+                    <option>Turismo</option>
+                </select>
+            </label>
+            <div class="list card">
+
+                <div class="item item-avatar">
+                    <img src="{{etapa.img}}">
+                    <h2>{{etapa.title}}</h2>
+                    <p>{{etapa.date|date:'shortDate'}}</p>
+                </div>
+
+                <div class="item item-body">
+                    Resultados
+                </div>
+
+            </div>
+
+        </ion-content>
+
+    </ion-view>
+    <ion-view view-title="Grid de Largada" ng-show="currTab == 'grid'" ng-cloak>
+
+
+        <ion-content class="scroll-bg" style="margin-top: 50px">
+            <label class="item item-input item-select">
+                <div class="input-label">
+
+                </div>
+                <select>
+                    <option>Graduados Pró</option>
+                    <option>Graduados</option>
+                    <option>Trekkers</option>
+                    <option>Turismo</option>
+                </select>
+            </label>
+            <div class="list card">
+
+
+                <div class="row subTituloTabela">
+                    <div class="col col-top col-100">Grid</div>
+                </div>
+                <div class="row">
+                    <div class="col col-demo col-25 titTabela">Horário</div>
+                    <div class="col col-demo col-75 titTabela">Equipe</div>
+
+                </div>
+
+                <div class="row" ng-repeat="entry in gridInfo.grid" ng-class="{'evenRow':($index%2==0),'oddRow':($index%2==1)}">
+                    <div class="col col-demo col-25">{{entry.time | date:'shortTime'}}</div>
+                    <div class="col col-demo col-75">{{entry.team.name}}</div>
+                </div>
+            </div>
+            <div class="list card">
+                <div class="row subTituloTabela">
+                    <div class="col col-top col-100">Pré-Grid</div>
+                </div>
+                <div class="row">
+                    <div class="col col-demo col-25 titTabela">Posição</div>
+                    <div class="col col-demo col-75 titTabela">Equipe</div>
+
+                </div>
+
+                <div class="row" ng-repeat="entry in gridInfo.preGrid" ng-class="{'evenRow':($index%2==0),'oddRow':($index%2==1)}">
+                    <div class="col col-demo col-25">{{$index}}</div>
+                    <div class="col col-demo col-75">{{entry.team.name}}</div>
+                </div>
+
+
+            </div>
+
+        </ion-content>
+    </ion-view>
+
+    <ion-view view-title="Location" ng-show="currTab == 'location'" ng-cloak>
+
+
+        <ion-content class="scroll-bg">
+
+            <div class="list card" style="margin-top: 50px">
+                <a href="#" class="item ">
+                    <h2>{{etapa.location.name}}</h2>
+                </a>
+
+                <a href="#" class="item item-icon-left" ng-click="tel(etapa.location.phone)">
+                    <i class="icon ion-ios-telephone"></i> {{etapa.location.phone}}
+                </a>
+
+                <a href="#" class="item item-icon-left" ng-click="maps(etapa)">
+                    <i class="icon ion-navigate"></i> {{etapa.location.address}}
+                </a>
+
+                <a href="#" class="item item-icon-left" ng-click="web(etapa.location.website)">
+                    <i class="icon ion-link"></i> {{etapa.location.website}}
+                </a>
+                <div class="item item-body" ng-bind-html="etapa.location.desc">
+
+
+
+
+
+
+                </div>
+
+            </div>
+
+        </ion-content>
+    </ion-view>
 </ion-view>

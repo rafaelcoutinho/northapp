@@ -3,10 +3,10 @@
 
 	<a class="item item-thumbnail-left" ng-repeat="etapa in etapas"
 		href="#/app/etapa/{{etapa.id}}"> <img src="{{etapa.img}}">
-		<p class="etapaDate">{{etapa.date}}</p>
+		<p class="etapaDate">{{etapa.date|date:'shortDate'}}</p>
 		<span class="etapaTitle">{{etapa.title}}</span>
 		<span class="etapaTitle">{{etapa.desc}}</span>
-		<p class="etapaLocation">{{etapa.location.name}}</p>
+		<p class="etapaLocation"><span ng-show="etapa.location==null">Local a definir</span>{{etapa.location.name}}</p>
 		
 
 	</a>
