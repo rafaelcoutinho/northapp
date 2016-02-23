@@ -1,4 +1,4 @@
-angular.module('starter', ['ionic', 'ionic.service.core', 'starter.controllers', 'ionic.service.push', 'ngCordova'])
+angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
 
     .run(function ($ionicPlatform, $rootScope) {
         $ionicPlatform.ready(function () {
@@ -64,6 +64,7 @@ angular.module('starter', ['ionic', 'ionic.service.core', 'starter.controllers',
     })
 
     .config(function ($stateProvider, $urlRouterProvider) {
+
         $stateProvider
 
             .state('app', {
@@ -82,6 +83,7 @@ angular.module('starter', ['ionic', 'ionic.service.core', 'starter.controllers',
                     }
                 }
             })
+
             .state('app.etapa', {
                 url: '/etapa/:id',
 
@@ -92,46 +94,7 @@ angular.module('starter', ['ionic', 'ionic.service.core', 'starter.controllers',
                     }
                 }
             })
-             .state('app.etapaGrid', {
-                url: '/etapa/:id/grid',
 
-                views: {
-                    'menuContent': {
-                        controller: 'EtapasCtrl',
-                        templateUrl: 'templates/etapa.grid.html'
-                    }
-                }
-            })
-            .state('app.etapaLocation', {
-                url: '/etapa/:id/location',
-
-                views: {
-                    'menuContent': {
-                        controller: 'EtapasCtrl',
-                        templateUrl: 'templates/etapa.location.html'
-                    }
-                }
-            })
-            .state('app.etapaResults', {
-                url: '/etapa/:id/results',
-
-                views: {
-                    'menuContent': {
-                        controller: 'EtapasCtrl',
-                        templateUrl: 'templates/etapa.results.html'
-                    }
-                }
-            })
-            .state('app.etapaPictures', {
-                url: '/etapa/:id/pictures',
-
-                views: {
-                    'menuContent': {
-                        controller: 'EtapasCtrl',
-                        templateUrl: 'templates/etapa.pictures.html'
-                    }
-                }
-            })
             .state('app.ranking', {
                 url: '/ranking',
                 views: {

@@ -1,5 +1,4 @@
-angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
-])
+angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services'])
 
     .controller('AppCtrl', function ($scope, $ionicModal, $ionicPlatform, $timeout, $ionicPush, $cordovaLocalNotification) {
 
@@ -77,7 +76,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
         };
     })
     .controller('TeamCtrl', function ($scope) {
-        $scope.pics = ['http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_678.JPG','http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_665.JPG'];
+        $scope.pics = ['http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_678.JPG', 'http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_665.JPG'];
     })
     .controller('HighlightCtrl', function ($scope) {
 
@@ -180,105 +179,81 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
             console.log("pegou usuario user " + JSON.stringify(user))
             var localUser = {
                 email: user.email,
-                name: user.name,
+                "name": user.name,
                 fbId: user.id,
                 image: "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128",
-                id: user.id
+                "id": user.id
 
             }
             loginService.setUser(localUser);
             $scope.user = loginService.getUser();
         };
 
-    }).factory('EtapasService', function ($http, $localStorage) {
-        return {
-            query: function () {
-                var etapas = [{
-                    title: '1a. Etapa',
-                    location: 'Jarinu/SP',
-                    desc: 'Parque Danape',
-                    date: '21/02/16',
-                    id: 1,
-                    img: 'img/random/trek01.png',
-                    imgFull: 'img/random/trek01_full.png',
-                    descFull: 'Foi dada a largada para o maior Enduro a Pé do Brasil! A primeira etapa da COPA NORTH de Enduro a Pé 2016 acontece no dia 21 de fevereiro. E dessa vez quem recebe a prova de abertura é o Parque D\'Anape, na cidade de Jarinu.'
-                }, {
-                        title: '2a. Etapa',
-                        location: 'Local a definir',
-                        desc: '',
-                        date: '03/04/16',
-                        id: 2,
-                        img: 'img/random/trek02.png'
-                    }, {
-                        title: '3a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Night Trekking',
-                        date: '14/05/16',
-                        id: 3,
-                        img: 'img/random/night.png'
-                    }, {
-                        title: '4a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Sem equipamentos',
-                        date: '19/06/16',
-                        id: 4,
-                        img: 'img/random/etapaTemp.png'
-                    }, {
-                        title: '5a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Enduro Julino',
-                        date: '31/07/16',
-                        id: 5,
-                        img: 'img/random/etapaTemp.png'
-                    }, {
-                        title: '6a. Etapa',
-                        location: 'Local a definir',
-                        desc: '',
-                        date: '18/09/16',
-                        id: 6,
-                        img: 'img/random/etapaTemp.png'
-                    }, {
-                        title: '7a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Enduro noturno halloween',
-                        date: '22/10/16',
-                        id: 7,
-                        img: 'img/random/etapaTemp.png'
-                    }, {
-                        title: '8a. Etapa',
-                        location: 'Local a definir',
-                        desc: 'Sem equipamentos',
-                        date: '27/11/16',
-                        id: 8,
-                        img: 'img/random/etapaTemp.png'
-                    }
-                ];
-                return etapas;
-            }
+    })
+
+
+    .controller('EtapasCtrl', function ($scope, $stateParams, EtapasService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, GridService) {
+        $scope.currTab = "details";
+        $scope.tabstemplate = "templates/etapa.tabs.html";
+        $scope.setTab = function (tabName) {
+            $scope.currTab = tabName;
         }
 
-    }).controller('EtapasCtrl', function ($scope, $stateParams, EtapasService,$location,$ionicBackdrop, $timeout, $rootScope) {
-        
-        console.log("entrou",$stateParams.id)
-        $scope.tabstemplate="templates/etapa.tabs.html";
-        $scope.isTab=function(val){
-            console.log(val,$location);
-            if($location.path().indexOf(val)>-1){
+
+        $scope.isTab = function (val) {
+
+            if ($scope.currTab == val) {
                 return " active";
             }
             return "";
         }
-       
-        $scope.etapas = EtapasService.query();
+
+        $scope.etapas = EtapasService.query(function(){
+             for (var index = 0; index < $scope.etapas.length; index++) {
+                var element = $scope.etapas[index];
+                if(element.id==$stateParams.id){
+                    $scope.etapa = element;
+                    break;
+                }
+                
+            }
+        });
         if ($stateParams.id) {
-            $scope.etapa = $scope.etapas[$stateParams.id - 1];
+            console.log("Etapa is here",$scope.etapas.length)
+            // $scope.etapa = EtapasService.get({id:$stateParams.id});
+           
+            
+            $scope.gridInfo = GridService.query();
+
         }
-         $scope.openMaps=function(etapa){
-            var location = "48.356860,17.011106";
-            if(ionic.Platform.isIOS()) {
-                window.open('waze://?ll=' + location + '&navigate=yes');
-            } else if (ionic.Platform.isAndroid()) {   
-                window.open('geo:' + location + '?&q=' + location);
+        $scope.tel = function (phone) {
+            window.open('tel:' + phone);
+        }
+        $scope.web = function (website) {
+
+            $cordovaInAppBrowser.open('http://' + website, '_blank')
+                .then(function (event) {
+                    // success
+                })
+                .catch(function (event) {
+                    // error
+                });
+
+        }
+        $scope.maps = function (etapa) {
+            console.log("maps");
+            if (ionic.Platform.isIOS()) {
+                console.log("ios");
+                window.open('waze://?ll=' + encodeURI(etapa.location.address) + '&navigate=yes');
+            } else if (ionic.Platform.isAndroid()) {
+                console.log("android");
+                if (etapa.location.coords != null) {
+                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.coords), "_system");
+                } else {
+                    $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.address, "_system");
+                }
+            } else {
+                window.open('geo:' + encodeURI(etapa.location.coords) + '?&q=' + encodeURI(etapa.location.address));
             }
         }
     })
@@ -309,7 +284,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
             return $scope.etapas[$scope.currEtapaIndex].title;
         };
         $scope.results = [{
-            name: "Anta",
+            "name": "Anta",
             pics: ['spengler.jpg', 'venkman.jpg'],
             points: [{
                 position: 20,
@@ -326,7 +301,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
                 points: 102
             }
         }, {
-                name: "TTT",
+                "name": "TTT",
                 pics: ['stantz.jpg', 'winston.jpg', 'tully.jpg'],
                 points: [{
                     position: 19,
@@ -343,7 +318,7 @@ angular.module('starter.controllers', ['ionic', 'ngCordova', 'ngStorage'
                     points: 100
                 }
             }, {
-                name: "CuméQé",
+                "name": "CuméQé",
                 pics: ['slimer.jpg'],
                 points: [{
                     position: 99,
