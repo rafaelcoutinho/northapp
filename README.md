@@ -22,7 +22,6 @@ https://github.com/rafaelcoutinho/northappadmin
 * Bower
 * Git
 * npm
-* 
 
 #### Instalação
 
