@@ -1,6 +1,6 @@
 # NorthApp
 
-O NorthApp é o aplicativo do CopaNorth da NorthBrasil. O objetivo dele é ser  a  principal  forma  de  comunicação  da  NorthBrasil  com seus competidores. Este deve fornecer informações da CopaNorth como ranking, dados das etapas etc... além de prover meios para a inscrição dos competidores nas etapas.
+O NorthApp é o aplicativo do [CopaNorth](http://www.northbrasil.com.br/northbrasil/index.aspx) da NorthBrasil. O objetivo dele é ser  a  principal  forma  de  comunicação  da  NorthBrasil  com seus competidores. Este deve fornecer informações da CopaNorth como ranking, dados das etapas etc... além de prover meios para a inscrição dos competidores nas etapas.
 
 A NorthBrasil escolheu fazer este aplicativo com código aberto, permitindo que qualquer desenvolvedor possa contribuir para o desenvolvimento do aplicativo. Se você deseja contribuir veja as issues em aberto, desenvolva e envie seu pull request. 
 
