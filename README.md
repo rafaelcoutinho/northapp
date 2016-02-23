@@ -17,22 +17,32 @@ https://github.com/rafaelcoutinho/northappadmin
 
 ### Construção do aplicativo
 
-Deve-se primeiro instalar o Ionic e suas dependências
-```
-$ npm install -g cordova ionic
-```
+#### Pré-requisitos
 
-Execute o bower para instalar as dependências
-```
-$ bower install
-```
+* Bower
+* Git
+* npm
+* 
+
+#### Instalação
+
 Execute o npm para instalar os componentes pendnetes
 ```
 $ npm install
 ```
+Execute o bower para instalar as dependências
+```
+$ bower install
+```
+
 Inicialize o SASS e restaure os plugins
 ```
+$ ionic setup sass
 $ ionic state restore
 $ ionic io init
-$ ionic setup sass
+```
+
+E teste o aplicativo no browser com:
+```
+$ ionic serve
 ```
