@@ -8,7 +8,7 @@ A NorthBrasil escolheu fazer este aplicativo com código aberto, permitindo que 
 
 As versões de produção serão mensais, e os sprints quinzenais. Acompanhe no Huboard o status atual do desenvolvimento.
 
-https://huboard.com/rafaelcoutinho/northapp#/
+https://huboard.com/rafaelcoutinho/northapp
 
 ## Aplicação
 
@@ -19,9 +19,12 @@ https://github.com/rafaelcoutinho/northappadmin
 
 #### Pré-requisitos
 
-* Bower
-* Git
+
+* git
 * npm
+* bower
+
+
 
 #### Instalação
 
