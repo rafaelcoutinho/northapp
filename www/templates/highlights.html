@@ -1,17 +1,18 @@
-<ion-view view-title="Destaque"> <ion-content class="scroll-bg">
-<div class="list card ">
+<ion-view view-title="Destaque">
+    <ion-content class="scroll-bg">        
+        <div class="list card ">
 
+            <div ng-repeat="highlight in highlights | orderBy:'-id'" ng-cloak>
+                <div class="item item-divider">{{highlight.titulo}}</div>
+                <div class="item item-body">
+                    <img class="item item-image" ng-src="{{highlight.imgUrl}}">
 
-	<div class="item item-divider">CopaNorth 2016</div>
-	<div class="item item-body">
-		<img class="item item-image" class="full-image" src="img/random/etapaTemp.png">
-		<p>Foi dada a largada para o maior Enduro a Pé do Brasil! A
-			primeira etapa da COPA NORTH de Enduro a Pé 2016 acontece no dia 21
-			de fevereiro. E dessa vez quem recebe a prova de abertura é o Parque
-			D'Anape, na cidade de Jarinu.</p>
+ <p>{{highlight.descricao}}</p>
+                </div>
+               
+            </div>
 
-	</div>
+        </div>
 
-</div>
-
-</ion-content> </ion-view>
+    </ion-content>
+</ion-view>

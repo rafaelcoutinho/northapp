@@ -1,26 +1,29 @@
 <ion-view view-title="Minha Equipe">
     <ion-content class="scroll-bg">
+        <ng-include src="'templates/breve.html'" />
+    </ion-content>
+    <ion-content class="scroll-bg" ng-show="false">
 
         <div class="list card">
 
             <div class="item ">
-                <img class="avatarImage" style="float:right;"  ng-src="http://ionicframework.com/img/docs/spengler.jpg">
-                <img class="avatarImage" style="float:right;"  ng-src="http://ionicframework.com/img/docs/venkman.jpg">
-                <img class="avatarImage" style="float:right;"  ng-src="http://ionicframework.com/img/docs/winston.jpg">
+                <img class="avatarImage" style="float:right;" ng-src="http://ionicframework.com/img/docs/spengler.jpg">
+                <img class="avatarImage" style="float:right;" ng-src="http://ionicframework.com/img/docs/venkman.jpg">
+                <img class="avatarImage" style="float:right;" ng-src="http://ionicframework.com/img/docs/winston.jpg">
                 <h2><small>Equipe</small> CuméQé?</h2>
                 <p>São Paulo/Campinas</p>
             </div>
 
             <div class="item item-body">
-                
+
                 <p>
                     Participantes de X etapas em 2015. Atualmente na <span style="font-weight:bold;">99o</span> posição.
                 </p>
-               <ul class="list">
-    <li class="item" >
-      <img  src="{{pic}}" ng-repeat="pic in pics">
-    </li>
-</ul>
+                <ul class="list">
+                    <li class="item">
+                        <img src="{{pic}}" ng-repeat="pic in pics">
+                    </li>
+                </ul>
             </div>
 
         </div>

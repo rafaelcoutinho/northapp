@@ -1,6 +1,36 @@
-angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
+var jsonTransformQuery = function (data, headers) {
+    data = angular.fromJson(data);
+    var mainObj;
+    for (var key in data) {
+        if (data.hasOwnProperty(key)) {
+            mainObj = data[key];
+            break;
+        }
+    }
+    console.log("Table ", mainObj)
+    var resp = [];
+    var cols = mainObj.columns;
+    var records = mainObj.records;
+    for (var i = 0; i < records.length; i++) {
+        var recordsEntry = records[i];
+        var entry = {};
+        for (var j = 0; j < cols.length; j++) {
+            var col = cols[j];
+            var val = recordsEntry[j];
+            entry[col] = val;
+        }
+        resp.push(entry);
 
-    .run(function ($ionicPlatform, $rootScope) {
+    }
+
+
+    return resp;
+}
+angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
+    .constant("appConfigs", {
+        "backend": "http://cumeqetrekking.appspot.com/rest"
+    })
+    .run(function ($ionicPlatform, $rootScope,$ionicLoading) {
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory
             // bar above the keyboard
@@ -14,6 +44,15 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
             }
+            $rootScope.$on('loading:show', function () {
+                $ionicLoading.show({
+                    template: 'Carregando...'
+                })
+            });
+
+            $rootScope.$on('loading:hide', function () {
+                $ionicLoading.hide()
+            });
             // kick off the platform web client
             try {
                 Ionic.io();
@@ -61,10 +100,34 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
 
             }
         });
+
     })
 
-    .config(function ($stateProvider, $urlRouterProvider) {
+    .config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
+        $httpProvider.interceptors.push(function ($rootScope, $q) {
+            return {
+                responseError: function (rejection) {
+                    $rootScope.$broadcast('loading:hide')
 
+
+                    return $q.reject(rejection);
+                },
+                requestError: function (rejection) {
+                    $rootScope.$broadcast('loading:hide')
+
+                    return $q.reject(rejection);
+                },
+                request: function (config) {
+                    $rootScope.$broadcast('loading:show')
+                    return config
+                },
+                response: function (response) {
+                    $rootScope.$broadcast('loading:hide')
+
+                    return response
+                }
+            }
+        });
         $stateProvider
 
             .state('app', {

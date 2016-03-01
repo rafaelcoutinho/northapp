@@ -1,17 +1,16 @@
-<ion-view view-title="Etapas"> <ion-content class="scroll-bg">
-<div class="list card">
+<ion-view view-title="Etapas">
+    <ion-content class="scroll-bg">
+        <div class="list card">
 
-	<a class="item item-thumbnail-left" ng-repeat="etapa in etapas"
-		href="#/app/etapa/{{etapa.id}}"> <img src="{{etapa.img}}">
-		<p class="etapaDate">{{etapa.date|date:'shortDate'}}</p>
-		<span class="etapaTitle">{{etapa.title}}</span>
-		<span class="etapaTitle">{{etapa.desc}}</span>
-		<p class="etapaLocation"><span ng-show="etapa.location==null">Local a definir</span>{{etapa.location.name}}</p>
-		
-
-	</a>
+            <a class="item item-thumbnail-left" ng-repeat="etapa in etapas| orderBy:'data'" href="#/app/etapa/{{etapa.id}}"> <img src="{{etapa.imgSmall}}">
+                <p class="etapaDate">{{etapa.data|date:'shortDate'}}</p>
+                <span class="etapaTitle">{{etapa.titulo}}</span>
+                <span class="etapaTitle">{{etapa.descricao}}</span>
+                <p class="etapaLocation"><span ng-show="etapa.id_Local==null">Local a definir</span><span ng-hide="etapa.id_Local==null">{{etapa.location.name}}</span></p>
+            </a>
 
 
-</div>
+        </div>
 
-</ion-content> </ion-view>
+    </ion-content>
+</ion-view>

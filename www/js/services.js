@@ -1,66 +1,190 @@
-angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage','ngResource'])
- .factory('EtapasService', function ($http, $localStorage,$resource) {
-        return $resource("http://www.mocky.io/v2/56c3edb6110000861e2824a3");
-                
-            
+angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource'])
 
-    })
-.factory('GridService', function ($http, $localStorage,$resource) {
-    return $resource('http://www.mocky.io/v2/56c3e97b110000201d2824a2',
-        {},
-        {
-            query:{
-                isArray:false
+    .factory('WeatherService', function ($http, $localStorage, $resource, appConfigs, $q) {
+        return {
+            getPerCoords: function (lat, lng, date) {
+                var now = new Date();
+                var diff = date - now.getTime();
+                var deferred = $q.defer();
+                diff = Math.ceil(diff / (24 * 60 * 60 * 1000));
+                setTimeout(function () {
+                    if(diff<0 || diff>16){
+                        deferred.reject("Etapa no passado OU mais de 16 dias de hoje.");
+                        return;
+                    }
+                    $http({
+                        method: 'GET',
+                        url: 'http://api.openweathermap.org/data/2.5/forecast/daily?lat=' + lat + '&lon=' + lng + '&cnt=' + diff + '&mode=json&appid=a6914b6f4ef75969ead626f11b294bf5&lang=pt'
+                    }).then(function successCallback(response) {
+                        var weather = response.data.list[diff - 1].weather[0];
+                        weather.wicon = 'http://openweathermap.org/img/w/' + weather.icon + '.png';
+                        deferred.resolve(weather);
+                    }, function errorCallback(response) {
+                        deferred.reject(response);
+                    });
+                },1);
+
+                return deferred.promise;
+
             }
         }
-    
-    );
-        // return {
-        //     query: function () {
-        //         var grid = [
-        //             {
-        //                 time: 1456052400000,
-        //                 team: {
-        //                     name: "Anta"
-        //                 }
-        //             },
-        //             {
-        //                 time: 1456052460000,
-        //                 team: {
-        //                     name: "Associação Sabesp"
-        //                 }
-        //             },
-        //             {
-        //                 time: 1456052520000,
-        //                 team: {
-        //                     name: "TTT"
-        //                 }
-        //             }
-        //         ]
-        //         return grid;
-        //     },
-        //     queryPreGrid: function () {
-        //         var grid = [{
 
-        //             team: {
-        //                 name: "CALANGO NA TRILHA	"
-        //             }
-        //         },
-        //             {
 
-        //                 team: {
-        //                     name: "TENTEQUELESENTEFESTES"
-        //                 }
-        //             },
-        //             {
+    }).service('modalService', ['$modal',
+        function ($modal) {
 
-        //                 team: {
-        //                     name: "C.S.I. NA TRILHA"
-        //                 }
-        //             }
-        //         ]
-        //         return grid;
-        //     },
+            var modalDefaults = {
+                backdrop: true,
+                keyboard: true,
+                modalFade: true,
+                templateUrl: '/app/partials/modal.html'
+            };
 
-        // }
+            var modalOptions = {
+                closeButtonText: 'Close',
+                actionButtonText: 'OK',
+                headerText: 'Proceed?',
+                bodyText: 'Perform this action?'
+            };
+
+            this.showModal = function (customModalDefaults, customModalOptions) {
+                if (!customModalDefaults) customModalDefaults = {};
+                customModalDefaults.backdrop = 'static';
+                return this.show(customModalDefaults, customModalOptions);
+            };
+
+            this.show = function (customModalDefaults, customModalOptions) {
+                //Create temp objects to work with since we're in a singleton service
+                var tempModalDefaults = {};
+                var tempModalOptions = {};
+
+                //Map angular-ui modal custom defaults to modal defaults defined in service
+                angular.extend(tempModalDefaults, modalDefaults, customModalDefaults);
+
+                //Map modal.html $scope custom properties to defaults defined in service
+                angular.extend(tempModalOptions, modalOptions, customModalOptions);
+
+                if (!tempModalDefaults.controller) {
+                    tempModalDefaults.controller = function ($scope, $modalInstance) {
+                        $scope.modalOptions = tempModalOptions;
+                        $scope.modalOptions.ok = function (result) {
+                            $modalInstance.close(result);
+                        };
+                        $scope.modalOptions.close = function (result) {
+                            $modalInstance.dismiss('cancel');
+                        };
+                    }
+                }
+
+                return $modal.open(tempModalDefaults).result;
+            };
+
+        }])
+
+
+    .factory('EtapasService', function ($http, $localStorage, $resource, appConfigs) {
+
+
+        return $resource(appConfigs.backend + "/Etapa/:id", {}, {
+            query: {
+                isArray: true,
+                transformResponse: jsonTransformQuery
+            }
+        });
+
+
+
+    })
+
+    .service('LocationService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
+        return $resource(appConfigs.backend + '/Local/:id', {}, {
+            query: {
+                isArray: true,
+                transformResponse: jsonTransformQuery
+            }
+        });
+
+    }])
+    .service('HighlightService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
+
+        return $resource(appConfigs.backend + '/Destaque/:id', {}, {
+            query: {
+                isArray: true,
+                transformResponse: jsonTransformQuery
+            }
+        });
+
+    }])
+    .service('GridService', function ($http, $localStorage, $resource) {
+        return $resource('http://www.mocky.io/v2/56c3e97b110000201d2824a2',
+            {},
+            {
+                query: {
+                    isArray: false
+                }
+            }
+
+            );
+
+    }).service('loginService', function ($http, $localStorage) {
+
+        return {
+            setUser: function (aUser) {
+                $localStorage.user = aUser;
+                this.reloadIonicUser(aUser);
+            },
+            reloadIonicUser: function (user) {
+                try {
+
+                    var ionicUser = Ionic.User.load(user.id).then(function (data) {
+                        console.log(data + "Carregou usuario do ionico " + JSON.stringify(ionicUser));
+
+                    }, function (erro) {
+                        try {
+                            console.log("Nao existe vai criar " + erro);
+                            ionicUser = Ionic.User.current();
+                            console.log("pegou current " + ionicUser);
+                            // if the user doesn't have an id, you'll need to give
+                            // it one.
+                            if (!ionicUser.id) {
+                                ionicUser.id = user.id + "";
+
+                            } else {
+                                console.log("na verdade existe id: " + ionicUser.id);
+
+                            }
+                            ionicUser.set('name', user.name);
+                            ionicUser.set('email', user.email);
+                            ionicUser.set('image', user.image);
+
+                            console.log("id: " + ionicUser.id);
+
+                            ionicUser.save().then(function (a) {
+                                console.log("salvou no ionic " + a)
+                            }, function (err) {
+                                console.log("falhou para salvar no ionic " + err)
+                            });
+                        } catch (e) {
+                            console.log("Erro criando" + e.message);
+                        }
+                    });
+                    ;
+
+                } catch (e) {
+                    console.log("erro buscando usuario " + e.message)
+
+                }
+            },
+            getUser: function () {
+                var user = $localStorage.user != null ? $localStorage.user : null;
+
+                return user;
+            },
+            getUserID: function () {
+                return this.getUser() == null ? null : this.getUser().id;
+            },
+            isLoggedIn: function () {
+                return ($localStorage.user) ? $localStorage.user : false;
+            }
+        };
     })

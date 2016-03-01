@@ -31,6 +31,9 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
   background: url($big-bg) no-repeat center center fixed;
   background-size: cover;
 }
+.item-image{
+    width: 100%;
+}
 ion-side-menu a.item{
     background-color: #7FA332;
     color:#fff;
