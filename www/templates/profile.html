@@ -1,42 +1,42 @@
 <ion-view view-title="Meu Perfil">
     <ion-content>
         <h1>Meu Perfil</h1>
-
-        <button class="button button-positive button-block  icon-left ion-social-facebook" ng-click="doLoginFB()" ng-show="user.fbId==null">Conectar com Facebook</button>
-        <div class="row">
-            <div class="col-50">
-                <button class="button button-balanced button-outline button-block" ng-show="user.id==null" ng-click="doLogin()">Login</button>
+        
+            <button class="button button-positive button-block  icon-left ion-social-facebook" ng-click="doLoginFB()" ng-show="user.fbId==null">Conectar com Facebook</button>
+            <div class="row">
+                <div class="col-50">
+                    <button class="button button-balanced button-outline button-block" ng-show="user.id==null" ng-click="doLogin()">Login</button>
+                </div>
+                <div class="col-50">
+                    <button class="button button-balanced button-outline button-block" ng-show="user.id==null" ng-click="doShowForm()">Criar uma conta</button>
+                </div>
             </div>
-            <div class="col-50">
-                <button class="button button-balanced button-outline button-block" ng-show="user.id==null" ng-click="doShowForm()">Criar uma conta</button>
+
+            <div class="list" ng-show="user.id!=null || showForm">
+                <div style="max-height: 40%;">
+                    <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="{{user.image}}">
+                </div>
+                <label class="item item-input">
+                    <input type="text" placeholder="Nome" ng-model="user.nome">
+                </label>
+                <label class="item item-input">
+                    <input type="email" placeholder="E-mail" ng-model="user.email">
+                </label>
+                <label class="item item-input">
+                    <input type="tel" placeholder="(XX) XXXX-XXXX" ng-model="user.telefone">
+                </label>
+                <label class="item item-input" ng-show="showForm">
+                    <input type="password" placeholder="Senha" ng-model="user.pwd">
+                </label>
+                <label class="item item-input" ng-show="showForm">
+                    <input type="password" placeholder="Confirmar Senha" ng-model="user.pwd">
+                </label>
+                <button class="button  " ng-click="saveData()" ng-cloak>
+                    Salvar
+                </button>
             </div>
-        </div>
 
-        <div class="list" ng-show="user.id!=null || showForm">
-            <div style="max-height: 40%;">
-                <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="{{user.image}}">
-            </div>
-            <label class="item item-input">
-                <input type="text" placeholder="Nome" ng-model="user.nome">
-            </label>
-            <label class="item item-input">
-                <input type="email" placeholder="E-mail" ng-model="user.email">
-            </label>
-            <label class="item item-input">
-                <input type="tel" placeholder="(XX) XXXX-XXXX" ng-model="user.telefone">
-            </label>
-            <label class="item item-input" ng-show="showForm">
-                <input type="password" placeholder="Senha" ng-model="user.pwd">
-            </label>
-            <label class="item item-input" ng-show="showForm">
-                <input type="password" placeholder="Confirmar Senha" ng-model="user.pwd">
-            </label>
-            <button class="button  " ng-click="saveData()" ng-cloak>
-                Salvar
-            </button>
-        </div>
-
-
+        
     </ion-content>
 </ion-view>
 <script id="login.html" type="text/ng-template">
