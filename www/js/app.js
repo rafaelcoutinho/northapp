@@ -29,6 +29,7 @@ var jsonTransformQuery = function (data, headers) {
 angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
     .constant("appConfigs", {
         "backend": "http://cumeqetrekking.appspot.com/rest"
+        // "backend": "http://localhost/northServer/api.php"
     })
     .run(function ($ionicPlatform, $rootScope,$ionicLoading) {
         $ionicPlatform.ready(function () {

@@ -8,7 +8,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 var deferred = $q.defer();
                 diff = Math.ceil(diff / (24 * 60 * 60 * 1000));
                 setTimeout(function () {
-                    if(diff<0 || diff>16){
+                    if (diff < 0 || diff > 16) {
                         deferred.reject("Etapa no passado OU mais de 16 dias de hoje.");
                         return;
                     }
@@ -22,7 +22,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     }, function errorCallback(response) {
                         deferred.reject(response);
                     });
-                },1);
+                }, 1);
 
                 return deferred.promise;
 
@@ -126,12 +126,31 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
             );
 
-    }).service('loginService', function ($http, $localStorage) {
+    }).service('loginService', function ($http, $localStorage, appConfigs, $resource, $q) {
 
         return {
+            serverUser: $resource(appConfigs.backend + '/Trekker/:id'),
             setUser: function (aUser) {
-                $localStorage.user = aUser;
-                this.reloadIonicUser(aUser);
+                var deferred = $q.defer();
+                if (!$localStorage.northApp) {
+                    $localStorage.northApp = {
+
+                    }
+                }
+                var me = this;
+                aUser = $resource(appConfigs.backend + '/Trekker/:id').save(aUser, function (data) {
+
+                    console.log("response", data);
+                    if (aUser.id == null) {
+                        aUser.id = data.id;
+                    }
+                    $localStorage.northApp.user = data;
+                    me.reloadIonicUser(data);
+                    deferred.resolve($localStorage.northApp.user);
+                }, function (data) {
+                    deferred.reject(data);
+                });
+                return deferred.promise;
             },
             reloadIonicUser: function (user) {
                 try {
@@ -176,7 +195,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 }
             },
             getUser: function () {
-                var user = $localStorage.user != null ? $localStorage.user : null;
+                var user = $localStorage.northapp != null && $localStorage.northapp.user != null ? $localStorage.northapp.user : null;
 
                 return user;
             },
@@ -184,7 +203,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 return this.getUser() == null ? null : this.getUser().id;
             },
             isLoggedIn: function () {
-                return ($localStorage.user) ? $localStorage.user : false;
+                return ($localStorage.northapp && $localStorage.northapp.user) ? $localStorage.northapp.user : false;
             }
         };
     })

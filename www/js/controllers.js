@@ -28,50 +28,82 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     .controller('HighlightCtrl', function ($scope, HighlightService) {
         $scope.highlights = HighlightService.query(function (data) { console.log("Carregou " + data) }, function (data) { console.log("Falhou " + JSON.stringify(data)) });
 
-    }).controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService) {
+    }).controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal) {
         $scope.user = loginService.getUser();
-
-        $scope.getfbinfo = function () {
-            $cordovaFacebook.api("me", ["public_profile", "email", "user_friends"
-            ]).then(function (success) {
-                console.log("public " + JSON.stringify(success));
-                $scope.logUserIn(success);
-            }, function (error) {
-                $scope.login_error = 'Erro carregando informações do Facebook';
+        if ($scope.user == null) {
+            $scope.user = {};
+        }
+        $scope.saveData = function () {
+            loginService.setUser($scope.user).then(function (user) {
+                $scope.user = user;
             });
         };
-        if ($scope.user != null) {
+        $scope.doShowForm = function () {
+            $scope.showForm = true;
+        }
+        $scope.getfbinfo = function () {
+            try {
+                $cordovaFacebook.api("me", ["public_profile", "email", "user_friends"
+                ]).then(function (success) {
+                    console.log("public " + JSON.stringify(success));
+                    $scope.logUserIn(success);
+                }, function (error) {
+                    $scope.login_error = 'Erro carregando informações do Facebook';
+                });
+            } catch (e) {
+                console.log("Facebook not available")
+            }
+        };
+        if ($scope.user != null && $scope.user.fbId != null) {
             $scope.getfbinfo();
         }
         $scope.doLoginFB = function () {
-            $cordovaFacebook.login(["public_profile", "email"
-            ]).then(function (user) {
-                console.log("sucesso " + JSON.stringify(user));
-                if (user.email) {
-                    $scope.logUserIn(user);
-                } else {
-                    $scope.getfbinfo();
-                }
+            try {
+                $cordovaFacebook.login(["public_profile", "email"
+                ]).then(function (user) {
+                    console.log("sucesso " + JSON.stringify(user));
+                    if (user.email) {
+                        $scope.logUserIn(user);
+                    } else {
+                        $scope.getfbinfo();
+                    }
 
-            }, function (error) {
-                console.log("error " + JSON.stringify(error));
-                $scope.login_error = 'Erro logando com Facebook';
-            });
+                }, function (error) {
+                    console.log("error " + JSON.stringify(error));
+                    $scope.login_error = 'Erro logando com Facebook';
+                });
 
-        }
-        $scope.logUserIn = function (user) {
-            console.log("pegou usuario user " + JSON.stringify(user))
-            var localUser = {
-                email: user.email,
-                "name": user.name,
-                fbId: user.id,
-                image: "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128",
-                "id": user.id
+            } catch (e) {
+                console.log("Facebook not available")
             }
-            loginService.setUser(localUser);
+
+        };
+
+
+        $scope.logUserIn = function (user) {
+            $scope.user.email = user.email;
+            $scope.user.nome = user.name;
+            $scope.user.fbId = user.id;
+            $scope.user.imagem = "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128";
+            loginService.setUser($scope.user);
             $scope.user = loginService.getUser();
         };
 
+        $ionicModal.fromTemplateUrl('login.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function (modal) {
+            $scope.modal = modal;
+        });
+        $scope.doLogin = function () {
+            $scope.openModal();
+        }
+        $scope.openModal = function () {
+            $scope.modal.show();
+        };
+        $scope.closeModal = function () {
+            $scope.modal.hide();
+        };
     })
 
 
