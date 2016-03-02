@@ -7,7 +7,7 @@ var jsonTransformQuery = function (data, headers) {
             break;
         }
     }
-    console.log("Table ", mainObj)
+
     var resp = [];
     var cols = mainObj.columns;
     var records = mainObj.records;
@@ -28,10 +28,13 @@ var jsonTransformQuery = function (data, headers) {
 }
 angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
     .constant("appConfigs", {
+        "backendSecure": "https://cumeqetrekking.appspot.com/rest",
         "backend": "http://cumeqetrekking.appspot.com/rest"
+        
+        // "backendSecure": "http://localhost/northServer/api.php",
         // "backend": "http://localhost/northServer/api.php"
     })
-    .run(function ($ionicPlatform, $rootScope,$ionicLoading) {
+    .run(function ($ionicPlatform, $rootScope, $ionicLoading) {
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory
             // bar above the keyboard

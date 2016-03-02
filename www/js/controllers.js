@@ -28,14 +28,21 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     .controller('HighlightCtrl', function ($scope, HighlightService) {
         $scope.highlights = HighlightService.query(function (data) { console.log("Carregou " + data) }, function (data) { console.log("Falhou " + JSON.stringify(data)) });
 
-    }).controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal) {
+    }).controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal, UserService) {
         $scope.user = loginService.getUser();
         if ($scope.user == null) {
             $scope.user = {};
         }
         $scope.saveData = function () {
+            $scope.errorMsg = null;
             loginService.setUser($scope.user).then(function (user) {
                 $scope.user = user;
+            }, function (fail) {
+                if (fail == "dupe") {
+                    $scope.errorMsg = "Usuário já existente. Utilize a função de login.";
+                } else {
+                    $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
+                }
             });
         };
         $scope.doShowForm = function () {
@@ -44,9 +51,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.getfbinfo = function () {
             try {
                 $cordovaFacebook.api("me", ["public_profile", "email", "user_friends"
-                ]).then(function (success) {
-                    console.log("public " + JSON.stringify(success));
-                    $scope.logUserIn(success);
+                ]).then(function (user) {
+                    console.log("public " + JSON.stringify(user));
+                    $scope.user.email = user.email;
+                    $scope.user.nome = user.name;
+                    $scope.user.fbId = user.id;
+                    $scope.user.imagem = "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128";
+                    $scope.logUserIn();
                 }, function (error) {
                     $scope.login_error = 'Erro carregando informações do Facebook';
                 });
@@ -63,7 +74,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 ]).then(function (user) {
                     console.log("sucesso " + JSON.stringify(user));
                     if (user.email) {
-                        $scope.logUserIn(user);
+                        $scope.user.email = user.email;
+                        $scope.user.nome = user.name;
+                        $scope.user.fbId = user.id;
+                        $scope.user.imagem = "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128";
+                        $scope.logUserIn();
                     } else {
                         $scope.getfbinfo();
                     }
@@ -78,23 +93,42 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
 
         };
+        $scope.loginData = {};
+        $scope.login = function () {
+            loginService.login($scope.loginData.username, $scope.loginData.password).then(
+                function (userInfo) { },
+                function (error) { }
+                );
+        }
+        $scope.logUserIn = function () {
 
+            loginService.setUser($scope.user).then(function (user) {
+                $scope.user = loginService.getUser();
+            }, function (fail) {
+                if (fail == "dupe") {
+                    //deve ter sido por facebook
+                    $scope.user = UserService.byEmail(
+                        {
+                            email: $scope.user.email
+                        },
+                        function (serverUser) {
+                            $scope.user.id = serverUser[0];
+                            loginService.setUser($scope.user);
+                        }
+                        );
+                } else {
+                    $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
+                }
+            });
 
-        $scope.logUserIn = function (user) {
-            $scope.user.email = user.email;
-            $scope.user.nome = user.name;
-            $scope.user.fbId = user.id;
-            $scope.user.imagem = "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128";
-            loginService.setUser($scope.user);
-            $scope.user = loginService.getUser();
         };
 
-        $ionicModal.fromTemplateUrl('login.html', {
-            scope: $scope,
-            animation: 'slide-in-up'
-        }).then(function (modal) {
+        $ionicModal.fromTemplateUrl('login.html', function (modal) {
             $scope.modal = modal;
-        });
+        }, {
+                scope: $scope,
+                animation: 'slide-in-up'
+            });
         $scope.doLogin = function () {
             $scope.openModal();
         }

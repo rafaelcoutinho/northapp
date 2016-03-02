@@ -126,10 +126,38 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
             );
 
-    }).service('loginService', function ($http, $localStorage, appConfigs, $resource, $q) {
+    })
+    .service('UserService', function ($http, $localStorage, appConfigs, $resource, $q) {
+        return $resource(appConfigs.backend + '/Trekker/:id', {},
+            {
+                byEmail: {
+                    method: "GET",
+                    isArray: true,
+                    transformResponse: jsonTransformQuery,
+                    url: appConfigs.backend + '/Trekker/?filter=email,eq,:email'
+                }
+            }
+            );
+    })
+    .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService) {
 
         return {
-            serverUser: $resource(appConfigs.backend + '/Trekker/:id'),
+            login: function (email, pwd) {
+                var deferred = $q.defer();
+
+                var data = {
+                    email: email,
+                    pwd: pwd
+                };
+                console.log(data)
+                $http.post(appConfigs.backendSecure + "/Login", data)
+                    .then(function successCallback(response) {
+                        deferred.resolve(response.data);
+                    }, function errorCallback(response) {
+                        deferred.reject(response);
+                    });
+                return deferred.promise;
+            },
             setUser: function (aUser) {
                 var deferred = $q.defer();
                 if (!$localStorage.northApp) {
@@ -138,17 +166,20 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     }
                 }
                 var me = this;
-                aUser = $resource(appConfigs.backend + '/Trekker/:id').save(aUser, function (data) {
-
-                    console.log("response", data);
+                aUser = UserService.save(aUser, function (data) {
                     if (aUser.id == null) {
                         aUser.id = data.id;
                     }
                     $localStorage.northApp.user = data;
                     me.reloadIonicUser(data);
                     deferred.resolve($localStorage.northApp.user);
-                }, function (data) {
-                    deferred.reject(data);
+                }, function (response) {
+                    var data = response.data;
+                    if (data.errorMsg.indexOf("Duplicate") > -1) {
+                        deferred.reject("dupe");
+                    } else {
+                        deferred.reject(data);
+                    }
                 });
                 return deferred.promise;
             },
