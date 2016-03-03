@@ -11,8 +11,8 @@
         </div>
         <div class="danger" ng-show="errorMsg!=null" ng-cloak>{{errorMsg}}</div>
         <div class="list" ng-show="user.id!=null || showForm">
-            <div style="max-height: 40%;">
-                <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="{{user.imagem}}">
+            <div style="max-height: 40%;" ng-show="user.fbId!=null" ng-cloak>
+                <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="http://graph.facebook.com/{{user.fbId}}/picture?width=128&height=128" >
             </div>
             <label class="item item-input">
                 <input type="text" placeholder="Nome" ng-model="user.nome">
@@ -24,7 +24,7 @@
                 <input type="tel" placeholder="(XX) XXXX-XXXX" ng-model="user.telefone">
             </label>
             <label class="item item-input" ng-show="showForm">
-                <input type="password" placeholder="Senha" ng-model="user.pwd">
+                <input type="password" placeholder="Senha" ng-model="user.password">
             </label>
             <label class="item item-input" ng-show="showForm">
                 <input type="password" placeholder="Confirmar Senha" ng-model="pwdConfirm">

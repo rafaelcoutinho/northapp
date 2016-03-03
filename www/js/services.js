@@ -135,6 +135,11 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     isArray: true,
                     transformResponse: jsonTransformQuery,
                     url: appConfigs.restBackend + '/Trekker/?filter=email,eq,:email'
+                },
+                 validate: {
+                    method: "POST",
+                    isArray: false,                    
+                    url: appConfigs.secureEndpointBackend + '/userManager.php'//'/User'
                 }
             }
             );
@@ -165,11 +170,11 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     this.reloadIonicUser(aUser);
                 }
             },
-            setUser: function (aUser) {
+            validateNewUser: function (aUser) {
                 var deferred = $q.defer();
 
                 var me = this;
-                aUser = UserService.save(aUser, function (data) {
+                UserService.validate(aUser, function (data) {
                     if (aUser.id == null) {
                         aUser.id = data.id;
                     }
@@ -227,8 +232,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
                 }
             },
-            getUser: function () {
-                console.log($localStorage.northapp)
+            getUser: function () {                
                 var user = $localStorage.northApp_user;
 
                 return user;

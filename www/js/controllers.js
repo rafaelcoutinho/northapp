@@ -35,7 +35,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
         $scope.saveData = function () {
             $scope.errorMsg = null;
-            loginService.setUser($scope.user).then(function (user) {
+            loginService.validateNewUser($scope.user).then(function (user) {
                 $scope.user = user;
             }, function (fail) {
                 if (fail == "dupe") {
@@ -50,14 +50,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
         $scope.getfbinfo = function () {
             try {
+                console.log("Api facebook")
                 $cordovaFacebook.api("me", ["public_profile", "email", "user_friends"
                 ]).then(function (user) {
-                    console.log("public " + JSON.stringify(user));
-                    $scope.user.email = user.email;
-                    $scope.user.nome = user.name;
-                    $scope.user.fbId = user.id;
-                    $scope.user.imagem = "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128";
-                    $scope.logUserIn();
+                    $scope.logUserIn(user);
                 }, function (error) {
                     $scope.errorMsg = 'Erro carregando informações do Facebook';
                 });
@@ -74,11 +70,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 ]).then(function (user) {
                     console.log("sucesso " + JSON.stringify(user));
                     if (user.email) {
-                        $scope.user.email = user.email;
-                        $scope.user.nome = user.name;
-                        $scope.user.fbId = user.id;
-                        $scope.user.imagem = "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128";
-                        $scope.logUserIn();
+                        $scope.logUserIn(user);
                     } else {
                         $scope.getfbinfo();
                     }
@@ -97,26 +89,17 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             $scope.user = null;
             loginService.setUserLocally(null);
         }
-        $scope.logUserIn = function () {
-            if ($scope.user.email == null || $scope.user.email == "") {
+        $scope.logUserIn = function (user) {
+            if (user.email == null || user.email == "") {
                 $scope.errorMsg = 'Erro: Não foi possível obter de e-mail do Facebook';
                 $scope.showForm = true;
                 return;
             }
-            loginService.setUser($scope.user).then(function (user) {
+            loginService.validateNewUser(user).then(function (user) {
                 $scope.user = loginService.getUser();
             }, function (fail) {
                 if (fail == "dupe") {
-                    //deve ter sido por facebook
-                    $scope.user = UserService.byEmail(
-                        {
-                            email: $scope.user.email
-                        },
-                        function (serverUser) {
-                            $scope.user.id = serverUser[0];
-                            loginService.setUser($scope.user);
-                        }
-                        );
+                    $scope.errorMsg = "Usuário já existe no sistema. Faça login ou utilize o Facebook.";
                 } else {
                     $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
                 }
@@ -232,13 +215,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 window.open('waze://?ll=' + encodeURI(etapa.location.endereco) + '&navigate=yes');
             } else if (ionic.Platform.isAndroid()) {
                 console.log("android");
-                if (etapa.location.coords != null) {
-                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.coords), "_system");
+                if (etapa.location.latitude != null) {
+                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.latitude+","+etapa.location.longitude), "_system");
                 } else {
                     $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.endereco, "_system");
                 }
             } else {
-                window.open('geo:' + encodeURI(etapa.location.coords) + '?&q=' + encodeURI(etapa.location.address));
+                window.open('geo:' + encodeURI(etapa.location.latitude+","+etapa.location.longitude) + '?&q=' + encodeURI(etapa.location.endereco));
             }
         }
     })

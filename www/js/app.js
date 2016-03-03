@@ -28,10 +28,15 @@ var jsonTransformQuery = function (data, headers) {
 }
 angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
     .constant("appConfigs", {        
-        "backendSecure": "https://cumeqetrekking.appspot.com/",
-        "backend": "http://cumeqetrekking.appspot.com/",
-        "restBackend": "http://cumeqetrekking.appspot.com/rest",
-        "secureEndpointBackend":"https://cumeqetrekking.appspot.com/endpoints"
+        // "backendSecure": "https://cumeqetrekking.appspot.com/",
+        // "backend": "http://cumeqetrekking.appspot.com/",
+        // "restBackend": "http://cumeqetrekking.appspot.com/rest",
+        // "secureEndpointBackend":"https://cumeqetrekking.appspot.com/endpoints"
+        
+        "backendSecure": "http://192.168.33.105/northServer/api.php",
+        "backend": "http://192.168.33.105/northServer/",
+        "restBackend": "http://192.168.33.105/northServer/api.php",
+        "secureEndpointBackend":"http://192.168.33.105/northServer/"
         // "backendSecure": "http://localhost/northServer/api.php",
         // "backend": "http://localhost/northServer/api.php"
     })
@@ -109,6 +114,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
     })
 
     .config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
+        
         $httpProvider.interceptors.push(function ($rootScope, $q) {
             return {
                 responseError: function (rejection) {
