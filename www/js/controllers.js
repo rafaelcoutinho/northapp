@@ -59,7 +59,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     $scope.user.imagem = "http://graph.facebook.com/" + user.id + "/picture?width=128&height=128";
                     $scope.logUserIn();
                 }, function (error) {
-                    $scope.login_error = 'Erro carregando informações do Facebook';
+                    $scope.errorMsg = 'Erro carregando informações do Facebook';
                 });
             } catch (e) {
                 console.log("Facebook not available")
@@ -85,7 +85,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
                 }, function (error) {
                     console.log("error " + JSON.stringify(error));
-                    $scope.login_error = 'Erro logando com Facebook';
+                    $scope.errorMsg = 'Erro logando com Facebook';
                 });
 
             } catch (e) {
@@ -93,15 +93,16 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
 
         };
-        $scope.loginData = {};
-        $scope.login = function () {
-            loginService.login($scope.loginData.username, $scope.loginData.password).then(
-                function (userInfo) { },
-                function (error) { }
-                );
+        $scope.logoff = function () {
+            $scope.user = null;
+            loginService.setUserLocally(null);
         }
         $scope.logUserIn = function () {
-
+            if ($scope.user.email == null || $scope.user.email == "") {
+                $scope.errorMsg = 'Erro: Não foi possível obter de e-mail do Facebook';
+                $scope.showForm = true;
+                return;
+            }
             loginService.setUser($scope.user).then(function (user) {
                 $scope.user = loginService.getUser();
             }, function (fail) {
@@ -123,7 +124,26 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
         };
 
-        $ionicModal.fromTemplateUrl('login.html', function (modal) {
+        $scope.loginData = {};
+        $scope.executeLogin = function () {
+
+            $scope.loginData.errorMsg = "";
+            loginService.login($scope.loginData.username, $scope.loginData.password).then(
+                function (userInfo) {
+                    console.log(userInfo);
+                    $scope.closeLogin();
+                    $scope.user = userInfo;
+                    loginService.setUserLocally($scope.user);
+
+                },
+                function (error) {
+                    console.log(error);
+                    $scope.loginData.errorMsg = "Usuário ou senha incorretos."
+
+                }
+                );
+        }
+        $ionicModal.fromTemplateUrl('templates/login.html', function (modal) {
             $scope.modal = modal;
         }, {
                 scope: $scope,
@@ -135,7 +155,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.openModal = function () {
             $scope.modal.show();
         };
-        $scope.closeModal = function () {
+        $scope.closeLogin = function () {
             $scope.modal.hide();
         };
     })

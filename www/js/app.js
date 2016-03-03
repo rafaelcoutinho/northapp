@@ -27,10 +27,11 @@ var jsonTransformQuery = function (data, headers) {
     return resp;
 }
 angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
-    .constant("appConfigs", {
-        "backendSecure": "https://cumeqetrekking.appspot.com/rest",
-        "backend": "http://cumeqetrekking.appspot.com/rest"
-        
+    .constant("appConfigs", {        
+        "backendSecure": "https://cumeqetrekking.appspot.com/",
+        "backend": "http://cumeqetrekking.appspot.com/",
+        "restBackend": "http://cumeqetrekking.appspot.com/rest",
+        "secureEndpointBackend":"https://cumeqetrekking.appspot.com/endpoints"
         // "backendSecure": "http://localhost/northServer/api.php",
         // "backend": "http://localhost/northServer/api.php"
     })

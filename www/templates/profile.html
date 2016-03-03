@@ -1,7 +1,5 @@
 <ion-view view-title="Meu Perfil">
     <ion-content>
-        <h1>Meu Perfil</h1>
-
         <button class="button button-positive button-block  icon-left ion-social-facebook" ng-click="doLoginFB()" ng-show="user.fbId==null">Conectar com Facebook</button>
         <div class="row">
             <div class="col-50">
@@ -14,7 +12,7 @@
         <div class="danger" ng-show="errorMsg!=null" ng-cloak>{{errorMsg}}</div>
         <div class="list" ng-show="user.id!=null || showForm">
             <div style="max-height: 40%;">
-                <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="{{user.image}}">
+                <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="{{user.imagem}}">
             </div>
             <label class="item item-input">
                 <input type="text" placeholder="Nome" ng-model="user.nome">
@@ -34,26 +32,11 @@
             <button class="button" ng-click="saveData()" ng-cloak>
                 Salvar
             </button>
+            <button class="button" ng-click="logoff()" ng-cloak>
+                Desconectar
+            </button>
         </div>
 
 
     </ion-content>
 </ion-view>
-<script id="login.html" type="text/ng-template">
-    <ion-modal-view>
-        <ion-header-bar>
-            <h1 class="title">Login</h1>
-        </ion-header-bar>
-        <ion-content>
-            <label class="item item-input">
-                <input type="email" placeholder="E-mail" ng-model="user.email">
-            </label>
-            <label class="item item-input">
-                <input type="password" placeholder="Senha" ng-model="user.pwd">
-            </label>
-            <button class="button" ng-click="login()" ng-cloak>
-                login
-            </button>
-        </ion-content>
-    </ion-modal-view>
-</script>

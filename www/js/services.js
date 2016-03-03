@@ -85,7 +85,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     .factory('EtapasService', function ($http, $localStorage, $resource, appConfigs) {
 
 
-        return $resource(appConfigs.backend + "/Etapa/:id", {}, {
+        return $resource(appConfigs.restBackend + "/Etapa/:id", {}, {
             query: {
                 isArray: true,
                 transformResponse: jsonTransformQuery
@@ -97,7 +97,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     })
 
     .service('LocationService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
-        return $resource(appConfigs.backend + '/Local/:id', {}, {
+        return $resource(appConfigs.restBackend + '/Local/:id', {}, {
             query: {
                 isArray: true,
                 transformResponse: jsonTransformQuery
@@ -107,7 +107,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     }])
     .service('HighlightService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
 
-        return $resource(appConfigs.backend + '/Destaque/:id', {}, {
+        return $resource(appConfigs.restBackend + '/Destaque/:id', {}, {
             query: {
                 isArray: true,
                 transformResponse: jsonTransformQuery
@@ -128,13 +128,13 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
     })
     .service('UserService', function ($http, $localStorage, appConfigs, $resource, $q) {
-        return $resource(appConfigs.backend + '/Trekker/:id', {},
+        return $resource(appConfigs.restBackend + '/Trekker/:id', {},
             {
                 byEmail: {
                     method: "GET",
                     isArray: true,
                     transformResponse: jsonTransformQuery,
-                    url: appConfigs.backend + '/Trekker/?filter=email,eq,:email'
+                    url: appConfigs.restBackend + '/Trekker/?filter=email,eq,:email'
                 }
             }
             );
@@ -147,10 +147,10 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
                 var data = {
                     email: email,
-                    pwd: pwd
+                    password: pwd
                 };
-                console.log(data)
-                $http.post(appConfigs.backendSecure + "/Login", data)
+
+                $http.post(appConfigs.secureEndpointBackend + "/Login", data)
                     .then(function successCallback(response) {
                         deferred.resolve(response.data);
                     }, function errorCallback(response) {
@@ -158,21 +158,23 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     });
                 return deferred.promise;
             },
+            setUserLocally: function (aUser) {
+
+                $localStorage.northApp_user = aUser;
+                if (aUser != null) {
+                    this.reloadIonicUser(aUser);
+                }
+            },
             setUser: function (aUser) {
                 var deferred = $q.defer();
-                if (!$localStorage.northApp) {
-                    $localStorage.northApp = {
 
-                    }
-                }
                 var me = this;
                 aUser = UserService.save(aUser, function (data) {
                     if (aUser.id == null) {
                         aUser.id = data.id;
                     }
-                    $localStorage.northApp.user = data;
-                    me.reloadIonicUser(data);
-                    deferred.resolve($localStorage.northApp.user);
+                    me.setUserLocally(data);
+                    deferred.resolve($localStorage.northApp_user);
                 }, function (response) {
                     var data = response.data;
                     if (data.errorMsg.indexOf("Duplicate") > -1) {
@@ -226,7 +228,8 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 }
             },
             getUser: function () {
-                var user = $localStorage.northapp != null && $localStorage.northapp.user != null ? $localStorage.northapp.user : null;
+                console.log($localStorage.northapp)
+                var user = $localStorage.northApp_user;
 
                 return user;
             },
@@ -234,7 +237,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 return this.getUser() == null ? null : this.getUser().id;
             },
             isLoggedIn: function () {
-                return ($localStorage.northapp && $localStorage.northapp.user) ? $localStorage.northapp.user : false;
+                return ($localStorage.northApp_user) ? $localStorage.northApp_user : false;
             }
         };
     })
