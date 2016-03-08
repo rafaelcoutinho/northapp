@@ -143,21 +143,31 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         };
     })
 
-
-    .controller('EtapasCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, GridService) {
+    .controller('EtapaCtrl', function (
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser) {
         $scope.currTab = "details";
         $scope.tabstemplate = "templates/etapa.tabs.html";
         $scope.categorias = [
-            { nome: "Pró", id: 4 },
-            { nome: "Graduados", id: 3 },
-            { nome: "Trekkers / Turismo", id: 1 }
+            { nome: "Pró", id_Config: 4 },
+            { nome: "Graduados", id_Config: 3 },
+            { nome: "Trekkers / Turismo", id_Config: 1 }
         ];
 
-
+        $scope.isInCategoria = function (categoriaGrid) {
+            return function (item) {
+                
+                if((item.id_Categoria==1 || item.id_Categoria==0)){
+                   return categoriaGrid.id_Config==1; 
+                } 
+                return categoriaGrid.id_Config==item.id_Categoria;
+            };
+        }
 
         $scope.setTab = function (tabName) {
             $scope.currTab = tabName;
+            if ($scope.currTab == "grid" && !$scope.inscricaoInfo) {
+                $scope.inscricaoInfo = EtapasService.getGrid({ id: $stateParams.id });
+            }
         }
         $scope.isTab = function (val) {
 
@@ -166,31 +176,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
             return "";
         }
-
-        $scope.etapas = EtapasService.query(function () {
-            for (var index = 0; index < $scope.etapas.length; index++) {
-                var element = $scope.etapas[index];
-                if (element.id == $stateParams.id) {
-                    $scope.etapa = element;
-                    break;
-                }
-
-            }
-        });
-
-        $scope.updateGrid = function (categoriaGrid) {
-            if (categoriaGrid) {
-                if( categoriaGrid.id==1 ||  categoriaGrid.id==2){
-                    $scope.gridInfo = GridService.query({ idEtapa: $stateParams.id, idConfig: 1 });
-                }else{
-                    $scope.gridInfo = GridService.query({ idEtapa: $stateParams.id, idConfig: categoriaGrid.id });
-                }
-                $scope.preGridInfo = GridService.queryPreGrid({ idEtapa: $stateParams.id,idCategoria: categoriaGrid.id});
-                
-            }
-        }
         if ($stateParams.id) {
-            console.log("Etapa is here", $scope.etapas.length)
             $scope.etapa = EtapasService.get({ id: $stateParams.id }, function (data) {
                 if (data.id_Local) {
                     $scope.etapa.location = LocationService.get({ id: $scope.etapa.id_Local }, function (location) {
@@ -209,8 +195,6 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     })
                 }
             });
-
-            $scope.updateGrid();
 
         }
 
@@ -244,6 +228,24 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 window.open('geo:' + encodeURI(etapa.location.latitude + "," + etapa.location.longitude) + '?&q=' + encodeURI(etapa.location.endereco));
             }
         }
+    })
+    .controller('EtapasCtrl', function (
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser) {
+
+
+        $scope.etapas = EtapasService.query(function () {
+            for (var index = 0; index < $scope.etapas.length; index++) {
+                var element = $scope.etapas[index];
+                if (element.id == $stateParams.id) {
+                    $scope.etapa = element;
+                    break;
+                }
+
+            }
+        });
+
+
+
     })
 
     .controller('RankingCtrl', function ($scope, $stateParams, EtapasService) {

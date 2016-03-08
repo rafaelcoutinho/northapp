@@ -85,10 +85,17 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     .factory('EtapasService', function ($http, $localStorage, $resource, appConfigs) {
 
 
-        return $resource(appConfigs.restBackend + "/Etapa/:id", {}, {
+        return $resource(appConfigs.openRestBackend + "/Etapa/:id", {}, {
             query: {
-                isArray: true,
-                transformResponse: jsonTransformQuery
+                isArray: true
+                // ,
+                // transformResponse: jsonTransformQuery
+            },
+            getGrid: {
+                isArray: false,
+                methdo: "GET",
+                url: appConfigs.openRestBackend + "/Etapa/:id/GridInfo"
+
             }
         });
 
@@ -115,22 +122,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         });
 
     }])
-    .service('GridService', function ($http, $localStorage, $resource, appConfigs) {
-         return $resource(appConfigs.restBackend + '/GridFull?filter0=id_Etapa,eq,:idEtapa&filter1=id_Config,eq,:idConfig', {}, {           
-            query: {
-                isArray: true,
-                url: appConfigs.restBackend + '/GridFull?filter0=id_Etapa,eq,:idEtapa&filter1=id_Config,eq,:idConfig',
-                transformResponse: jsonTransformQuery
-            },
-            queryPreGrid: {
-                isArray: true,
-                url: appConfigs.restBackend + '/PreGrid?filter0=id_Etapa,eq,:idEtapa&filter1=id_Categoria,eq,:idCategoria',
-                transformResponse: jsonTransformQuery
-            }
-            
-        })
-
-    })
+  
     .service('UserService', function ($http, $localStorage, appConfigs, $resource, $q) {
         return $resource(appConfigs.restBackend + '/Trekker/:id', {},
             {
@@ -140,9 +132,9 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     transformResponse: jsonTransformQuery,
                     url: appConfigs.restBackend + '/Trekker/?filter0=email,eq,:email'
                 },
-                 validate: {
+                validate: {
                     method: "POST",
-                    isArray: false,                    
+                    isArray: false,
                     url: appConfigs.secureEndpointBackend + '/userManager.php'//'/User'
                 }
             }
@@ -236,7 +228,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
                 }
             },
-            getUser: function () {                
+            getUser: function () {
                 var user = $localStorage.northApp_user;
 
                 return user;
