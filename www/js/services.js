@@ -115,16 +115,20 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         });
 
     }])
-    .service('GridService', function ($http, $localStorage, $resource) {
-        return $resource('http://www.mocky.io/v2/56c3e97b110000201d2824a2',
-            {},
-            {
-                query: {
-                    isArray: false
-                }
+    .service('GridService', function ($http, $localStorage, $resource, appConfigs) {
+         return $resource(appConfigs.restBackend + '/GridFull?filter0=id_Etapa,eq,:idEtapa&filter1=id_Config,eq,:idConfig', {}, {           
+            query: {
+                isArray: true,
+                url: appConfigs.restBackend + '/GridFull?filter0=id_Etapa,eq,:idEtapa&filter1=id_Config,eq,:idConfig',
+                transformResponse: jsonTransformQuery
+            },
+            queryPreGrid: {
+                isArray: true,
+                url: appConfigs.restBackend + '/PreGrid?filter0=id_Etapa,eq,:idEtapa&filter1=id_Categoria,eq,:idCategoria',
+                transformResponse: jsonTransformQuery
             }
-
-            );
+            
+        })
 
     })
     .service('UserService', function ($http, $localStorage, appConfigs, $resource, $q) {
@@ -134,7 +138,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     method: "GET",
                     isArray: true,
                     transformResponse: jsonTransformQuery,
-                    url: appConfigs.restBackend + '/Trekker/?filter=email,eq,:email'
+                    url: appConfigs.restBackend + '/Trekker/?filter0=email,eq,:email'
                 },
                  validate: {
                     method: "POST",

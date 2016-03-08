@@ -148,6 +148,14 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, GridService) {
         $scope.currTab = "details";
         $scope.tabstemplate = "templates/etapa.tabs.html";
+        $scope.categorias = [
+            { nome: "Pró", id: 4 },
+            { nome: "Graduados", id: 3 },
+            { nome: "Trekkers / Turismo", id: 1 }
+        ];
+
+
+
         $scope.setTab = function (tabName) {
             $scope.currTab = tabName;
         }
@@ -169,6 +177,18 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
             }
         });
+
+        $scope.updateGrid = function (categoriaGrid) {
+            if (categoriaGrid) {
+                if( categoriaGrid.id==1 ||  categoriaGrid.id==2){
+                    $scope.gridInfo = GridService.query({ idEtapa: $stateParams.id, idConfig: 1 });
+                }else{
+                    $scope.gridInfo = GridService.query({ idEtapa: $stateParams.id, idConfig: categoriaGrid.id });
+                }
+                $scope.preGridInfo = GridService.queryPreGrid({ idEtapa: $stateParams.id,idCategoria: categoriaGrid.id});
+                
+            }
+        }
         if ($stateParams.id) {
             console.log("Etapa is here", $scope.etapas.length)
             $scope.etapa = EtapasService.get({ id: $stateParams.id }, function (data) {
@@ -190,10 +210,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 }
             });
 
-
-            $scope.gridInfo = GridService.query();
+            $scope.updateGrid();
 
         }
+
         $scope.tel = function (phone) {
             window.open('tel:' + phone);
         }
@@ -216,12 +236,12 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             } else if (ionic.Platform.isAndroid()) {
                 console.log("android");
                 if (etapa.location.latitude != null) {
-                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.latitude+","+etapa.location.longitude), "_system");
+                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.latitude + "," + etapa.location.longitude), "_system");
                 } else {
                     $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.endereco, "_system");
                 }
             } else {
-                window.open('geo:' + encodeURI(etapa.location.latitude+","+etapa.location.longitude) + '?&q=' + encodeURI(etapa.location.endereco));
+                window.open('geo:' + encodeURI(etapa.location.latitude + "," + etapa.location.longitude) + '?&q=' + encodeURI(etapa.location.endereco));
             }
         }
     })
