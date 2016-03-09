@@ -2,11 +2,11 @@
 <widget id="com.northbrasil.app" version="0.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>NorthApp</name>
   <description>
-Aplicativo da NorthBrasil.
+        Aplicativo da NorthBrasil
     </description>
-  <author email="rafael.coutinho@gmail.com" href="http://example.com.com/">
-Rafael Coutinho
-    </author>
+  <author email="rafael.coutinho+north@gmail.com" href="http://www.northbrasil.com.br/northbrasil/index.html">
+    Rafael Coutinho
+  </author>
   <content src="index.html"/>
   <access origin="*"/>
   <access origin="http://cumeqetrekking.appspot.com"/>
@@ -49,10 +49,11 @@ Rafael Coutinho
     <splash src="resources/android/splash/drawable-port-xxxhdpi-screen.png" density="port-xxxhdpi"/>
   </platform>
   <platform name="ios">
-<config-file platform="ios" target="*-Info.plist" parent="NSAppTransportSecurity">
+    <config-file platform="ios" target="*-Info.plist" parent="NSAppTransportSecurity">
         <dict>
             <key>NSAllowsArbitraryLoads</key><true/>
         </dict>
+        <key>ITSAppUsesNonExemptEncryption</key><false/>
     </config-file>
     <icon src="resources/ios/icon/icon.png" width="57" height="57"/>
     <icon src="resources/ios/icon/icon@2x.png" width="114" height="114"/>
