@@ -1,4 +1,5 @@
 <ion-view view-title="Meu Perfil">
+
     <ion-content>
         <button class="button button-positive button-block  icon-left ion-social-facebook" ng-click="doLoginFB()" ng-show="user.fbId==null">Conectar com Facebook</button>
         <div class="row">
@@ -12,16 +13,16 @@
         <div class="danger" ng-show="errorMsg!=null" ng-cloak>{{errorMsg}}</div>
         <div class="list" ng-show="user.id!=null || showForm">
             <div style="max-height: 40%;" ng-show="user.fbId!=null" ng-cloak>
-                <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="http://graph.facebook.com/{{user.fbId}}/picture?width=128&height=128" >
+                <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="http://graph.facebook.com/{{user.fbId}}/picture?width=128&height=128">
             </div>
             <label class="item item-input">
-                <input type="text" placeholder="Nome" ng-model="user.nome">
+                <input type="text" placeholder="Nome" ng-model="user.nome" ng-change="haschange=true">
             </label>
             <label class="item item-input">
-                <input type="email" placeholder="E-mail" ng-model="user.email">
+                <input type="email" placeholder="E-mail" ng-model="user.email" ng-disabled="user.id!=null">
             </label>
             <label class="item item-input">
-                <input type="tel" placeholder="(XX) XXXX-XXXX" ng-model="user.telefone">
+                <input type="tel" placeholder="(XX) XXXX-XXXX" ng-model="user.telefone" ng-change="haschange=true">
             </label>
             <label class="item item-input" ng-show="showForm">
                 <input type="password" placeholder="Senha" ng-model="user.password">
@@ -29,7 +30,7 @@
             <label class="item item-input" ng-show="showForm">
                 <input type="password" placeholder="Confirmar Senha" ng-model="pwdConfirm">
             </label>
-            <button class="button" ng-click="saveData()" ng-cloak>
+            <button class="button button-balanced" ng-click="saveData()" ng-cloak ng-disabled="!haschange || haschange==false">
                 Salvar
             </button>
             <button class="button" ng-click="logoff()" ng-cloak>

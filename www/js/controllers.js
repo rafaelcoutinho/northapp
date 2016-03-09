@@ -1,6 +1,6 @@
 angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services'])
 
-    .controller('AppCtrl', function ($scope, $ionicModal, $ionicPlatform, $timeout, $ionicPush, $cordovaLocalNotification) {
+    .controller('AppCtrl', function ($scope, $ionicModal, $ionicPlatform, $timeout, $ionicPush, $cordovaLocalNotification, $cordovaInAppBrowser) {
 
         if ($scope.shide != true) {
             if (navigator && navigator.splashscreen) {
@@ -19,7 +19,9 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
         }
 
-
+        $scope.openGitHub = function () {
+            $cordovaInAppBrowser.open('https://github.com/rafaelcoutinho/northapp', '_blank')
+        }
 
     })
     .controller('TeamCtrl', function ($scope) {
@@ -28,84 +30,53 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     .controller('HighlightCtrl', function ($scope, HighlightService) {
         $scope.highlights = HighlightService.query(function (data) { console.log("Carregou " + data) }, function (data) { console.log("Falhou " + JSON.stringify(data)) });
 
-    }).controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal, UserService) {
+    })
+    .controller('MenuCtrl', function ($scope, $stateParams, EtapasService) {
+        $scope.menuBtns = [];
+        $scope.$on('$routeChangeStart', function (next, current) {
+            console.log("changed")
+            //$scope.menuBtns = [];
+        });
+        $scope.$on('showRight', function (event, mass) {
+            console.log("showRight")
+            $scope.menuBtns.push({ label: "Salvar" });
+            console.log("showRight ", $scope.menuBtns)
+        });
+    })
+    .controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal, UserService, $log, $rootScope) {
+        $rootScope.$broadcast('showRight', [1, 2, 3]);
         $scope.user = loginService.getUser();
         if ($scope.user == null) {
             $scope.user = {};
         }
+        $scope.haschange = false;
         $scope.saveData = function () {
             $scope.errorMsg = null;
-            loginService.validateNewUser($scope.user).then(function (user) {
-                $scope.user = user;
-            }, function (fail) {
-                if (fail == "dupe") {
-                    $scope.errorMsg = "Usuário já existente. Utilize a função de login.";
-                } else {
-                    $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
-                }
-            });
+            if ($scope.user.id == null) {
+                loginService.validateNewUser($scope.user).then(function (user) {
+                    $scope.user = user;
+                    $scope.haschange = false;
+                    $scope.showForm = false;
+                }, function (fail) {
+                    if (fail == "dupe") {
+                        $scope.errorMsg = "Usuário já existente. Utilize a função de login.";
+                    } else {
+                        $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
+                    }
+                });
+            } else {
+                loginService.saveUser($scope.user).then(
+                    function () {
+                        console.log("salvou")
+                        $scope.haschange = false;
+                    })
+
+            }
         };
         $scope.doShowForm = function () {
+            $rootScope.$broadcast('showRight', [1, 2, 3]);
             $scope.showForm = true;
         }
-        $scope.getfbinfo = function () {
-            try {
-                console.log("Api facebook")
-                $cordovaFacebook.api("me", ["public_profile", "email", "user_friends"
-                ]).then(function (user) {
-                    $scope.logUserIn(user);
-                }, function (error) {
-                    $scope.errorMsg = 'Erro carregando informações do Facebook';
-                });
-            } catch (e) {
-                console.log("Facebook not available")
-            }
-        };
-        if ($scope.user != null && $scope.user.fbId != null) {
-            $scope.getfbinfo();
-        }
-        $scope.doLoginFB = function () {
-            try {
-                $cordovaFacebook.login(["public_profile", "email"
-                ]).then(function (user) {
-                    console.log("sucesso " + JSON.stringify(user));
-                    if (user.email) {
-                        $scope.logUserIn(user);
-                    } else {
-                        $scope.getfbinfo();
-                    }
-
-                }, function (error) {
-                    console.log("error " + JSON.stringify(error));
-                    $scope.errorMsg = 'Erro logando com Facebook';
-                });
-
-            } catch (e) {
-                console.log("Facebook not available")
-            }
-
-        };
-        $scope.logoff = function () {
-            $scope.user = null;
-            loginService.setUserLocally(null);
-        }
-        $scope.logUserIn = function (user) {
-            if (user.email == null || user.email == "") {
-                $scope.errorMsg = 'Erro: Não foi possível obter de e-mail do Facebook';
-                $scope.showForm = true;
-                return;
-            }
-            loginService.validateNewUser(user).then(function (user) {
-                $scope.user = loginService.getUser();
-            }, function (fail) {
-                if (fail == "dupe") {
-                    $scope.errorMsg = "Usuário já existe no sistema. Faça login ou utilize o Facebook.";
-                } else {
-                    $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
-                }
-            });
-
-        };
 
         $scope.loginData = {};
         $scope.executeLogin = function () {
@@ -141,6 +112,79 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.closeLogin = function () {
             $scope.modal.hide();
         };
+        $scope.logoff = function () {
+            $scope.user = {};
+            loginService.setUserLocally(null);
+            try {
+                $cordovaFacebook.logout();
+            } catch (e) {
+
+            }
+        };
+
+        $scope.getfbinfo = function () {
+            try {
+                console.log("Api facebook")
+                $cordovaFacebook.api("me/?fields=id,name,email", FBPerms).then($scope.logUserInWithFB, function (error) {
+                    $scope.errorMsg = 'Erro carregando informações do Facebook';
+                });
+            } catch (e) {
+                console.log("Facebook not available")
+            }
+        };
+        var FBPerms = ["email", "public_profile", "user_friends"]
+        $scope.doLoginFB = function () {
+            try {
+                $cordovaFacebook.login(FBPerms).then(function (user) {
+                    console.log("sucesso " + JSON.stringify(user));
+                    console.log("sucesso ", user);
+                    if (user.email) {
+                        $scope.logUserInWithFB(user);
+                    } else {
+                        $scope.getfbinfo();
+                    }
+
+                }, function (error) {
+                    console.log("error " + JSON.stringify(error));
+                    $scope.errorMsg = 'Erro conectando com Facebook';
+                });
+
+            } catch (e) {
+                console.log("Facebook not available")
+            }
+
+        };
+
+        $scope.logUserInWithFB = function (user) {
+            if (user.email == null || user.email == "") {
+                $scope.errorMsg = 'Erro: Não foi possível obter de e-mail do Facebook';
+                $cordovaFacebook.logout()
+                    .then(function (success) {
+                        console.log("Deslogou")
+                    }, function (error) {
+                        console.log("falhou ao deslogar" + error)
+                    });
+                $scope.user.nome = user.name;
+                $scope.user.fbId = user.id;
+                $scope.showForm = true;
+                return;
+            }
+            var dbUser = {
+                nome: user.name,
+                email: user.email,
+                fbId: user.id
+            }
+            loginService.validateNewUser(dbUser, { fromFB: true }).then(function (userServer) {
+                $scope.user = loginService.getUser();
+            }, function (fail) {
+                $log.log(fail)
+                $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
+
+            });
+
+        };
+
+
     })
 
     .controller('EtapaCtrl', function (
@@ -152,14 +196,19 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             { nome: "Graduados", id_Config: 3 },
             { nome: "Trekkers / Turismo", id_Config: 1 }
         ];
-
+        $scope.getLabelCategoria = function (item) {
+            //hardcoded
+            var categorias = ["", "Turismo", "Trekker", "Graduado", "Pró"];
+            
+            return categorias[item];
+        }
         $scope.isInCategoria = function (categoriaGrid) {
             return function (item) {
-                
-                if((item.id_Categoria==1 || item.id_Categoria==0)){
-                   return categoriaGrid.id_Config==1; 
-                } 
-                return categoriaGrid.id_Config==item.id_Categoria;
+
+                if ((item.id_Categoria == 1 || item.id_Categoria == 0)) {
+                    return categoriaGrid.id_Config == 1;
+                }
+                return categoriaGrid.id_Config == item.id_Categoria;
             };
         }
 
@@ -202,8 +251,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             window.open('tel:' + phone);
         }
         $scope.web = function (website) {
-
-            $cordovaInAppBrowser.open('http://' + website, '_blank')
+            if (!website.startsWith("http")) {
+                website = "http://" + website;
+            }
+            $cordovaInAppBrowser.open(website, '_blank')
                 .then(function (event) {
                     // success
                 })

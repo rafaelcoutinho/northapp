@@ -30,16 +30,15 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
     .constant("appConfigs", {
         "backendSecure": "https://cumeqetrekking.appspot.com/",
         "backend": "http://cumeqetrekking.appspot.com/",
-        "restBackend": "http://cumeqetrekking.appspot.com/rest",
+        "enhancedRestBackend": "http://cumeqetrekking.appspot.com/app/enhanced",        
         "openRestBackend": "http://cumeqetrekking.appspot.com/app/rest",
         "secureEndpointBackend": "https://cumeqetrekking.appspot.com/endpoints"
         
-        // "backendSecure": "http://192.168.33.105/northServer/api.php",
+        // "backendSecure": "http://192.168.33.105/northServer/apiPub.php",
         // "backend": "http://192.168.33.105/northServer/",
-        // "restBackend": "http://192.168.33.105/northServer/api.php",
-        // "secureEndpointBackend":"http://192.168.33.105/northServer/"
-        // "backendSecure": "http://localhost/northServer/api.php",
-        // "backend": "http://localhost/northServer/api.php"
+        // "restBackend": "http://192.168.33.105/northServer/apiPub.php",
+        // "secureEndpointBackend": "http://192.168.33.105/northServer/"
+
     })
     .run(function ($ionicPlatform, $rootScope, $ionicLoading) {
         $ionicPlatform.ready(function () {
@@ -68,44 +67,23 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
             try {
                 Ionic.io();
                 console.log("vai registrar pushes");
-                $rootScope.onRegistered = function (pushToken) {
-                    try {
-                        console.log("Got Token onRegister: " + pushToken.token + " ");
-                        var ionicUser = Ionic.User.current();
-                        if (ionicUser.id) {
-                            console.log("setting token to user");
-                            ionicUser.addPushToken(pushToken.token);
-                            ionicUser.save().then(function () {
-                                console.log("token setado")
-                            }, function (data) {
-                                console.log("erro ao setar token!" + data)
-                            });
-                        }
-
-                    } catch (e) {
-                        console.log("erro regi " + e.message);
-                    }
-
-                };
                 var push = new Ionic.Push({
+                    "debug": false,
                     "onNotification": function (notification) {
                         var payload = notification.payload;
                         console.log(notification, payload);
-                        var idMsg = Math.round((Math.random() * 10000));
-                        //					$cordovaLocalNotification.schedule({
-                        //						id : idMsg,
-                        //						title : notification.title,
-                        //						text : notification.message,
-                        //						icon : 'file://img/full.png',
-                        //					}).then(function(result) {
-                        //						console.log("resultado " + result);
-                        //					});
                     },
-                    "onRegister": $rootScope.onRegistered
-
+                    "onRegister": function (token) {
+                         console.log("Device token: '" + token.token);
+                         push.saveToken(token);
+                    }
                 });
 
-                push.register();
+                push.register(function (token) {
+                   
+                });
+
+
             } catch (e) {
                 console.log("erro Ionic.Push " + e.message);
 

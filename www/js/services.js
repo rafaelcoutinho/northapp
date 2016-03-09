@@ -88,13 +88,13 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         return $resource(appConfigs.openRestBackend + "/Etapa/:id", {}, {
             query: {
                 isArray: true
-                // ,
-                // transformResponse: jsonTransformQuery
+                ,
+                transformResponse: jsonTransformQuery
             },
             getGrid: {
                 isArray: false,
                 methdo: "GET",
-                url: appConfigs.openRestBackend + "/Etapa/:id/GridInfo"
+                url: appConfigs.enhancedRestBackend + "/Etapa/:id/GridInfo"
 
             }
         });
@@ -104,7 +104,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     })
 
     .service('LocationService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
-        return $resource(appConfigs.restBackend + '/Local/:id', {}, {
+        return $resource(appConfigs.openRestBackend + '/Local/:id', {}, {
             query: {
                 isArray: true,
                 transformResponse: jsonTransformQuery
@@ -114,7 +114,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     }])
     .service('HighlightService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
 
-        return $resource(appConfigs.restBackend + '/Destaque/:id', {}, {
+        return $resource(appConfigs.openRestBackend + '/Destaque/:id', {}, {
             query: {
                 isArray: true,
                 transformResponse: jsonTransformQuery
@@ -122,27 +122,35 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         });
 
     }])
-  
+
     .service('UserService', function ($http, $localStorage, appConfigs, $resource, $q) {
-        return $resource(appConfigs.restBackend + '/Trekker/:id', {},
+        return $resource(appConfigs.secureEndpointBackend + '/User', {},
             {
-                byEmail: {
-                    method: "GET",
-                    isArray: true,
-                    transformResponse: jsonTransformQuery,
-                    url: appConfigs.restBackend + '/Trekker/?filter0=email,eq,:email'
-                },
+
                 validate: {
                     method: "POST",
                     isArray: false,
-                    url: appConfigs.secureEndpointBackend + '/userManager.php'//'/User'
+                    url: appConfigs.secureEndpointBackend + '/Register'//'/User'
                 }
             }
             );
     })
-    .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService) {
+    .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService, $log) {
 
         return {
+            saveUser: function (user) {
+                var deferred = $q.defer();
+                var me = this;
+                //TODO algum tipo controle de login
+                UserService.save({ id: user.id }, user, function (response) {
+                    me.setUserLocally(user);
+                    deferred.resolve(response.data);
+                }, function (response) {
+                    deferred.reject(response);
+                }
+                    );
+                return deferred.promise;
+            },
             login: function (email, pwd) {
                 var deferred = $q.defer();
 
@@ -153,6 +161,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
                 $http.post(appConfigs.secureEndpointBackend + "/Login", data)
                     .then(function successCallback(response) {
+                        //TODO algum tipo controle de login
                         deferred.resolve(response.data);
                     }, function errorCallback(response) {
                         deferred.reject(response);
@@ -164,13 +173,15 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 $localStorage.northApp_user = aUser;
                 if (aUser != null) {
                     this.reloadIonicUser(aUser);
+                } else {
+                    Ionic.Auth.logout();
                 }
             },
-            validateNewUser: function (aUser) {
+            validateNewUser: function (aUser, headers) {
                 var deferred = $q.defer();
 
                 var me = this;
-                UserService.validate(aUser, function (data) {
+                UserService.validate(headers, aUser, function (data) {
                     if (aUser.id == null) {
                         aUser.id = data.id;
                     }
@@ -178,7 +189,8 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     deferred.resolve($localStorage.northApp_user);
                 }, function (response) {
                     var data = response.data;
-                    if (data.errorMsg.indexOf("Duplicate") > -1) {
+                    console.log("Validating error " + JSON.stringify(response));
+                    if (data.errorMsg && data.errorMsg.indexOf("Duplicate") > -1) {
                         deferred.reject("dupe");
                     } else {
                         deferred.reject(data);
@@ -186,43 +198,88 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 });
                 return deferred.promise;
             },
+            ionicLogin: function (user) {
+                var deferred = $q.defer();
+                var ioData = {
+                    email: user.email,
+                    password: "default",
+                    custom: user
+                }
+
+                var authProvider = 'basic';
+                var authSettings = { 'remember': true };
+
+                var authSuccess = function (newuser) {
+                    $log.log("authSuccess " + newuser);
+                    // user was authenticated, you can get the authenticated user
+                    // with Ionic.User.current();
+                    iouser = Ionic.User.current();
+                    for (var key in user) {
+                        $log.log($key, user[key]);
+                        if (key != 'password' && key != 'email') {
+                            $log.log("setando")
+                            iouser.set(key, user[key]);
+                        }
+                        iouser.save();
+                    }
+
+                    deferred.resolve(iouser);
+                };
+                var authFailure = function (errors) {
+                    $log.log("authFailure ");
+                    for (var err in errors) {
+                        // check the error and provide an appropriate message
+                        // for your application
+                        $log.log("Erro " + err);
+                    }
+                    deferred.reject(errors);
+                };
+                var login = function () {
+                    Ionic.Auth.login(authProvider, authSettings, ioData)
+                        .then(authSuccess, authFailure);
+                };
+                login();
+                return deferred.promise;
+            },
+            ionicSignUp: function (user) {
+                var deferred = $q.defer();
+                var ioData = {
+                    email: user.email,
+                    password: "default",
+                    custom: user
+                }
+                var signupSuccess = function (arg) {
+                    console.log("Ionic signup " + arg);
+                    iouser = Ionic.User.current();
+                    deferred.resolve(iouser);
+                }
+                var signupFailure = function (arg) {
+                    console.log("Ionic signup error " + arg)
+                    deferred.reject(arg);
+                }
+                Ionic.Auth.signup(ioData).then(signupSuccess, signupFailure);
+                return deferred.promise;
+            },
             reloadIonicUser: function (user) {
                 try {
+                    var iouser = Ionic.User.current();
+                    if (iouser.isAuthenticated()) {
+                        $log.log("iouser " + iouser);
 
-                    var ionicUser = Ionic.User.load(user.id).then(function (data) {
-                        console.log(data + "Carregou usuario do ionico " + JSON.stringify(ionicUser));
-
-                    }, function (erro) {
-                        try {
-                            console.log("Nao existe vai criar " + erro);
-                            ionicUser = Ionic.User.current();
-                            console.log("pegou current " + ionicUser);
-                            // if the user doesn't have an id, you'll need to give
-                            // it one.
-                            if (!ionicUser.id) {
-                                ionicUser.id = user.id + "";
-
-                            } else {
-                                console.log("na verdade existe id: " + ionicUser.id);
-
-                            }
-                            ionicUser.set('name', user.name);
-                            ionicUser.set('email', user.email);
-                            ionicUser.set('image', user.image);
-
-                            console.log("id: " + ionicUser.id);
-
-                            ionicUser.save().then(function (a) {
-                                console.log("salvou no ionic " + a)
+                    } else {
+                        $log.log("Ionic user not found, trying to log user in ");
+                        var me = this;
+                        this.ionicLogin(user).then(function () {
+                            $log.log("ok");
+                        }, function (err) {
+                            $log.log("usuário nao existe na plataforma ionic, criando agora");
+                            me.ionicSignUp(user).then(function () {
+                                $log.log("Usuarip ok");
                             }, function (err) {
-                                console.log("falhou para salvar no ionic " + err)
+                                $log.log("Não foi possivel cadastrar usuario");
                             });
-                        } catch (e) {
-                            console.log("Erro criando" + e.message);
-                        }
-                    });
-                    ;
-
+                        })
+                    }
                 } catch (e) {
                     console.log("erro buscando usuario " + e.message)
 
@@ -230,7 +287,8 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             },
             getUser: function () {
                 var user = $localStorage.northApp_user;
-
+                var iouser = Ionic.User.current();
+                $log.log("Ionic user " + iouser)
                 return user;
             },
             getUserID: function () {

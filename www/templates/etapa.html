@@ -109,13 +109,18 @@
                 </div>
                 <div class="row ">
                     <div class="col col-demo col-25 titTabela ">Horário</div>
-                    <div class="col col-demo col-75 titTabela ">Equipe</div>
+                    <div class="col col-demo col-75 titTabela " ng-hide="categoriaGrid.id_Config==1">Equipe</div>
+                    <div class="col col-demo col-50 titTabela " ng-show="categoriaGrid.id_Config==1">Equipe</div>
+                    <div class="col col-demo col-25 titTabela " ng-show="categoriaGrid.id_Config==1">Categoria</div>
 
                 </div>
 
-                <div class="row " ng-repeat="entry in inscricaoInfo.grid|filter:{id_Config:categoriaGrid.id_Config} " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                <div class="row " ng-repeat="entry in inscricaoInfo.grid|filter:{id_Config:categoriaGrid.id_Config}|orderBy:'largada' " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
                     <div class="col col-demo col-25 ">{{entry.largada | date:'shortTime'}}</div>
-                    <div class="col col-demo col-75 ">{{entry.nome_Equipe}}</div>
+                    <div class="col col-demo col-75 " ng-hide="categoriaGrid.id_Config==1">{{entry.nome_Equipe}} </div>
+                    <div class="col col-demo col-50 " ng-show="categoriaGrid.id_Config==1">{{entry.nome_Equipe}} </div>
+                    <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1">{{getLabelCategoria(entry.categoria_Equipe)}}</div>
+
                 </div>
             </div>
             <div class="list card ">
@@ -127,7 +132,7 @@
 
                 </div>
 
-                <div class="row " ng-repeat="entry in inscricaoInfo.preGrid|filter:isInCategoria(categoriaGrid)  " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                <div class="row " ng-repeat="entry in inscricaoInfo.preGrid|filter:isInCategoria(categoriaGrid) |orderBy:'equipe' " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
                     <div class="col col-demo  ">{{entry.equipe}}</div>
                 </div>
 
