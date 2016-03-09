@@ -12,3 +12,5 @@ resources/android/
 resources/ios/
 www/lib
 res/values/facebookconnect.xml
+*.apk
+build*.sh
