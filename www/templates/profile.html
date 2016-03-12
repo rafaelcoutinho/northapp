@@ -10,34 +10,41 @@
                 <button class="button button-balanced button-outline button-block" ng-show="user.id==null" ng-click="doShowForm()">Criar uma conta</button>
             </div>
         </div>
-        <div class="danger" ng-show="errorMsg!=null" ng-cloak>{{errorMsg}}</div>
-        <div class="list" ng-show="user.id!=null || showForm">
-            <div style="max-height: 40%;" ng-show="user.fbId!=null" ng-cloak>
-                <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="http://graph.facebook.com/{{user.fbId}}/picture?width=128&height=128">
+        <div class="assertive" ng-show="errorMsg!=null" ng-cloak>{{errorMsg}}</div>
+        <form name="profileForm" novalidate>
+            <div class="list" ng-show="user.id!=null || showForm">
+                <div style="max-height: 40%;" ng-show="user.fbId!=null" ng-cloak>
+                    <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="http://graph.facebook.com/{{user.fbId}}/picture?width=128&height=128">
+                </div>
+                <label class="item item-input">
+                    <input type="text" placeholder="Nome" ng-model="user.nome" ng-change="haschange=true">
+                </label>
+                <label class="item item-input">
+                    <input type="email" placeholder="E-mail" ng-model="user.email" ng-required="true" name="profileEmail" ng-disabled="user.id!=null">
+                </label>
+                <label class="item item-input">
+                    <input type="tel" placeholder="(XX) XXXX-XXXX" ng-model="user.telefone" ng-change="haschange=true">
+                </label>
+
+                <label class="item item-input item-button-right" ng-show="showForm" ng-cloak>
+                    <!--<button class="button " ng-click="showpassword=!showpassword">
+                        <i class="icon" ng-class="{'ion-eye':showpassword==false,'ion-eye-disabled':showpassword==true}"></i>
+                    </button>-->
+                    <input ng-show="showpassword" type="text" placeholder="Senha" ng-model="user.password">
+                    <input ng-hide="showpassword" type="password" placeholder="Senha" ng-model="user.password">
+
+                </label>
+
+
             </div>
-            <label class="item item-input">
-                <input type="text" placeholder="Nome" ng-model="user.nome" ng-change="haschange=true">
-            </label>
-            <label class="item item-input">
-                <input type="email" placeholder="E-mail" ng-model="user.email" ng-disabled="user.id!=null">
-            </label>
-            <label class="item item-input">
-                <input type="tel" placeholder="(XX) XXXX-XXXX" ng-model="user.telefone" ng-change="haschange=true">
-            </label>
-            <label class="item item-input" ng-show="showForm">
-                <input type="password" placeholder="Senha" ng-model="user.password">
-            </label>
-            <label class="item item-input" ng-show="showForm">
-                <input type="password" placeholder="Confirmar Senha" ng-model="pwdConfirm">
-            </label>
             <button class="button button-balanced" ng-click="saveData()" ng-cloak ng-disabled="!haschange || haschange==false">
                 Salvar
             </button>
             <button class="button" ng-click="logoff()" ng-cloak>
                 Desconectar
             </button>
-        </div>
-
+            </div>
+        </form>
 
     </ion-content>
 </ion-view>

@@ -2,11 +2,13 @@
     <ion-content class="scroll-bg">
         <div class="list card">
 
-            <a class="item item-thumbnail-left" ng-repeat="etapa in etapas| orderBy:'data'" href="#/app/etapa/{{etapa.id}}"> <img src="{{etapa.imgSmall}}">
+            <a id="{{etapa.id}}" class="item item-thumbnail-left" ng-repeat="etapa in etapas| orderBy:'data'" href="#/app/etapa/{{etapa.id}}">
+                <img ng-src="{{etapa.imgSmall}}" ng-if="etapa.imgSmall">
+                <img src="img/random/etapaTemp.png" ng-if="!etapa.imgSmall">
                 <p class="etapaDate">{{etapa.data|date:'shortDate'}}</p>
-                <span class="etapaTitle">{{etapa.titulo}}</span>
-                <span class="etapaTitle">{{etapa.descricao}}</span>
-                <p class="etapaLocation"><span ng-show="etapa.id_Local==null">Local a definir</span><span ng-hide="etapa.id_Local==null">{{etapa.location.name}}</span></p>
+                <h2 class="etapaTitle">{{etapa.titulo}}</h2>
+                <p class="etapaDescription">{{etapa.descricao}}</p>
+                <p class="etapaLocation"><span ng-show="etapa.id_Local==null">Local a definir</span><span ng-hide="etapa.id_Local==null">{{etapa.location.nome}}</span></p>
             </a>
 
 

@@ -1,3 +1,6 @@
+var isTooOld = function (cacheInfo) {
+    return cacheInfo.updated < (new Date().getTime() - (1000 * 60 * 60 * 24 * 7));
+}
 angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource'])
 
     .factory('WeatherService', function ($http, $localStorage, $resource, appConfigs, $q) {
@@ -82,14 +85,16 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         }])
 
 
-    .factory('EtapasService', function ($http, $localStorage, $resource, appConfigs) {
+    .factory('EtapasService', function ($http, $localStorage, $resource, appConfigs, $q) {
 
-
-        return $resource(appConfigs.openRestBackend + "/Etapa/:id", {}, {
+        var etapaResource = $resource(appConfigs.openRestBackend + "/Etapa/:id", {}, {
             query: {
-                isArray: true
-                ,
+                isArray: true,
+                cache: true,
                 transformResponse: jsonTransformQuery
+            },
+            get: {
+                cache: true
             },
             getGrid: {
                 isArray: false,
@@ -99,6 +104,53 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             }
         });
 
+
+
+        return {
+            getGrid: etapaResource.getGrid,
+            query: etapaResource.query,
+            queryCached: function () {
+                var deferred = $q.defer();
+
+                if ($localStorage.northApp_etapas && !isTooOld($localStorage.northApp_etapas)) {
+
+                    deferred.resolve($localStorage.northApp_etapas.data);
+
+                } else {
+                    etapaResource.query({}, function (response) {
+                        $localStorage.northApp_etapas = {
+                            data: response,
+                            updated: new Date().getTime()
+                        }
+                        deferred.resolve(response);
+                    }, function (error) {
+                        deferred.reject(error);
+                    })
+                }
+                return deferred.promise;
+            },
+            get: function (obj) {
+                if (!$localStorage.northApp_etapas_details) {
+                    $localStorage.northApp_etapas_details = {};
+                }
+                var deferred = $q.defer();
+                var l = $localStorage.northApp_etapas_details[obj.id];
+                if (l && !isTooOld(l)) {
+                    deferred.resolve(l.data);
+                } else {
+                    etapaResource.get(obj, function (resp) {
+                        if (resp.id_Local && resp.id_Local != -1) {
+                            //só cacheia se estiver ok
+                            $localStorage.northApp_etapas_details[obj.id] = { data: resp, updated: new Date().getTime() };
+                        }
+                        deferred.resolve(resp.data);
+                    }, function (resp) {
+                        deferred.reject(resp);
+                    });
+                }
+                return deferred.promise;
+            }
+        }
 
 
     })
@@ -130,7 +182,8 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 validate: {
                     method: "POST",
                     isArray: false,
-                    url: appConfigs.secureEndpointBackend + '/Register'//'/User'
+                    url: appConfigs.secureEndpointBackend + '/Register'
+                    // url: 'http://localhost/northServer/userRegister.php'
                 }
             }
             );
@@ -189,12 +242,9 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     deferred.resolve($localStorage.northApp_user);
                 }, function (response) {
                     var data = response.data;
-                    console.log("Validating error " + JSON.stringify(response));
-                    if (data.errorMsg && data.errorMsg.indexOf("Duplicate") > -1) {
-                        deferred.reject("dupe");
-                    } else {
-                        deferred.reject(data);
-                    }
+
+                    deferred.reject(data);
+
                 });
                 return deferred.promise;
             },

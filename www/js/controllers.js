@@ -24,6 +24,20 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
 
     })
+    .filter('leadingZero', function ($filter) {
+        return function (input) {
+            if (isNaN(input)) {
+                return "-";
+            } else {
+                if (input < 10) {
+                    return '0' + input;
+                } else {
+                    return input;
+                }
+
+            };
+        };
+    })
     .controller('TeamCtrl', function ($scope) {
         $scope.pics = ['http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_678.JPG', 'http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_665.JPG'];
     })
@@ -49,20 +63,41 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         if ($scope.user == null) {
             $scope.user = {};
         }
+
         $scope.haschange = false;
+        $scope.showpassword = false;
+        $scope.togglePwd = function () {
+            $scope.showpassword = true;
+        }
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
         $scope.saveData = function () {
             $scope.errorMsg = null;
             if ($scope.user.id == null) {
+
+                if ($scope.user.password == null || $scope.user.password.length < 3) {
+                    $scope.errorMsg = "Senha é um campo obrigatório e com pelo menos 3 caracteres.";
+                    return;
+                } else if (!$scope.user.email || $scope.user.email.length == 0 || !re.test($scope.user.email)) {
+                    $scope.errorMsg = "Por favor insira um e-mail válido.";
+                    return;
+                }
                 loginService.validateNewUser($scope.user).then(function (user) {
                     $scope.user = user;
                     $scope.haschange = false;
                     $scope.showForm = false;
                 }, function (fail) {
-                    if (fail == "dupe") {
-                        $scope.errorMsg = "Usuário já existente. Utilize a função de login.";
-                    } else {
-                        $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
+                    switch (fail.errorCode) {
+                        case 800:
+                            $scope.errorMsg = "Você já está cadastrado no aplicativo, utilize o Login ou Facebook para entrar.";
+                            break;
+                        case 803:
+                            $scope.errorMsg = "Senha é um campo obrigatório.";
+                            break;
+                        default:
+                            $scope.errorMsg = "Erro ao cadastrar, verifique seus dados.";
                     }
+
                 });
             } else {
                 loginService.saveUser($scope.user).then(
@@ -199,7 +234,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.getLabelCategoria = function (item) {
             //hardcoded
             var categorias = ["", "Turismo", "Trekker", "Graduado", "Pró"];
-            
+
             return categorias[item];
         }
         $scope.isInCategoria = function (categoriaGrid) {
@@ -226,7 +261,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             return "";
         }
         if ($stateParams.id) {
-            $scope.etapa = EtapasService.get({ id: $stateParams.id }, function (data) {
+            EtapasService.get({ id: $stateParams.id }).then(function (data) {
+                $scope.etapa = data;
                 if (data.id_Local) {
                     $scope.etapa.location = LocationService.get({ id: $scope.etapa.id_Local }, function (location) {
                         if (location.latitude != null) {
@@ -281,18 +317,24 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
     })
     .controller('EtapasCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser) {
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $anchorScroll) {
 
 
-        $scope.etapas = EtapasService.query(function () {
+        EtapasService.queryCached({}).then(function (data) {
+            $scope.etapas = data;
+            console.log($scope.etapas);
+            var today = new Date().getTime();
             for (var index = 0; index < $scope.etapas.length; index++) {
                 var element = $scope.etapas[index];
-                if (element.id == $stateParams.id) {
+                if (!$scope.etapa && element.data > today) {
                     $scope.etapa = element;
-                    break;
                 }
-
+                if (element.id_Local) {
+                    $scope.etapas[index].location = LocationService.get({ id: element.id_Local });
+                }
             }
+            $location.hash($scope.etapa.id);
+            $anchorScroll();
         });
 
 

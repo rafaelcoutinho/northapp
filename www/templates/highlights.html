@@ -1,13 +1,15 @@
 <ion-view view-title="Destaque">
     <ion-content class="scroll-bg">        
         <div class="list card ">
-
+            <div ng-if="highlights==null" >
+                Carregando
+            </div>
             <div ng-repeat="highlight in highlights | orderBy:'-id'" ng-cloak>
                 <div class="item item-divider">{{highlight.titulo}}</div>
                 <div class="item item-body">
                     <img class="item item-image" ng-src="{{highlight.imgUrl}}">
 
- <p>{{highlight.descricao}}</p>
+                    <p>{{highlight.descricao}}</p>
                 </div>
                
             </div>

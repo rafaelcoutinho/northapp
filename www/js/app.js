@@ -30,7 +30,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
     .constant("appConfigs", {
         "backendSecure": "https://cumeqetrekking.appspot.com/",
         "backend": "http://cumeqetrekking.appspot.com/",
-        "enhancedRestBackend": "http://cumeqetrekking.appspot.com/app/enhanced",        
+        "enhancedRestBackend": "http://cumeqetrekking.appspot.com/app/enhanced",
         "openRestBackend": "http://cumeqetrekking.appspot.com/app/rest",
         "secureEndpointBackend": "https://cumeqetrekking.appspot.com/endpoints"
         
@@ -40,7 +40,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
         // "secureEndpointBackend": "http://192.168.33.105/northServer/"
 
     })
-    .run(function ($ionicPlatform, $rootScope, $ionicLoading) {
+    .run(function ($ionicPlatform, $rootScope, $ionicLoading, $location, $anchorScroll) {
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory
             // bar above the keyboard
@@ -74,13 +74,13 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
                         console.log(notification, payload);
                     },
                     "onRegister": function (token) {
-                         console.log("Device token: '" + token.token);
-                         push.saveToken(token);
+                        console.log("Device token: '" + token.token);
+                        push.saveToken(token);
                     }
                 });
 
                 push.register(function (token) {
-                   
+
                 });
 
 
@@ -88,6 +88,10 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
                 console.log("erro Ionic.Push " + e.message);
 
             }
+        });
+        //permite fazer scroll com route
+        $rootScope.$on('$routeChangeSuccess', function (newRoute, oldRoute) {
+            if ($location.hash()) $anchorScroll();
         });
 
     })

@@ -115,8 +115,8 @@
 
                 </div>
 
-                <div class="row " ng-repeat="entry in inscricaoInfo.grid|filter:{id_Config:categoriaGrid.id_Config}|orderBy:'largada' " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
-                    <div class="col col-demo col-25 ">{{entry.largada | date:'shortTime'}}</div>
+                <div class="row " ng-repeat="entry in inscricaoInfo.grid|filter:{id_Config:categoriaGrid.id_Config}|orderBy:['hora','minuto'] " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                    <div class="col col-demo col-25 ">{{entry.hora|leadingZero}}:{{entry.minuto|leadingZero}}</div>
                     <div class="col col-demo col-75 " ng-hide="categoriaGrid.id_Config==1">{{entry.nome_Equipe}} </div>
                     <div class="col col-demo col-50 " ng-show="categoriaGrid.id_Config==1">{{entry.nome_Equipe}} </div>
                     <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1">{{getLabelCategoria(entry.categoria_Equipe)}}</div>
