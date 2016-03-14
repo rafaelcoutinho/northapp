@@ -124,7 +124,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                             data: response,
                             updated: new Date().getTime()
                         }
-                        deferred.resolve(response);
+                        deferred.resolve($localStorage.northApp_etapas.data);
                     }, function (error) {
                         deferred.reject(error);
                     })
@@ -145,7 +145,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                             //só cacheia se estiver ok
                             $localStorage.northApp_etapas_details[obj.id] = { data: resp, updated: new Date().getTime() };
                         }
-                        deferred.resolve(resp.data);
+                        deferred.resolve(resp);
                     }, function (resp) {
                         deferred.reject(resp);
                     });
@@ -163,9 +163,9 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 transformResponse: jsonTransformQuery
             },
             getMyEquipe: {
-                isArray:false,
-                url:appConfigs.enhancedRestBackend + '/Competidor/:id/Equipe',
-                
+                isArray: false,
+                url: appConfigs.enhancedRestBackend + '/Competidor/:id/Equipe',
+
             }
         });
 
@@ -200,6 +200,11 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     isArray: false,
                     url: appConfigs.secureEndpointBackend + '/Register'
                     // url: 'http://localhost/northServer/userRegister.php'
+                },
+                rememberPwd: {
+                    method: "POST",
+                    isArray: false,
+                    url: appConfigs.secureEndpointBackend + "/senha/LembrarSenha"
                 }
             }
             );
@@ -207,6 +212,9 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService, $log) {
 
         return {
+            startPwdRecovery: function (email) {
+                UserService.rememberPwd({ },{ email: email });
+            },
             saveUser: function (user) {
                 var deferred = $q.defer();
                 var me = this;

@@ -19,10 +19,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
         }
 
+
+
+    })
+    .controller('BreveCtrl', function ($scope, $cordovaInAppBrowser) {
         $scope.openGitHub = function () {
             $cordovaInAppBrowser.open('https://github.com/rafaelcoutinho/northapp', '_blank')
         }
-
     })
     .filter('leadingZero', function ($filter) {
         return function (input) {
@@ -41,7 +44,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     .controller('TeamCtrl', function ($scope, EquipesService, loginService) {
         $scope.user = loginService.getUser();
         if ($scope.user != null) {
-            $scope.info = EquipesService.getMyEquipe({id:$scope.user.id});
+            $scope.info = EquipesService.getMyEquipe({ id: $scope.user.id });
         }
 
 
@@ -62,7 +65,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             console.log("showRight ", $scope.menuBtns)
         });
     })
-    .controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal, UserService, $log, $rootScope) {
+    .controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup) {
         $rootScope.$broadcast('showRight', [1, 2, 3]);
         $scope.user = loginService.getUser();
         if ($scope.user == null) {
@@ -136,6 +139,29 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
                 }
                 );
+        }
+        $scope.showConfirm = function () {
+            var confirmPopup = $ionicPopup.confirm({
+                title: 'Lembrar senha',
+                template: 'Um e-mail será enviado para executar o reset de sua senha. Desenha continuar?'
+            });
+
+            confirmPopup.then(function (res) {
+                if (res) {
+                    loginService.startPwdRecovery($scope.loginData.username);
+                    $scope.closeLogin();
+                } else {
+
+                }
+            });
+        };
+        $scope.rememberPwd = function () {
+            if ($scope.loginData.username == null) {
+                $scope.loginData.errorMsg = "Por favor preencha seu endereço de e-mail."
+            } else {
+                // A confirm dialog
+                $scope.showConfirm();
+            }
         }
         $ionicModal.fromTemplateUrl('templates/login.html', function (modal) {
             $scope.modal = modal;
@@ -265,28 +291,33 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
             return "";
         }
-        if ($stateParams.id) {
-            EtapasService.get({ id: $stateParams.id }).then(function (data) {
-                $scope.etapa = data;
-                if (data.id_Local) {
-                    $scope.etapa.location = LocationService.get({ id: $scope.etapa.id_Local }, function (location) {
-                        if (location.latitude != null) {
-                            var lat = parseFloat(location.latitude) / 1000000;
-                            var lng = parseFloat(location.latitude) / 1000000;
 
-                            WeatherService.getPerCoords(lat, lng, data.data).then(function (weather) {
-                                $scope.weather = weather;
+        console.log("Vai carregar etapa $stateParams.id ");
+        EtapasService.get({ id: $stateParams.id }).then(function (data) {
+            console.log("CArregou etapa", data);
+            $scope.etapa = data;
+            if (data.id_Local) {
+                $scope.etapa.location = LocationService.get({ id: $scope.etapa.id_Local }, function (location) {
+                    if (location.latitude != null) {
+                        var lat = parseFloat(location.latitude) / 1000000;
+                        var lng = parseFloat(location.latitude) / 1000000;
 
-                            },
-                                function (err) {
-                                    console.log("erro carregando clima", err);
-                                });
-                        }
-                    })
-                }
-            });
+                        WeatherService.getPerCoords(lat, lng, data.data).then(function (weather) {
+                            $scope.weather = weather;
 
-        }
+                        },
+                            function (err) {
+                                console.log("erro carregando clima", err);
+                            });
+                    }
+                })
+            }
+
+        }, function (error) {
+            console.log("Não carregou etapa");
+        });
+
+
 
         $scope.tel = function (phone) {
             window.open('tel:' + phone);

@@ -37,10 +37,10 @@
 
 
             </div>
-            <button class="button button-balanced" ng-click="saveData()" ng-cloak ng-disabled="!haschange || haschange==false">
+            <button class="button button-balanced" ng-click="saveData()" ng-cloak ng-disabled="!haschange || haschange==false" ng-show="user.id!=null || showForm">
                 Salvar
             </button>
-            <button class="button" ng-click="logoff()" ng-cloak>
+            <button class="button" ng-click="logoff()" ng-cloak ng-show="user.id!=null || showForm">
                 Desconectar
             </button>
             </div>
