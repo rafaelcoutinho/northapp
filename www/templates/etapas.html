@@ -1,5 +1,7 @@
 <ion-view view-title="Etapas">
     <ion-content class="scroll-bg">
+        <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh()">
+        </ion-refresher>
         <div class="list card">
 
             <a id="{{etapa.id}}" class="item item-thumbnail-left" ng-repeat="etapa in etapas| orderBy:'data'" href="#/app/etapa/{{etapa.id}}">

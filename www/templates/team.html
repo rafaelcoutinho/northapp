@@ -1,29 +1,14 @@
 <ion-view view-title="Minha Equipe">
+
     <ion-content class="scroll-bg">
-        <ng-include src="'templates/breve.html'" />
-    </ion-content>
-    <ion-content class="scroll-bg" ng-show="false">
 
         <div class="list card">
-
+            <h2>{{equipe.nome}}</h2>
             <div class="item ">
-                <img class="avatarImage" style="float:right;" ng-src="http://ionicframework.com/img/docs/spengler.jpg">
-                <img class="avatarImage" style="float:right;" ng-src="http://ionicframework.com/img/docs/venkman.jpg">
-                <img class="avatarImage" style="float:right;" ng-src="http://ionicframework.com/img/docs/winston.jpg">
-                <h2><small>Equipe</small> CuméQé?</h2>
-                <p>São Paulo/Campinas</p>
-            </div>
+                <img class="avatarImage" style="float:right;" ng-repeat="integante in info.integrantes" ng-src="http://graph.facebook.com/{{integante.fbId}}/picture?width=128&height=128">
 
-            <div class="item item-body">
-
-                <p>
-                    Participantes de X etapas em 2015. Atualmente na <span style="font-weight:bold;">99o</span> posição.
-                </p>
-                <ul class="list">
-                    <li class="item">
-                        <img src="{{pic}}" ng-repeat="pic in pics">
-                    </li>
-                </ul>
+                <h2><small>Equipe</small> {{info.equipe.nome}}</h2>
+                <p>{{info.equipe.descricao}}</p>
             </div>
 
         </div>

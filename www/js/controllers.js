@@ -38,8 +38,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             };
         };
     })
-    .controller('TeamCtrl', function ($scope) {
-        $scope.pics = ['http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_678.JPG', 'http://www.northbrasil.com.br/northbrasil/Ftp/ENDURO_08CAMPINAS2015/THUMB_ENDURO_PQECOLOGICO_CAMPINAS_2015_665.JPG'];
+    .controller('TeamCtrl', function ($scope, EquipesService, loginService) {
+        $scope.user = loginService.getUser();
+        if ($scope.user != null) {
+            $scope.info = EquipesService.getMyEquipe({id:$scope.user.id});
+        }
+
+
     })
     .controller('HighlightCtrl', function ($scope, HighlightService) {
         $scope.highlights = HighlightService.query(function (data) { console.log("Carregou " + data) }, function (data) { console.log("Falhou " + JSON.stringify(data)) });
@@ -307,37 +312,42 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             } else if (ionic.Platform.isAndroid()) {
                 console.log("android");
                 if (etapa.location.latitude != null) {
-                    $cordovaInAppBrowser.open('geo:' + encodeURI(etapa.location.latitude + "," + etapa.location.longitude), "_system");
+                    $cordovaInAppBrowser.open('geo:' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)), "_system");
                 } else {
                     $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.endereco, "_system");
                 }
             } else {
-                window.open('geo:' + encodeURI(etapa.location.latitude + "," + etapa.location.longitude) + '?&q=' + encodeURI(etapa.location.endereco));
+                window.open('geo:' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)) + '?&q=' + encodeURI(etapa.location.endereco));
             }
         }
     })
     .controller('EtapasCtrl', function (
         $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $anchorScroll) {
 
-
-        EtapasService.queryCached({}).then(function (data) {
-            $scope.etapas = data;
-            console.log($scope.etapas);
-            var today = new Date().getTime();
-            for (var index = 0; index < $scope.etapas.length; index++) {
-                var element = $scope.etapas[index];
-                if (!$scope.etapa && element.data > today) {
-                    $scope.etapa = element;
+        $scope.doRefresh = function () {
+            EtapasService.clear();
+            $scope.loadData();
+        }
+        $scope.loadData = function () {
+            EtapasService.queryCached({}).then(function (data) {
+                $scope.etapas = data;
+                console.log($scope.etapas);
+                var today = new Date().getTime();
+                for (var index = 0; index < $scope.etapas.length; index++) {
+                    var element = $scope.etapas[index];
+                    if (!$scope.etapa && element.data > today) {
+                        $scope.etapa = element;
+                    }
+                    if (element.id_Local) {
+                        $scope.etapas[index].location = LocationService.get({ id: element.id_Local });
+                    }
                 }
-                if (element.id_Local) {
-                    $scope.etapas[index].location = LocationService.get({ id: element.id_Local });
-                }
-            }
-            $location.hash($scope.etapa.id);
-            $anchorScroll();
-        });
+                $location.hash($scope.etapa.id);
+                $anchorScroll();
+            });
+        }
 
-
+        $scope.loadData();
 
     })
 

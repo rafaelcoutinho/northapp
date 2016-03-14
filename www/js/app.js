@@ -40,7 +40,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
         // "secureEndpointBackend": "http://192.168.33.105/northServer/"
 
     })
-    .run(function ($ionicPlatform, $rootScope, $ionicLoading, $location, $anchorScroll) {
+    .run(function ($ionicPlatform, $rootScope, $ionicLoading, $location, $anchorScroll, $ionicHistory, $ionicSideMenuDelegate) {
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory
             // bar above the keyboard
@@ -88,6 +88,20 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
                 console.log("erro Ionic.Push " + e.message);
 
             }
+            $ionicPlatform.registerBackButtonAction(function (event) {              
+               event.preventDefault();
+               console.log($ionicSideMenuDelegate.isOpenLeft())
+                if ($ionicHistory.backView() == null) {
+                    if ($ionicSideMenuDelegate.isOpen()) {
+                        navigator.app.exitApp(); //<-- remove this line to disable the exit
+                    }else{
+                        $ionicSideMenuDelegate.toggleLeft();
+                    }
+                }
+                else {
+                    navigator.app.backHistory();
+                }
+            }, 1000);
         });
         //permite fazer scroll com route
         $rootScope.$on('$routeChangeSuccess', function (newRoute, oldRoute) {

@@ -87,11 +87,11 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
     .factory('EtapasService', function ($http, $localStorage, $resource, appConfigs, $q) {
 
-        var etapaResource = $resource(appConfigs.openRestBackend + "/Etapa/:id", {}, {
+        var etapaResource = $resource(appConfigs.enhancedRestBackend + "/Etapa/:id", {}, {
             query: {
                 isArray: true,
                 cache: true,
-                transformResponse: jsonTransformQuery
+                // transformResponse: jsonTransformQuery
             },
             get: {
                 cache: true
@@ -107,15 +107,17 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
 
         return {
+            clear: function () {
+                delete $localStorage.northApp_etapas;
+                delete $localStorage.northApp_etapas_details;
+            },
             getGrid: etapaResource.getGrid,
             query: etapaResource.query,
             queryCached: function () {
                 var deferred = $q.defer();
 
                 if ($localStorage.northApp_etapas && !isTooOld($localStorage.northApp_etapas)) {
-
                     deferred.resolve($localStorage.northApp_etapas.data);
-
                 } else {
                     etapaResource.query({}, function (response) {
                         $localStorage.northApp_etapas = {
@@ -154,7 +156,20 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
 
     })
+    .service('EquipesService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
+        return $resource(appConfigs.openRestBackend + '/Equipe/:id', {}, {
+            query: {
+                isArray: true,
+                transformResponse: jsonTransformQuery
+            },
+            getMyEquipe: {
+                isArray:false,
+                url:appConfigs.enhancedRestBackend + '/Competidor/:id/Equipe',
+                
+            }
+        });
 
+    }])
     .service('LocationService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
         return $resource(appConfigs.openRestBackend + '/Local/:id', {}, {
             query: {
@@ -169,6 +184,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         return $resource(appConfigs.openRestBackend + '/Destaque/:id', {}, {
             query: {
                 isArray: true,
+                cache: true,
                 transformResponse: jsonTransformQuery
             }
         });
