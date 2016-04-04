@@ -34,6 +34,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
         "openRestBackend": "http://cumeqetrekking.appspot.com/app/rest",
         "secureEndpointBackend": "https://cumeqetrekking.appspot.com/endpoints"
         
+        // "enhancedRestBackend": "http://localhost/northServer/app.php",
         // "backendSecure": "http://192.168.33.105/northServer/apiPub.php",
         // "backend": "http://192.168.33.105/northServer/",
         // "restBackend": "http://192.168.33.105/northServer/apiPub.php",

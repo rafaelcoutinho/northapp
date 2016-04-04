@@ -50,7 +50,16 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
     })
     .controller('HighlightCtrl', function ($scope, HighlightService) {
-        $scope.highlights = HighlightService.query(function (data) { console.log("Carregou " + data) }, function (data) { console.log("Falhou " + JSON.stringify(data)) });
+        $scope.doRefresh = function (avoidClear) {
+            if (!avoidClear || avoidClear == false) {
+
+                HighlightService.clear();
+            }
+            HighlightService.queryCached().then(
+                function (data) { console.log("Carregou " + data); $scope.highlights = data; $scope.$broadcast('scroll.refreshComplete'); },
+                function (data) { console.log("Falhou " + JSON.stringify(data)); $scope.$broadcast('scroll.refreshComplete'); });
+        }
+        $scope.doRefresh(true);
 
     })
     .controller('MenuCtrl', function ($scope, $stateParams, EtapasService) {
@@ -254,19 +263,56 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser) {
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage) {
         $scope.currTab = "details";
         $scope.tabstemplate = "templates/etapa.tabs.html";
+        $scope.etapaNotComplete = true;
         $scope.categorias = [
+            { nome: "Pró", id: 4 },
+            { nome: "Graduados", id: 3 },
+            { nome: "Trekkers", id: 2 },
+            { nome: "Turismo", id: 1 }
+        ];
+
+        $scope.getLastSelectedCat = function () {
+            var selectedCat = $scope.categorias[0].id;
+            if ($localStorage.lastSelectedCat) {
+                selectedCat = $localStorage.lastSelectedCat;
+            }
+
+            return { id_Categoria: selectedCat };
+        }
+        $scope.getLastSelectedGrid = function () {
+            var grid = $scope.categoriasGrid[0].id;
+            if ($localStorage.lastSelectedGrid) {
+                grid = $localStorage.lastSelectedGrid;
+            }
+
+            return { id_Config: grid };
+        }
+        $scope.updatePrefCategoria = function (idCat, idGrid) {
+            if (idCat != null) {
+                $localStorage.lastSelectedCat = idCat;
+            }
+            if (idGrid != null) {
+                $localStorage.lastSelectedGrid = idGrid;
+            }
+        }
+
+        $scope.categoriasGrid = [
             { nome: "Pró", id_Config: 4 },
             { nome: "Graduados", id_Config: 3 },
             { nome: "Trekkers / Turismo", id_Config: 1 }
         ];
         $scope.getLabelCategoria = function (item) {
-            //hardcoded
-            var categorias = ["", "Turismo", "Trekker", "Graduado", "Pró"];
+            for (var index = 0; index < $scope.categorias.length; index++) {
+                var element = $scope.categorias[index];
+                if (item == element.id) {
+                    return element.nome;
+                }
+            }
+            return "-";
 
-            return categorias[item];
         }
         $scope.isInCategoria = function (categoriaGrid) {
             return function (item) {
@@ -281,7 +327,15 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.setTab = function (tabName) {
             $scope.currTab = tabName;
             if ($scope.currTab == "grid" && !$scope.inscricaoInfo) {
-                $scope.inscricaoInfo = EtapasService.getGrid({ id: $stateParams.id });
+                EtapasService.getGrid($scope.etapa).then(function (data) {
+                    $scope.inscricaoInfo = data;
+                });
+            } else if ($scope.currTab == "results") {
+                EtapasService.getResultados($scope.etapa).then(function (data) {
+                    $scope.resultados = data;
+                }, function (error) {
+
+                });
             }
         }
         $scope.isTab = function (val) {
@@ -292,17 +346,17 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             return "";
         }
 
-        console.log("Vai carregar etapa $stateParams.id ");
-        EtapasService.get({ id: $stateParams.id }).then(function (data) {
-            console.log("CArregou etapa", data);
-            $scope.etapa = data;
-            if (data.id_Local) {
+        EtapasService.get({ id: $stateParams.id }).then(function (dadosEtapa) {
+
+            $scope.etapa = dadosEtapa;
+            $scope.aconteceuEtapa = $scope.etapa.data < new Date().getTime();
+            if (dadosEtapa.id_Local) {
                 $scope.etapa.location = LocationService.get({ id: $scope.etapa.id_Local }, function (location) {
                     if (location.latitude != null) {
                         var lat = parseFloat(location.latitude) / 1000000;
                         var lng = parseFloat(location.latitude) / 1000000;
 
-                        WeatherService.getPerCoords(lat, lng, data.data).then(function (weather) {
+                        WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(function (weather) {
                             $scope.weather = weather;
 
                         },
@@ -338,8 +392,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.maps = function (etapa) {
 
             if (ionic.Platform.isIOS()) {
-                console.log("ios");
-                window.open('waze://?ll=' + encodeURI(etapa.location.endereco) + '&navigate=yes');
+                if (etapa.location.latitude != null) {
+                    window.open('waze://?ll=' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)) + '&navigate=yes');
+                } else {
+                    window.open('waze://?q=' + encodeURI(etapa.location.endereco) + '&navigate=yes');
+                }
             } else if (ionic.Platform.isAndroid()) {
                 console.log("android");
                 if (etapa.location.latitude != null) {
@@ -362,11 +419,12 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.loadData = function () {
             EtapasService.queryCached({}).then(function (data) {
                 $scope.etapas = data;
-                console.log($scope.etapas);
-                var today = new Date().getTime();
+
+                var twoDaysAgo = new Date().getTime() - (24 * 60 * 60 * 1000 * 2);
                 for (var index = 0; index < $scope.etapas.length; index++) {
                     var element = $scope.etapas[index];
-                    if (!$scope.etapa && element.data > today) {
+                    //até 2 dias seguintes a etapa deve-se centralizar nela
+                    if (!$scope.etapa && element.data > twoDaysAgo) {
                         $scope.etapa = element;
                     }
                     if (element.id_Local) {
@@ -375,6 +433,9 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 }
                 $location.hash($scope.etapa.id);
                 $anchorScroll();
+                $scope.$broadcast('scroll.refreshComplete');
+            }, function () {
+                $scope.$broadcast('scroll.refreshComplete');
             });
         }
 

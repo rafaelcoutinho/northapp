@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.northbrasil.app" version="0.0.5" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.northbrasil.app" version="0.0.6" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>NorthApp</name>
   <description>
         Aplicativo da NorthBrasil
     </description>
   <author email="rafael.coutinho+north@gmail.com" href="http://www.northbrasil.com.br/northbrasil/index.html">
-    Rafael Coutinho
+    NorthBrasil
   </author>
   <content src="index.html"/>
   <access origin="*"/>

@@ -39,14 +39,49 @@
         </ion-content>
     </ion-view>
     <ion-view view-title="Resultados" ng-show="currTab == 'results'" ng-cloak>
+
         <ion-content class="scroll-bg" style="margin-top: 50px">
-            <ng-include src="'templates/breve.html'" />
-        </ion-content>
+            <div ng-show="aconteceuEtapa==false">
+                <h3>Está cedo ainda para termos resultados.</h3>
+
+            </div>
+            <div ng-show="etapaNotComplete==true">
+                
+
+                <label class="item item-input item-select ">
+                    <div class="input-label ">
 
 
-        <ion-content class="scroll-bg" style="margin-top: 50px" ng-show="false">
+                        <select class="form-control " ng-change="updatePrefCategoria(filterCat.id_Categoria,null)" ng-model="filterCat.id_Categoria"
+                        ng-options="cat.id as cat.nome for cat in categorias" ng-init="filterCat = getLastSelectedCat()">
 
 
+                        </select>
+                    </div>
+
+                </label>
+                <div class="list card">
+                    <div class="list card ">
+
+                        <div class="row titTabela">
+                            <div class="col col-demo col-10  ">Col</div>
+                            <div class="col col-demo col-33  ">Equipe</div>
+                            <div class="col col-demo col-33  ">Cidade</div>
+                            <div class="col col-demo col-20  ">Total</div>
+
+                        </div>
+
+                        <div class="row " ng-repeat="entry in resultados|filter:filterCat| orderBy:['colocacao']" ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                            <div class="col col-demo col-10 ">{{entry.colocacao}}</div>
+                            <div class="col col-demo col-33 ">{{entry.nome}} </div>
+                            <div class="col col-demo col-33 ">{{entry.descricao}} </div>
+                            <div class="col col-demo col-20 ">{{entry.pontos_perdidos}}</div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </ion-content>
 
     </ion-view>
@@ -58,8 +93,8 @@
                 <div class="input-label ">
 
                 </div>
-                <select class="form-control " ng-model="categoriaGrid" ng-init="categoriaGrid = categorias[0]" ng-options="categoria.nome for categoria in categorias">
-
+                <select class="form-control " ng-change="updatePrefCategoria(null,categoriaGrid.id_Config)" ng-model="categoriaGrid.id_Config"
+                ng-options="cat.id_Config as cat.nome for cat in categoriasGrid" ng-init="categoriaGrid = getLastSelectedGrid()">
 
                 </select>
 
@@ -117,7 +152,7 @@
                     <h2>{{etapa.location.nome}}</h2>
                 </a>
 
-                <a href="# " class="item item-icon-left " ng-click="tel(etapa.location.telefone) ">
+                <a href="# " class="item item-icon-left " ng-click="tel(etapa.location.telefone) " ng-if="etapa.location.telefone!=null">
                     <i class="icon ion-ios-telephone "></i> {{etapa.location.telefone}}
                 </a>
 
@@ -125,7 +160,7 @@
                     <i class="icon ion-navigate "></i> {{etapa.location.endereco}}
                 </a>
 
-                <a href="# " class="item item-icon-left " ng-click="web(etapa.location.website) ">
+                <a href="# " class="item item-icon-left " ng-click="web(etapa.location.website) " ng-if="etapa.location.website!=''">
                     <i class="icon ion-link "></i> {{etapa.location.website}}
                 </a>
                 <div class="item item-body " ng-bind-html="etapa.location.descricao ">
