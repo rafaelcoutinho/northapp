@@ -3,8 +3,9 @@
   "private": "true",
   "devDependencies": {
     "ionic": "driftyco/ionic-bower#1.2.4",
-    "ionic-platform-web-client": "^0.2.1",
     "ngCordova": "^0.1.24-alpha",
-    "ngstorage": "^0.3.10"
+    "angular-resource": "^1.5.0",
+    "ngstorage": "^0.3.10",
+    "ionic-platform-web-client": "^0.5.2"
   }
 }

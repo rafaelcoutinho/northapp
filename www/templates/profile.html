@@ -1,19 +1,50 @@
 <ion-view view-title="Meu Perfil">
-    <ion-content>
-        <h1>Meu Perfil</h1>
-        <label class="item">
 
-            <div class="list">
-                <div style="max-height: 40%;">
-                    <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="{{user.image}}">
+    <ion-content>
+        <button class="button button-positive button-block  icon-left ion-social-facebook" ng-click="doLoginFB()" ng-show="user.fbId==null">Conectar com Facebook</button>
+        <div class="row">
+            <div class="col-50">
+                <button class="button button-balanced button-outline button-block" ng-show="user.id==null" ng-click="doLogin()">Login</button>
+            </div>
+            <div class="col-50">
+                <button class="button button-balanced button-outline button-block" ng-show="user.id==null" ng-click="doShowForm()">Criar uma conta</button>
+            </div>
+        </div>
+        <div class="assertive" ng-show="errorMsg!=null" ng-cloak>{{errorMsg}}</div>
+        <form name="profileForm" novalidate>
+            <div class="list" ng-show="user.id!=null || showForm">
+                <div style="max-height: 40%;" ng-show="user.fbId!=null" ng-cloak>
+                    <img class="imageProfile " style="max-width: 60px; max-height: 100px;" ng-src="http://graph.facebook.com/{{user.fbId}}/picture?width=128&height=128">
                 </div>
-                <div class="item">
-                    <span style="vertical-align: top; font-size: 20pt">{{user.name}}</span>
-                </div>
-                <small>{{user.email}}</small>
+                <label class="item item-input">
+                    <input type="text" placeholder="Nome" ng-model="user.nome" ng-change="haschange=true">
+                </label>
+                <label class="item item-input">
+                    <input type="email" placeholder="E-mail" ng-model="user.email" ng-required="true" name="profileEmail" ng-disabled="user.id!=null">
+                </label>
+                <label class="item item-input">
+                    <input type="tel" placeholder="(XX) XXXX-XXXX" ng-model="user.telefone" ng-change="haschange=true">
+                </label>
+
+                <label class="item item-input item-button-right" ng-show="showForm" ng-cloak>
+                    <!--<button class="button " ng-click="showpassword=!showpassword">
+                        <i class="icon" ng-class="{'ion-eye':showpassword==false,'ion-eye-disabled':showpassword==true}"></i>
+                    </button>-->
+                    <input ng-show="showpassword" type="text" placeholder="Senha" ng-model="user.password">
+                    <input ng-hide="showpassword" type="password" placeholder="Senha" ng-model="user.password">
+
+                </label>
+
 
             </div>
-            <button ng-controller="AppCtrl" class="button button-positive button-block  icon-left ion-social-facebook" ng-click="doLoginFB()">Conectar meu Facebook.</button>
-        </label>
+            <button class="button button-balanced" ng-click="saveData()" ng-cloak ng-disabled="!haschange || haschange==false" ng-show="user.id!=null || showForm">
+                Salvar
+            </button>
+            <button class="button" ng-click="logoff()" ng-cloak ng-show="user.id!=null || showForm">
+                Desconectar
+            </button>
+            </div>
+        </form>
+
     </ion-content>
 </ion-view>

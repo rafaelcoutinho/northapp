@@ -1,6 +1,46 @@
-angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
+var jsonTransformQuery = function (data, headers) {
+    data = angular.fromJson(data);
+    var mainObj;
+    for (var key in data) {
+        if (data.hasOwnProperty(key)) {
+            mainObj = data[key];
+            break;
+        }
+    }
 
-    .run(function ($ionicPlatform, $rootScope) {
+    var resp = [];
+    var cols = mainObj.columns;
+    var records = mainObj.records;
+    for (var i = 0; i < records.length; i++) {
+        var recordsEntry = records[i];
+        var entry = {};
+        for (var j = 0; j < cols.length; j++) {
+            var col = cols[j];
+            var val = recordsEntry[j];
+            entry[col] = val;
+        }
+        resp.push(entry);
+
+    }
+
+
+    return resp;
+}
+angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
+    .constant("appConfigs", {
+        "backendSecure": "https://cumeqetrekking.appspot.com/",
+        "backend": "http://cumeqetrekking.appspot.com/",
+        "enhancedRestBackend": "http://cumeqetrekking.appspot.com/app/enhanced",
+        "openRestBackend": "http://cumeqetrekking.appspot.com/app/rest",
+        "secureEndpointBackend": "https://cumeqetrekking.appspot.com/endpoints"
+        
+        // "backendSecure": "http://192.168.33.105/northServer/apiPub.php",
+        // "backend": "http://192.168.33.105/northServer/",
+        // "restBackend": "http://192.168.33.105/northServer/apiPub.php",
+        // "secureEndpointBackend": "http://192.168.33.105/northServer/"
+
+    })
+    .run(function ($ionicPlatform, $rootScope, $ionicLoading, $location, $anchorScroll, $ionicHistory, $ionicSideMenuDelegate) {
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory
             // bar above the keyboard
@@ -14,57 +54,88 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
             }
+            $rootScope.$on('loading:show', function () {
+                $ionicLoading.show({
+                    template: 'Carregando...'
+                })
+            });
+
+            $rootScope.$on('loading:hide', function () {
+                $ionicLoading.hide()
+            });
             // kick off the platform web client
             try {
                 Ionic.io();
                 console.log("vai registrar pushes");
-                $rootScope.onRegistered = function (pushToken) {
-                    try {
-                        console.log("Got Token onRegister: " + pushToken.token + " ");
-                        var ionicUser = Ionic.User.current();
-                        if (ionicUser.id) {
-                            console.log("setting token to user");
-                            ionicUser.addPushToken(pushToken.token);
-                            ionicUser.save().then(function () {
-                                console.log("token setado")
-                            }, function (data) {
-                                console.log("erro ao setar token!" + data)
-                            });
-                        }
-
-                    } catch (e) {
-                        console.log("erro regi " + e.message);
-                    }
-
-                };
                 var push = new Ionic.Push({
+                    "debug": false,
                     "onNotification": function (notification) {
                         var payload = notification.payload;
                         console.log(notification, payload);
-                        var idMsg = Math.round((Math.random() * 10000));
-                        //					$cordovaLocalNotification.schedule({
-                        //						id : idMsg,
-                        //						title : notification.title,
-                        //						text : notification.message,
-                        //						icon : 'file://img/full.png',
-                        //					}).then(function(result) {
-                        //						console.log("resultado " + result);
-                        //					});
                     },
-                    "onRegister": $rootScope.onRegistered
+                    "onRegister": function (token) {
+                        console.log("Device token: '" + token.token);
+                        push.saveToken(token);
+                    }
+                });
+
+                push.register(function (token) {
 
                 });
 
-                push.register();
+
             } catch (e) {
                 console.log("erro Ionic.Push " + e.message);
 
             }
+            $ionicPlatform.registerBackButtonAction(function (event) {              
+               event.preventDefault();
+               console.log($ionicSideMenuDelegate.isOpenLeft())
+                if ($ionicHistory.backView() == null) {
+                    if ($ionicSideMenuDelegate.isOpen()) {
+                        navigator.app.exitApp(); //<-- remove this line to disable the exit
+                    }else{
+                        $ionicSideMenuDelegate.toggleLeft();
+                    }
+                }
+                else {
+                    navigator.app.backHistory();
+                }
+            }, 1000);
         });
+        //permite fazer scroll com route
+        $rootScope.$on('$routeChangeSuccess', function (newRoute, oldRoute) {
+            if ($location.hash()) $anchorScroll();
+        });
+
     })
 
-    .config(function ($stateProvider, $urlRouterProvider) {
+    .config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
 
+        $httpProvider.interceptors.push(function ($rootScope, $q) {
+            return {
+                responseError: function (rejection) {
+                    $rootScope.$broadcast('loading:hide')
+
+
+                    return $q.reject(rejection);
+                },
+                requestError: function (rejection) {
+                    $rootScope.$broadcast('loading:hide')
+
+                    return $q.reject(rejection);
+                },
+                request: function (config) {
+                    $rootScope.$broadcast('loading:show')
+                    return config
+                },
+                response: function (response) {
+                    $rootScope.$broadcast('loading:hide')
+
+                    return response
+                }
+            }
+        });
         $stateProvider
 
             .state('app', {
@@ -89,7 +160,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
 
                 views: {
                     'menuContent': {
-                        controller: 'EtapasCtrl',
+                        controller: 'EtapaCtrl',
                         templateUrl: 'templates/etapa.html'
                     }
                 }
