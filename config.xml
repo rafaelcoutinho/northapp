@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.northbrasil.app" version="0.0.6" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.northbrasil.app" version="0.0.7" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>NorthApp</name>
   <description>
         Aplicativo da NorthBrasil
@@ -10,22 +10,18 @@
   <content src="index.html"/>
   <access origin="*"/>
   <access origin="http://cumeqetrekking.appspot.com"/>
-
-  <allow-navigation href="*://cumeqetrekking.appspot.com" />
-  <!-- Allow tel: links to open the dialer -->
-  <allow-intent href="tel:*" />
-
-  <!-- Allow geo: links to open maps -->
-  <allow-intent href="geo:*" />
   <access origin="geo:*" launch-external="yes"/>
   <access origin="tel:*" launch-external="yes"/>
+  <allow-navigation href="*://cumeqetrekking.appspot.com"/>
+  <allow-intent href="tel:*"/>
+  <allow-intent href="geo:*"/>
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="true"/>
   <preference name="android-minSdkVersion" value="16"/>
   <preference name="BackupWebStorage" value="none"/>
   <preference name="SplashScreen" value="screen"/>
-  <preference name="SplashScreenDelay" value="30000"/>
+  <preference name="SplashScreenDelay" value="3000"/>
   <feature name="StatusBar">
     <param name="ios-package" value="CDVStatusBar" onload="true"/>
   </feature>
@@ -51,10 +47,12 @@
   </platform>
   <platform name="ios">
     <config-file platform="ios" target="*-Info.plist" parent="NSAppTransportSecurity">
-        <dict>
-            <key>NSAllowsArbitraryLoads</key><true/>
-        </dict>
-        <key>ITSAppUsesNonExemptEncryption</key><false/>
+      <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true></true>
+      </dict>
+      <key>ITSAppUsesNonExemptEncryption</key>
+      <false></false>
     </config-file>
     <icon src="resources/ios/icon/icon.png" width="57" height="57"/>
     <icon src="resources/ios/icon/icon@2x.png" width="114" height="114"/>
