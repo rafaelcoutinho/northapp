@@ -10,12 +10,13 @@
   <content src="index.html"/>
   <access origin="*"/>
   <access origin="http://cumeqetrekking.appspot.com"/>
-<allow-navigation href="*://cumeqetrekking.appspot.com/*" />
-<!-- Allow tel: links to open the dialer -->
-<allow-intent href="tel:*" />
 
-<!-- Allow geo: links to open maps -->
-<allow-intent href="geo:*" />
+  <allow-navigation href="*://cumeqetrekking.appspot.com" />
+  <!-- Allow tel: links to open the dialer -->
+  <allow-intent href="tel:*" />
+
+  <!-- Allow geo: links to open maps -->
+  <allow-intent href="geo:*" />
   <access origin="geo:*" launch-external="yes"/>
   <access origin="tel:*" launch-external="yes"/>
   <preference name="webviewbounce" value="false"/>
