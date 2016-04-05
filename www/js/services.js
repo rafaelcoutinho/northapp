@@ -1,7 +1,7 @@
 var isTooOld = function (cacheInfo) {
     return cacheInfo.updated < (new Date().getTime() - (1000 * 60 * 60 * 24 * 7));
 }
-angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource'])
+angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource', 'rcCachedResource'])
 
     .factory('WeatherService', function ($http, $localStorage, $resource, appConfigs, $q) {
         return {
@@ -89,8 +89,82 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
         }])
 
+    .factory('EtapasService', function ($localStorage, $resource, appConfigs, $q, $cachedResource) {
+        var cacheForeverAfterComplete = function (cacheEntry) {
+            var etapa = cacheEntry.data;
+            if (cacheEntry.date > (new Date().getTime() - (1 * 60 * 60 * 1000))) {
+                console.log("cache está valido")
+                return true;//avoid keeping requesting..
+            }
+            return etapa.data < cacheEntry.date;//TODO uns 5 dias;
+        }
+        return $cachedResource(appConfigs.enhancedRestBackend + "/Etapa/:id", {}, {
+            query: {
+                isArray: true,
+                cache: true,
+                cr: {
+                    timeout: 7 * 60 * 60 * 1000,
+                    cacheHalfLife: function (cacheEntry) {
+                        if (cacheEntry.date < (new Date().getTime() - (this.timeout / 1.5))) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }
 
-    .factory('EtapasService', function ($http, $localStorage, $resource, appConfigs, $q) {
+            },
+            get: {
+                cache: true,
+                cr: {
+                    cacheName: function (params) {
+                        return params.id + "_get"
+                    },
+                    isCacheValid: cacheForeverAfterComplete
+                }
+            },
+            getGrid: {
+                isArray: false,
+                methdo: "GET",
+                cr: {
+                    cacheName: function (params) {
+                        return params.id + "_grid"
+                    },
+                    isCacheValid: function (cacheEntry) {
+                        if (cacheEntry.data.etapa.data < cacheEntry.date) {
+                            return true;
+                        } else {
+                            if (cacheEntry.date < (new Date().getTime() - (24 * 60 * 60 * 1000))) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        }
+                    }
+                },
+                url: appConfigs.enhancedRestBackend + "/Etapa/:id/GridInfo"
+
+            },
+            getResultados: {
+                isArray: true,
+                url: appConfigs.enhancedRestBackend + '/Etapa/:id/Resultado',
+                cr: {
+                    cacheName: function (params) {
+                        return params.id + "_resultados"
+                    },
+                    isCacheValid: function (cacheEntry) {
+
+                        if (cacheEntry.date > (new Date().getTime() - (1 * 60 * 60 * 1000))) {
+                            console.log("cache está valido")
+                            return true;//avoid keeping requesting..
+                        }
+                        return cacheEntry.data.length > 0;
+                    }
+                }
+                // url: "http://localhost/northServer/app.php/Etapa/:id/Resultado"
+            }
+        }, { cacheTimeout: 10, name: "Etapa" });
+    })
+    .factory('EtapasService2', function ($localStorage, $resource, appConfigs, $q) {
 
         var etapaResource = $resource(appConfigs.enhancedRestBackend + "/Etapa/:id", {}, {
             query: {
@@ -235,7 +309,34 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         });
 
     }])
-    .service('HighlightService', ['$http', '$q', '$resource', 'appConfigs', '$localStorage', function ($http, $q, $resource, appConfigs, $localStorage) {
+    .service('HighlightService', ['$http', '$q', '$resource', 'appConfigs', '$cachedResource', function ($http, $q, $resource, appConfigs, $cachedResource) {
+        return $cachedResource(appConfigs.openRestBackend + '/Destaque/:id', {}, {
+            query: {
+                isArray: true,
+                cache: true,
+                transformResponse: jsonTransformQuery,
+                cr: {
+                    timeout: 7 * 60 * 60 * 1000,
+                    cacheHalfLife: function (cacheEntry) {
+                        if (cacheEntry.date < (new Date().getTime() - (this.timeout / 1.5))) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+
+            },
+            get: {
+                cache: true,
+                cr: {
+                    cacheName: function (params) {
+                        return params.id + "_get"
+                    },
+                    timeout: 7 * 60 * 60 * 1000
+                }
+            }},{name:"HL"});
+    }])
+    .service('HighlightService2', ['$http', '$q', '$resource', 'appConfigs', '$localStorage', function ($http, $q, $resource, appConfigs, $localStorage) {
         var resourceVar = $resource(appConfigs.openRestBackend + '/Destaque/:id', {}, {
             query: {
                 isArray: true,
@@ -252,9 +353,9 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 var deferred = $q.defer();
 
                 if ($localStorage.northApp_highlights && !isTooOld($localStorage.northApp_highlights)) {
-                    
+
                     deferred.resolve($localStorage.northApp_highlights.data);
-                     
+
                 } else {
                     resourceVar.query({}, function (response) {
                         $localStorage.northApp_highlights = {

@@ -1,4 +1,4 @@
-angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services'])
+angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services', 'rcCachedResource'])
 
     .controller('AppCtrl', function ($scope, $ionicModal, $ionicPlatform, $timeout, $ionicPush, $cordovaLocalNotification, $cordovaInAppBrowser) {
 
@@ -22,7 +22,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
 
     })
-    .controller('BreveCtrl', function ($scope, $cordovaInAppBrowser) {
+    .controller('BreveCtrl', function ($scope, $cordovaInAppBrowser,  $resource, appConfigs) {
+        
         $scope.openGitHub = function () {
             $cordovaInAppBrowser.open('https://github.com/rafaelcoutinho/northapp', '_blank')
         }
@@ -55,12 +56,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
                 HighlightService.clear();
             }
-            HighlightService.queryCached().then(
+            HighlightService.query().then(
                 function (data) { console.log("Carregou " + data); $scope.highlights = data; $scope.$broadcast('scroll.refreshComplete'); },
                 function (data) { console.log("Falhou " + JSON.stringify(data)); $scope.$broadcast('scroll.refreshComplete'); });
         }
         $scope.doRefresh(true);
-
     })
     .controller('MenuCtrl', function ($scope, $stateParams, EtapasService) {
         $scope.menuBtns = [];
@@ -417,7 +417,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             $scope.loadData();
         }
         $scope.loadData = function () {
-            EtapasService.queryCached({}).then(function (data) {
+            EtapasService.query().then(function (data) {
                 $scope.etapas = data;
 
                 var twoDaysAgo = new Date().getTime() - (24 * 60 * 60 * 1000 * 2);
@@ -444,82 +444,6 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('RankingCtrl', function ($scope, $stateParams, EtapasService) {
-        $scope.etapas = EtapasService.query();
-        $scope.currEtapaIndex = 0;
-        $scope.expandedEquipe = -1;
-        $scope.showEquipeDetails = function (equipe) {
-            return $scope.expandedEquipe == equipe.name;
-        }
-        $scope.expandDetails = function (equipe) {
-            $scope.expandedEquipe = equipe.name;
-        }
-
-        $scope.nextEtapa = function () {
-            $scope.currEtapaIndex++;
-        }
-        $scope.previousEtapa = function () {
-            if ($scope.currEtapaIndex > 0) {
-                $scope.currEtapaIndex--;
-            }
-        }
-        $scope.getCurrentEtapa = function (equipe) {
-            return equipe.points[$scope.currEtapaIndex];
-        }
-        $scope.getCurrentEtapaName = function () {
-            return $scope.etapas[$scope.currEtapaIndex].title;
-        };
-        $scope.results = [{
-            "name": "Anta",
-            pics: ['spengler.jpg', 'venkman.jpg'],
-            points: [{
-                position: 20,
-                etapaId: 1,
-                points: 1.96
-            }, {
-                    position: 2,
-                    etapaId: 2,
-                    points: 17
-                }
-            ],
-            total: {
-                position: 1,
-                points: 102
-            }
-        }, {
-                "name": "TTT",
-                pics: ['stantz.jpg', 'winston.jpg', 'tully.jpg'],
-                points: [{
-                    position: 19,
-                    etapaId: 1,
-                    points: 2.0
-                }, {
-                        position: 3,
-                        etapaId: 2,
-                        points: 15
-                    }
-                ],
-                total: {
-                    position: 2,
-                    points: 100
-                }
-            }, {
-                "name": "CuméQé",
-                pics: ['slimer.jpg'],
-                points: [{
-                    position: 99,
-                    etapaId: 1,
-                    points: 0.0
-                }, {
-                        position: 98,
-                        etapaId: 2,
-                        points: 1.0
-                    }
-                ],
-                total: {
-                    position: 99,
-                    points: -1
-                }
-            }
-        ];
+       
 
     });

@@ -3,7 +3,7 @@
         <ng-include src="tabstemplate" />
     </div>
 
-    <ion-view view-title="Etapa" ng-show="currTab == 'details'" ng-cloak>
+    <ion-view view-title="Etapa" ng-if="currTab == 'details'" ng-cloak>
         <ion-content class="scroll-bg">
 
             <div class="list card" style="margin-top: 50px">
@@ -28,7 +28,7 @@
 
         </ion-content>
     </ion-view>
-    <ion-view view-title="Etapa" ng-show="currTab == 'pictures'" ng-cloak>
+    <ion-view view-title="Etapa" ng-if="currTab == 'pictures'" ng-cloak>
         <ion-content class="scroll-bg" style="margin-top: 50px">
             <ng-include src="'templates/breve.html'" />
         </ion-content>
@@ -38,7 +38,7 @@
 
         </ion-content>
     </ion-view>
-    <ion-view view-title="Resultados" ng-show="currTab == 'results'" ng-cloak>
+    <ion-view view-title="Resultados" ng-if="currTab == 'results'" ng-cloak>
 
         <ion-content class="scroll-bg" style="margin-top: 50px">
             <div ng-show="aconteceuEtapa==false">
@@ -86,7 +86,7 @@
 
     </ion-view>
 
-    <ion-view view-title="Grid de Largada " ng-show="currTab=='grid' " ng-cloak>
+    <ion-view view-title="Grid de Largada " ng-if="currTab=='grid' " ng-cloak>
 
         <ion-content class="scroll-bg " style="margin-top: 50px ">
             <label class="item item-input item-select ">
@@ -142,7 +142,7 @@
         </ion-content>
     </ion-view>
 
-    <ion-view view-title="Location " ng-show="currTab=='location' " ng-cloak>
+    <ion-view view-title="Location " ng-if="currTab=='location' " ng-cloak>
 
 
         <ion-content class="scroll-bg ">

@@ -26,7 +26,7 @@ var jsonTransformQuery = function (data, headers) {
 
     return resp;
 }
-angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
+angular.module('north', ['ionic',  'north.services', 'north.controllers', 'ngCordova', 'ngResource'])
     .constant("appConfigs", {
         "backendSecure": "https://cumeqetrekking.appspot.com/",
         "backend": "http://cumeqetrekking.appspot.com/",
@@ -64,34 +64,10 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
             $rootScope.$on('loading:hide', function () {
                 $ionicLoading.hide()
             });
-            // kick off the platform web client
-            try {
-                Ionic.io();
-                console.log("vai registrar pushes");
-                var push = new Ionic.Push({
-                    "debug": false,
-                    "onNotification": function (notification) {
-                        var payload = notification.payload;
-                        console.log(notification, payload);
-                    },
-                    "onRegister": function (token) {
-                        console.log("Device token: '" + token.token);
-                        push.saveToken(token);
-                    }
-                });
-
-                push.register(function (token) {
-
-                });
-
-
-            } catch (e) {
-                console.log("erro Ionic.Push " + e.message);
-
-            }
+          
             $ionicPlatform.registerBackButtonAction(function (event) {              
                event.preventDefault();
-               console.log($ionicSideMenuDelegate.isOpenLeft())
+               
                 if ($ionicHistory.backView() == null) {
                     if ($ionicSideMenuDelegate.isOpen()) {
                         navigator.app.exitApp(); //<-- remove this line to disable the exit
