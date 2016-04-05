@@ -15,7 +15,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     deferred.resolve($sessionStorage.weather[date]);
                 } else {
 
-                    if (diff < -46 || diff > 16) {//até 2 dias depois
+                    if (diff < -2 || diff > 16) {//até 2 dias depois
                         deferred.reject("Etapa muito antiga OU mais de 16 dias de hoje. Dif " + diff);
                     } else {
                         var url = 'http://api.openweathermap.org/data/2.5/forecast/daily?lat=' + lat + '&lon=' + lng + '&cnt=' + diff + '&mode=json&appid=a6914b6f4ef75969ead626f11b294bf5&lang=pt';
