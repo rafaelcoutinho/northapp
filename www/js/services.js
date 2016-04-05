@@ -3,34 +3,46 @@ var isTooOld = function (cacheInfo) {
 }
 angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource', 'rcCachedResource'])
 
-    .factory('WeatherService', function ($http, $localStorage, $resource, appConfigs, $q) {
+    .factory('WeatherService', function ($http, $sessionStorage, $resource, appConfigs, $q, $log) {
         return {
             getPerCoords: function (lat, lng, date) {
+
                 var now = new Date();
                 var diff = date - now.getTime();
                 var deferred = $q.defer();
                 diff = Math.ceil(diff / (24 * 60 * 60 * 1000));
-                console.log("diff", diff)
-                setTimeout(function () {
-                    if (diff < -2 || diff > 16) {//até 2 dias depois
-                        deferred.reject("Etapa muito antiga OU mais de 16 dias de hoje.");
-                        return;
-                    }
-                    $http({
-                        method: 'GET',
-                        url: 'http://api.openweathermap.org/data/2.5/forecast/daily?lat=' + lat + '&lon=' + lng + '&cnt=' + diff + '&mode=json&appid=a6914b6f4ef75969ead626f11b294bf5&lang=pt'
-                    }).then(function successCallback(response) {
-                        console.log(response.data.list)
-                        if (diff < 1) {
-                            diff = 1;
-                        }
-                        var weather = response.data.list[diff - 1].weather[0];
-                        weather.wicon = 'http://openweathermap.org/img/w/' + weather.icon + '.png';
-                        deferred.resolve(weather);
-                    }, function errorCallback(response) {
-                        deferred.reject(response);
-                    });
-                }, 1);
+                if ($sessionStorage.weather && $sessionStorage.weather[date]) {
+                    deferred.resolve($sessionStorage.weather[date]);
+                } else {
+
+                    if (diff < -46 || diff > 16) {//até 2 dias depois
+                        deferred.reject("Etapa muito antiga OU mais de 16 dias de hoje. Dif " + diff);
+                    } else {
+                        var url = 'http://api.openweathermap.org/data/2.5/forecast/daily?lat=' + lat + '&lon=' + lng + '&cnt=' + diff + '&mode=json&appid=a6914b6f4ef75969ead626f11b294bf5&lang=pt';
+                        $http({
+                            method: 'GET',
+                            url: url
+                        }).then(function successCallback(response) {
+                            if (response.data.cod == "404") {
+                                $log.error("Falhou ao carregar clima ", url, response)
+                                deferred.reject(response);
+                            } else {
+                                if (diff < 1) {
+                                    diff = 1;
+                                }
+                                var weather = response.data.list[diff - 1].weather[0];
+                                weather.wicon = 'http://openweathermap.org/img/w/' + weather.icon + '.png';
+                                if(!$sessionStorage.weather){
+                                    $sessionStorage.weather = {};
+                                }
+                                $sessionStorage.weather[date] = weather;
+                                deferred.resolve(weather);
+                            }
+                        }, function errorCallback(response) {
+                            deferred.reject(response);
+                        });
+                    };
+                }
 
                 return deferred.promise;
 
@@ -93,7 +105,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         var cacheForeverAfterComplete = function (cacheEntry) {
             var etapa = cacheEntry.data;
             if (cacheEntry.date > (new Date().getTime() - (1 * 60 * 60 * 1000))) {
-                console.log("cache está valido")
+                
                 return true;//avoid keeping requesting..
             }
             return etapa.data < cacheEntry.date;//TODO uns 5 dias;
@@ -154,7 +166,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     isCacheValid: function (cacheEntry) {
 
                         if (cacheEntry.date > (new Date().getTime() - (1 * 60 * 60 * 1000))) {
-                            console.log("cache está valido")
+                            
                             return true;//avoid keeping requesting..
                         }
                         return cacheEntry.data.length > 0;
@@ -205,7 +217,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 if ($localStorage.northApp_etapas_resultados && $localStorage.northApp_etapas_resultados[etapa.id] && $localStorage.northApp_etapas_resultados[etapa.id].updated > etapa.data) {
                     deferred.resolve($localStorage.northApp_etapas_resultados[etapa.id].data);
                 } else {
-                    console.log("recarregando grid...")
+                    
                     etapaResource.getResultados({ id: etapa.id }, function (response) {
                         $localStorage.northApp_etapas_resultados[etapa.id] = {
                             data: response,
@@ -228,7 +240,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 if ($localStorage.northApp_etapas_grids && $localStorage.northApp_etapas_grids[etapa.id] && $localStorage.northApp_etapas_grids[etapa.id].updated > etapa.data) {
                     deferred.resolve($localStorage.northApp_etapas_grids[etapa.id].data);
                 } else {
-                    console.log("recarregando grid...")
+                    
                     etapaResource.getGrid({ id: etapa.id }, function (response) {
                         $localStorage.northApp_etapas_grids[etapa.id] = {
                             data: response,
@@ -300,13 +312,25 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         });
 
     }])
-    .service('LocationService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
-        return $resource(appConfigs.openRestBackend + '/Local/:id', {}, {
+    .service('LocationService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
+        return $cachedResource(appConfigs.openRestBackend + '/Local/:id', {},
+        {
             query: {
                 isArray: true,
-                transformResponse: jsonTransformQuery
+                cache: true,
+                transformResponse: jsonTransformQuery,
+                cr: {
+                    timeout: 300 * 60 * 60 * 1000
+                }
             }
-        });
+        },
+        {name:"LocSvc"});
+        // return $resource(appConfigs.openRestBackend + '/Local/:id', {}, {
+        //     query: {
+        //         isArray: true,
+        //         transformResponse: jsonTransformQuery
+        //     }
+        // });
 
     }])
     .service('HighlightService', ['$http', '$q', '$resource', 'appConfigs', '$cachedResource', function ($http, $q, $resource, appConfigs, $cachedResource) {
@@ -430,12 +454,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             },
             setUserLocally: function (aUser) {
 
-                $localStorage.northApp_user = aUser;
-                if (aUser != null) {
-                    this.reloadIonicUser(aUser);
-                } else {
-                    Ionic.Auth.logout();
-                }
+                $localStorage.northApp_user = aUser;                
             },
             validateNewUser: function (aUser, headers) {
                 var deferred = $q.defer();
@@ -455,97 +474,10 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 });
                 return deferred.promise;
             },
-            ionicLogin: function (user) {
-                var deferred = $q.defer();
-                var ioData = {
-                    email: user.email,
-                    password: "default",
-                    custom: user
-                }
-
-                var authProvider = 'basic';
-                var authSettings = { 'remember': true };
-
-                var authSuccess = function (newuser) {
-                    $log.log("authSuccess " + newuser);
-                    // user was authenticated, you can get the authenticated user
-                    // with Ionic.User.current();
-                    iouser = Ionic.User.current();
-                    for (var key in user) {
-                        $log.log($key, user[key]);
-                        if (key != 'password' && key != 'email') {
-                            $log.log("setando")
-                            iouser.set(key, user[key]);
-                        }
-                        iouser.save();
-                    }
-
-                    deferred.resolve(iouser);
-                };
-                var authFailure = function (errors) {
-                    $log.log("authFailure ");
-                    for (var err in errors) {
-                        // check the error and provide an appropriate message
-                        // for your application
-                        $log.log("Erro " + err);
-                    }
-                    deferred.reject(errors);
-                };
-                var login = function () {
-                    Ionic.Auth.login(authProvider, authSettings, ioData)
-                        .then(authSuccess, authFailure);
-                };
-                login();
-                return deferred.promise;
-            },
-            ionicSignUp: function (user) {
-                var deferred = $q.defer();
-                var ioData = {
-                    email: user.email,
-                    password: "default",
-                    custom: user
-                }
-                var signupSuccess = function (arg) {
-                    console.log("Ionic signup " + arg);
-                    iouser = Ionic.User.current();
-                    deferred.resolve(iouser);
-                }
-                var signupFailure = function (arg) {
-                    console.log("Ionic signup error " + arg)
-                    deferred.reject(arg);
-                }
-                Ionic.Auth.signup(ioData).then(signupSuccess, signupFailure);
-                return deferred.promise;
-            },
-            reloadIonicUser: function (user) {
-                try {
-                    var iouser = Ionic.User.current();
-                    if (iouser.isAuthenticated()) {
-                        $log.log("iouser " + iouser);
-
-                    } else {
-                        $log.log("Ionic user not found, trying to log user in ");
-                        var me = this;
-                        this.ionicLogin(user).then(function () {
-                            $log.log("ok");
-                        }, function (err) {
-                            $log.log("usuário nao existe na plataforma ionic, criando agora");
-                            me.ionicSignUp(user).then(function () {
-                                $log.log("Usuarip ok");
-                            }, function (err) {
-                                $log.log("Não foi possivel cadastrar usuario");
-                            });
-                        })
-                    }
-                } catch (e) {
-                    console.log("erro buscando usuario " + e.message)
-
-                }
-            },
             getUser: function () {
                 var user = $localStorage.northApp_user;
-                var iouser = Ionic.User.current();
-                $log.log("Ionic user " + iouser)
+                
+                
                 return user;
             },
             getUserID: function () {

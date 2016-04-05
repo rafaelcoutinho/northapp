@@ -1,6 +1,6 @@
 angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services', 'rcCachedResource'])
 
-    .controller('AppCtrl', function ($scope, $ionicModal, $ionicPlatform, $timeout, $ionicPush, $cordovaLocalNotification, $cordovaInAppBrowser) {
+    .controller('AppCtrl', function ($scope, $ionicModal, $timeout, $cordovaLocalNotification, $cordovaInAppBrowser) {
 
         if ($scope.shide != true) {
             if (navigator && navigator.splashscreen) {
@@ -22,8 +22,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
 
     })
-    .controller('BreveCtrl', function ($scope, $cordovaInAppBrowser,  $resource, appConfigs) {
-        
+    .controller('BreveCtrl', function ($scope, $cordovaInAppBrowser, $resource, appConfigs) {
+
         $scope.openGitHub = function () {
             $cordovaInAppBrowser.open('https://github.com/rafaelcoutinho/northapp', '_blank')
         }
@@ -263,7 +263,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage) {
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log) {
         $scope.currTab = "details";
         $scope.tabstemplate = "templates/etapa.tabs.html";
         $scope.etapaNotComplete = true;
@@ -351,7 +351,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             $scope.etapa = dadosEtapa;
             $scope.aconteceuEtapa = $scope.etapa.data < new Date().getTime();
             if (dadosEtapa.id_Local) {
-                $scope.etapa.location = LocationService.get({ id: $scope.etapa.id_Local }, function (location) {
+                LocationService.get({ id: $scope.etapa.id_Local }).then(function (location) {
+                    $scope.etapa.location = location;
                     if (location.latitude != null) {
                         var lat = parseFloat(location.latitude) / 1000000;
                         var lng = parseFloat(location.latitude) / 1000000;
@@ -361,14 +362,14 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
                         },
                             function (err) {
-                                console.log("erro carregando clima", err);
+                                $log.log("erro carregando clima", err);
                             });
                     }
                 })
             }
 
         }, function (error) {
-            console.log("Não carregou etapa");
+            $log.log("Não carregou etapa");
         });
 
 
@@ -419,7 +420,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.loadData = function () {
             EtapasService.query().then(function (data) {
                 $scope.etapas = data;
-
+                $scope.$broadcast('scroll.refreshComplete');
                 var twoDaysAgo = new Date().getTime() - (24 * 60 * 60 * 1000 * 2);
                 for (var index = 0; index < $scope.etapas.length; index++) {
                     var element = $scope.etapas[index];
@@ -428,12 +429,22 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         $scope.etapa = element;
                     }
                     if (element.id_Local) {
-                        $scope.etapas[index].location = LocationService.get({ id: element.id_Local });
+                        LocationService.get({ id: element.id_Local }).then(function (data) {
+                            for (var index = 0; index < $scope.etapas.length; index++) {
+                                var element = $scope.etapas[index];
+                                if(element.id_Local==data.id){
+                                    $scope.etapas[index].location = data;
+                                    return;        
+                                }
+                                
+                            }
+                            
+                        });
                     }
                 }
                 $location.hash($scope.etapa.id);
                 $anchorScroll();
-                $scope.$broadcast('scroll.refreshComplete');
+
             }, function () {
                 $scope.$broadcast('scroll.refreshComplete');
             });
@@ -444,6 +455,6 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('RankingCtrl', function ($scope, $stateParams, EtapasService) {
-       
+
 
     });

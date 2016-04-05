@@ -36,6 +36,14 @@
              delete $localStorage[this.name];
              $localStorage[this.name]={};
          }
+         if(!actions["get"]){
+             actions["get"]={method: 'GET'};
+         }
+           if(!actions["query"]){
+             actions["query"]={method: 'GET', isArray: true};
+         }
+         
+         
          forEach(actions, function (action, nameFct) {
              me[nameFct] = function (a, b) {
                  var deferred = $q.defer();
@@ -43,6 +51,9 @@
                 
                     var cacheName = nameFct;
                     var cacheParams = action.cr;
+                    if(!cacheParams){
+                        cacheParams={};
+                    }
                     if(cacheParams.cacheName){
                         cacheName=cacheParams.cacheName(a);
                         $log.debug(cacheName,me.name);                     
