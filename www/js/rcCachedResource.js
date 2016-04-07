@@ -74,7 +74,7 @@
 
                         return (timeout <= 0 || ((new Date().getTime() - cache.date) < timeout));
                     }
-                    var reloadCache = function (executeCallback) {
+                    var reloadCache = function (executeCallback,onFailure) {
                         me.res[nameFct](a, b,
                             function (data) {
                                 var cacheData = {
@@ -88,17 +88,28 @@
                             }, function (error) {
                                 $log.log("erro", error)
                                 if (executeCallback) {
-                                    deferred.reject(error);
+                                    if(onFailure!=null){
+                                        deferred.resolve(onFailure)
+                                    }else{
+                                        deferred.reject(error);
+                                    }
                                 }
                             });
                     };
-                    if (cache && cache.data != null && checkValidity(cache)) {
-                        $log.debug("Cache hit '" + (cacheName) + "'");
-                        deferred.resolve(cache.data);
-                        if(cacheParams.cacheHalfLife && cacheParams.cacheHalfLife(cache)){
-                            $log.debug("Cache halflife reached");
-                            reloadCache(false);    
+                    if (cache && cache.data != null) {
+                        //checar se está velho:
+                        if (checkValidity(cache) == true) {
+                            $log.debug("Cache hit '" + (cacheName) + "'");
+                            deferred.resolve(cache.data);
+                            if (cacheParams.cacheHalfLife && cacheParams.cacheHalfLife(cache)) {
+                                $log.debug("Cache halflife reached");
+                                reloadCache(false);
+                            }
+                        }else{
+                            reloadCache(true,cache.data);
                         }
+                        
+                        
                     } else {
                         $log.debug("Cache miss '" + (cacheName) + "'");
                         reloadCache(true);
