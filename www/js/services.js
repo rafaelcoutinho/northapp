@@ -298,8 +298,8 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
 
     })
-    .service('EquipesService', ['$http', '$q', '$resource', 'appConfigs', function ($http, $q, $resource, appConfigs) {
-        return $resource(appConfigs.openRestBackend + '/Equipe/:id', {}, {
+    .service('EquipesService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
+        return $cachedResource(appConfigs.openRestBackend + '/Equipe/:id', {}, {
             query: {
                 isArray: true,
                 transformResponse: jsonTransformQuery
@@ -307,9 +307,31 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             getMyEquipe: {
                 isArray: false,
                 url: appConfigs.enhancedRestBackend + '/Competidor/:id/Equipe',
-
+            },
+            getMembers:{
+                 isArray: true,
+                 url: appConfigs.openRestBackend + '/Competidor/:id',
+                  cr: {
+                    timeout: 7*24 * 60 * 60 * 1000
+                },
+                transformResponse: jsonTransformQuery
             }
-        });
+        }, {name:"EquipesService"});
+        // return $resource(appConfigs.openRestBackend + '/Equipe/:id', {}, {
+        //     query: {
+        //         isArray: true,
+        //         transformResponse: jsonTransformQuery
+        //     },
+        //     getMyEquipe: {
+        //         isArray: false,
+        //         url: appConfigs.enhancedRestBackend + '/Competidor/:id/Equipe',
+        //     },
+        //     getMembers:{
+        //          isArray: true,
+        //          url: appConfigs.openRestBackend + '/Competidor/:id',
+        //         transformResponse: jsonTransformQuery
+        //     }
+        // });
 
     }])
     .service('LocationService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
@@ -331,6 +353,21 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         //         transformResponse: jsonTransformQuery
         //     }
         // });
+
+    }])
+    .service('RankingService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
+        return $cachedResource(appConfigs.enhancedRestBackend + '/Ranking', {},
+        {
+            query: {
+                isArray: true,
+                cache: true,                
+                cr: {
+                    timeout: 24 * 60 * 60 * 1000
+                }
+            }
+        },
+        {name:"Ranking"});
+       
 
     }])
     .service('HighlightService', ['$http', '$q', '$resource', 'appConfigs', '$cachedResource', function ($http, $q, $resource, appConfigs, $cachedResource) {

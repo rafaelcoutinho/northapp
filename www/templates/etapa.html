@@ -71,7 +71,7 @@
 
                         </div>
 
-                        <div class="row " ng-repeat="entry in resultados|filter:filterCat| orderBy:['colocacao']" ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                        <div class="row" ng-repeat="entry in resultados|filter:filterCat| orderBy:['colocacao']" ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
                             <div class="col col-demo col-10 ">{{entry.colocacao}}</div>
                             <div class="col col-demo col-33 ">{{entry.nome}} </div>
                             <div class="col col-demo col-33 ">{{entry.descricao}} </div>

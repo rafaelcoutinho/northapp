@@ -432,13 +432,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         LocationService.get({ id: element.id_Local }).then(function (data) {
                             for (var index = 0; index < $scope.etapas.length; index++) {
                                 var element = $scope.etapas[index];
-                                if(element.id_Local==data.id){
+                                if (element.id_Local == data.id) {
                                     $scope.etapas[index].location = data;
-                                    return;        
+                                    return;
                                 }
-                                
+
                             }
-                            
+
                         });
                     }
                 }
@@ -454,7 +454,53 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
     })
 
-    .controller('RankingCtrl', function ($scope, $stateParams, EtapasService) {
+    .controller('RankingCtrl', function ($scope, $stateParams, $localStorage, RankingService, EquipesService) {
 
+        $scope.doRefresh = function (forceClean) {
+            if (forceClean == true) {
+                RankingService.clear();
+                EquipesService.clear();
+            }
+            RankingService.query().then(function (data) {
+                $scope.results = data;
+                $scope.$broadcast('scroll.refreshComplete');
+            });
+        }
+        $scope.allCompetidores = {};
+        EquipesService.getMembers({}).then(function (data) {
+            for (var index = 0; index < data.length; index++) {
+                var element = data[index];
+                if (!$scope.allCompetidores[element.id_Equipe]) {
+                    $scope.allCompetidores[element.id_Equipe] = [];
+                }
+                $scope.allCompetidores[element.id_Equipe].push(element);
+            }
+        });
+        $scope.carregaCompetidores = function (equipe) {
+
+            return $scope.allCompetidores[equipe.id_Equipe];
+        }
+        $scope.doRefresh();
+        $scope.categorias = [
+            { nome: "Pró", id: 4 },
+            { nome: "Graduados", id: 3 },
+            { nome: "Trekkers", id: 2 },
+            { nome: "Turismo", id: 1 }
+        ];
+
+        $scope.getLastSelectedCat = function () {
+            var selectedCat = $scope.categorias[0].id;
+            if ($localStorage.lastSelectedCat) {
+                selectedCat = $localStorage.lastSelectedCat;
+            }
+
+            return { id_Categoria: selectedCat };
+        }
+
+        $scope.updatePrefCategoria = function (idCat) {
+            if (idCat != null) {
+                $localStorage.lastSelectedCat = idCat;
+            }
+        }
 
     });

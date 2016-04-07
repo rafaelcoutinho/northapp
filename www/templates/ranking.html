@@ -1,47 +1,37 @@
 <ion-view view-title="Ranking">
-    <ion-content class="scroll-bg">
-        <ng-include src="'templates/breve.html'" />
-    </ion-content>
-    <ion-content class="scroll-bg" ng-show="false">
 
-        <label class="item item-input item-select">
-            <div class="input-label">
-                Categoria
+    <ion-content class="scroll-bg">
+        <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh(true)">
+        </ion-refresher>
+        <label class="item item-input item-select ">
+            <div class="input-label ">
+
+
+                <select class="form-control " ng-change="updatePrefCategoria(filterCat.id_Categoria,null)" ng-model="filterCat.id_Categoria"
+                ng-options="cat.id as cat.nome for cat in categorias" ng-init="filterCat = getLastSelectedCat()">
+
+
+                </select>
             </div>
-            <select>
-                <option>Graduados Pró</option>
-                <option>Graduados</option>
-                <option>Trekkers</option>
-                <option>Turismo</option>
-            </select>
+
         </label>
-        <label class="item item-input item-select">
-            <div class="input-label">
-                Ranking
-            </div>
-            <select>
-                <option>2016</option>
-                <option>1o Turno</option>
-                <option>2o Turno</option>
-            </select>
-        </label>
+
 
         <div class="list card">
 
-            <div class="row">
-                <div class="col col-top col-10">#</div>
-                <div class="col col-top col-50">Equipe</div>
+            <div class="row titTabela">
+                <div class="col col-top col-10 ">#</div>
                 <div class="col col-top col-33">Pontos</div>
+                <div class="col col-top col-50">Equipe</div>
             </div>
-            <a class="item " ng-repeat="equipe in results" href="#">
-                <div class="row">
-                    <div class="col col-demo col-10">{{equipe.total.position}}</div>
-                    <div class="col col-demo col-50" style=" font-size: 18px; font-weight: bold; color: #F5A81C;">{{equipe.name}}</div>
-                    <div class="col col-demo col-33">{{equipe.total.points}}</div>
-
+            <a class="item " ng-repeat="equipe in results|filter:filterCat| orderBy:['-pontos']" "  href="# ">
+                <div class="row " ng-init="carregaCompetidores(equipe)">
+                    <div class="col col-demo col-10 ">{{$index+1}}º</div>
+                    <div class="col col-demo col-10 " style="text-align:center;">{{equipe.pontos}}</div>
+                    <div class="col col-demo col-80 " style="font-size: 18px; font-weight: bold; color: #F5A81C; ">{{equipe.nome}}</div>
                 </div>
 
-                <img class="avatarImage" style="float:right;" ng-repeat="pic in equipe.pics" ng-src="http://ionicframework.com/img/docs/{{pic}}">
+                <img class="avatarImage "  ng-repeat="membro in equipe.membros" style="float:right;" ng-src="http://graph.facebook.com/{{membro.fbId}}/picture?width=128&height=128">
 
             </a>
 
