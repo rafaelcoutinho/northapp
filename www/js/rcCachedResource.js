@@ -33,6 +33,7 @@
              $localStorage[this.name]={};
          }
          this.clear = function(){
+		$log.log("Limpando cache",this.name);
              delete $localStorage[this.name];
              $localStorage[this.name]={};
          }

@@ -457,7 +457,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
     })
     .controller('EtapasCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $anchorScroll) {
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $anchorScroll,$ionicScrollDelegate) {
 
         $scope.doRefresh = function () {
             EtapasService.clear();
@@ -489,14 +489,15 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         });
                     }
                 }
+console.log("scroll anchor");
                 $location.hash($scope.etapa.id);
-                $anchorScroll();
-
+                // $anchorScroll();
+$ionicScrollDelegate.anchorScroll()
             }, function () {
                 $scope.$broadcast('scroll.refreshComplete');
             });
         }
-
+console.log("Entrou no etapas");
         $scope.loadData();
 
     })
