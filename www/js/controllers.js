@@ -64,14 +64,16 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                             var b = p2.pontos;
                             return a < b ? -1 : (a > b ? 1 : 0);
                         });
+			var posicao = 0;
                         for (var index = $scope.ranking.length - 1; index >= 0; index--) {
+		            posicao++;
                             var eRanking = $scope.ranking[index];
-                            console.log(($scope.ranking.length - index), eRanking.id_Equipe)
+                            console.log(posicao+" "+ eRanking.nome+" "+eRanking.pontos)
                             if (eRanking.id_Equipe == $scope.info.equipe.id) {
                                 $scope.rankingAtual = eRanking;
-                                $scope.rankingAtual.colocacao = $scope.ranking.length - index;
-                                $scope.proximo = $scope.ranking[index - 1];
-                                $scope.anterior = $scope.ranking[index + 1];
+                                $scope.rankingAtual.colocacao = posicao;
+                                $scope.proximo = $scope.ranking[index + 1];
+                                $scope.anterior = $scope.ranking[index - 1];
                                 break;
                             }
                         }
