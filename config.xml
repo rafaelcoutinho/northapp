@@ -10,6 +10,8 @@
   <content src="index.html"/>
   <access origin="*"/>
   <access origin="http://cumeqetrekking.appspot.com"/>
+  <access origin="http://graph.facebook.com"/>
+  
   <access origin="geo:*" launch-external="yes"/>
   <access origin="tel:*" launch-external="yes"/>
   <allow-navigation href="*://cumeqetrekking.appspot.com"/>
@@ -50,7 +52,9 @@
       <dict>
         <key>NSAllowsArbitraryLoads</key>
         <true></true>
-      </dict>
+      </dict>      
+    </config-file>
+    <config-file platform="ios" target="*-Info.plist" >      
       <key>ITSAppUsesNonExemptEncryption</key>
       <false></false>
     </config-file>
