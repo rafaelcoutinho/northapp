@@ -102,7 +102,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
 
         $scope.irPerfil = function () {
-            $location.path("/profile");
+            $location.path("/app/profile");
         }
         $scope.getLabelCategoria = function (id) {
             return UtilsService.getLabelCategoria(id);
@@ -463,6 +463,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             EtapasService.clear();
             $scope.loadData();
         }
+        
         $scope.loadData = function () {
             EtapasService.query().then(function (data) {
                 $scope.etapas = data;
