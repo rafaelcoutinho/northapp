@@ -307,31 +307,36 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             getMyEquipe: {
                 isArray: false,
                 url: appConfigs.enhancedRestBackend + '/Competidor/:id/Equipe',
+                cr: {
+                    cacheName: function (params) {
+                        return params.id + "_getEquipe"
+                    }
+                }
             },
             getMembers:{
                  isArray: true,
                  url: appConfigs.openRestBackend + '/Competidor/:id',
                   cr: {
+                   cacheName: function (params) {
+                        return params.id + "_getMembers"
+                    },
                     timeout: 7*24 * 60 * 60 * 1000
                 },
                 transformResponse: jsonTransformQuery
+            }, 
+            getResultados:{
+                 isArray: true,
+                 url: appConfigs.openRestBackend + '/Resultado?filter0=id_Equipe,eq,:id',
+                  transformResponse: jsonTransformQuery,
+                  cr: {
+                   cacheName: function (params) {
+                        return params.id + "_getResultados"
+                    },
+                    timeout: 7*24 * 60 * 60 * 1000
+                }
             }
         }, {name:"EquipesService"});
-        // return $resource(appConfigs.openRestBackend + '/Equipe/:id', {}, {
-        //     query: {
-        //         isArray: true,
-        //         transformResponse: jsonTransformQuery
-        //     },
-        //     getMyEquipe: {
-        //         isArray: false,
-        //         url: appConfigs.enhancedRestBackend + '/Competidor/:id/Equipe',
-        //     },
-        //     getMembers:{
-        //          isArray: true,
-        //          url: appConfigs.openRestBackend + '/Competidor/:id',
-        //         transformResponse: jsonTransformQuery
-        //     }
-        // });
+       
 
     }])
     .service('LocationService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
@@ -452,6 +457,30 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 }
             }
             );
+    })
+    .service('UtilsService', function ($http, $q, $resource) {
+        var categorias = [
+            { nome: "Pró", id: 4 },
+            { nome: "Graduados", id: 3 },
+            { nome: "Trekkers", id: 2 },
+            { nome: "Turismo", id: 1 }
+        ];
+        return {
+            getCategorias:function(){
+                return categorias;
+            },
+            getLabelCategoria: function (item) {
+                for (var index = 0; index < categorias.length; index++) {
+                    var element = categorias[index];
+                    if (item == element.id) {
+                        return element.nome;
+                    }
+                }
+                return "-";
+
+            }
+
+        }
     })
     .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService, $log) {
 

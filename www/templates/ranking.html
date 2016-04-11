@@ -20,18 +20,24 @@
         <div class="list card">
 
             <div class="row titTabela">
-                <div class="col col-top col-10 ">#</div>
-                <div class="col col-top col-33">Pontos</div>
-                <div class="col col-top col-50">Equipe</div>
+                <div class="col col-top col-20 ">#</div>
+                <div class="col col-top col-80">Equipe</div>
             </div>
-            <a class="item " ng-repeat="equipe in results|filter:filterCat| orderBy:['-pontos']" "  href="# ">
-                <div class="row " ng-init="carregaCompetidores(equipe)">
-                    <div class="col col-demo col-10 ">{{$index+1}}º</div>
-                    <div class="col col-demo col-10 " style="text-align:center;">{{equipe.pontos}}</div>
-                    <div class="col col-demo col-80 " style="font-size: 18px; font-weight: bold; color: #F5A81C; ">{{equipe.nome}}</div>
+            <a class="item " style="padding:2px" ng-repeat="equipe in results|filter:filterCat| orderBy:['-pontos']" >
+                <div class="row " ng-init="carregaCompetidores(equipe) ">
+                    <div class="col col-demo col-20 "style="text-align:center; "><span style="font-size: 24px;font-weight:bold;
+            color: #F5A81C; ">{{$index+1}}º</span>
+                    </div>
+                    
+                    <div class="col col-demo col-80 " style="font-size: 18px; color: #F5A81C; ">{{equipe.nome}}                    
+                    </div>
                 </div>
-
-                <img class="avatarImage "  ng-repeat="membro in equipe.membros" style="float:right;" ng-src="http://graph.facebook.com/{{membro.fbId}}/picture?width=128&height=128">
+                <div class="row ">
+                <div class="col col-demo col-20 "style="text-align:center; ">
+                    {{equipe.pontos}}pts
+                </div>
+                <div class="col col-demo col-80 "><img class="avatarImage"  ng-repeat="membro in carregaCompetidores(equipe)|limitTo:6|orderBy:['fbId']" style="float:right; " ng-src="http://graph.facebook.com/{{membro.fbId}}/picture?width=128&height=128 "></div>
+                </div>
 
             </a>
 

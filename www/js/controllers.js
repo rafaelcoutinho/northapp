@@ -42,10 +42,70 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             };
         };
     })
-    .controller('TeamCtrl', function ($scope, EquipesService, loginService) {
+    .controller('TeamCtrl', function ($scope, EquipesService, loginService, $location, EtapasService, RankingService, UtilsService) {
         $scope.user = loginService.getUser();
+// $scope.user = {id:3249}
         if ($scope.user != null) {
-            $scope.info = EquipesService.getMyEquipe({ id: $scope.user.id });
+
+            EquipesService.getMyEquipe({ id: $scope.user.id }, function (data) {
+                $scope.info = data;
+                $scope.ranking = [];
+                RankingService.query().then(function (data) {
+                    for (var index = 0; index < data.length; index++) {
+                        var element = data[index];
+                        if (element.id_Categoria == $scope.info.equipe.id_Categoria) {
+                            $scope.ranking.push(element);
+                        }
+                    }
+                    console.log($scope.ranking)
+                    $scope.ranking.sort(function (p1, p2) {
+                        var a = p1.pontos;
+                        var b = p2.pontos;
+                        return a < b ? -1 : (a > b ? 1 : 0);
+                    });
+                    for (var index = $scope.ranking.length - 1; index >= 0; index--) {
+                        var eRanking = $scope.ranking[index];
+                        console.log(($scope.ranking.length - index), eRanking.id_Equipe)
+                        if (eRanking.id_Equipe == $scope.info.equipe.id) {
+                            $scope.rankingAtual = eRanking;
+                            $scope.rankingAtual.colocacao = $scope.ranking.length - index;
+                            $scope.proximo = $scope.ranking[index - 1];
+                            $scope.anterior = $scope.ranking[index + 1];
+                            break;
+                        }
+                    }
+
+                }
+                    );
+                EquipesService.getResultados({ id: data.equipe.id }).then(function (results) {
+                    $scope.results = results;
+                    for (var index = 0; index < results.length; index++) {
+                        var element = results[index];
+
+                        EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
+
+                            for (var index = 0; index < $scope.results.length; index++) {
+                                var element = $scope.results[index];
+
+
+                                if (element.id_Etapa == etapa.id) {
+                                    element.etapa = etapa;
+                                    break;
+                                }
+                            }
+                        }, function (etapa) {
+                            console.log("Error", etapa)
+                        })
+                    }
+                })
+            });
+        }
+
+        $scope.irPerfil = function () {
+            $location.path("/profile");
+        }
+        $scope.getLabelCategoria = function (id) {
+            return UtilsService.getLabelCategoria(id);
         }
 
 
@@ -263,19 +323,14 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log) {
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService) {
         $scope.currTab = "details";
         $scope.tabstemplate = "templates/etapa.tabs.html";
         $scope.etapaNotComplete = true;
-        $scope.categorias = [
-            { nome: "Pró", id: 4 },
-            { nome: "Graduados", id: 3 },
-            { nome: "Trekkers", id: 2 },
-            { nome: "Turismo", id: 1 }
-        ];
 
+        $scope.categorias = UtilsService.getCategorias();
         $scope.getLastSelectedCat = function () {
-            var selectedCat = $scope.categorias[0].id;
+            var selectedCat = UtilsService.getCategorias()[0].id;
             if ($localStorage.lastSelectedCat) {
                 selectedCat = $localStorage.lastSelectedCat;
             }
@@ -304,16 +359,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             { nome: "Graduados", id_Config: 3 },
             { nome: "Trekkers / Turismo", id_Config: 1 }
         ];
-        $scope.getLabelCategoria = function (item) {
-            for (var index = 0; index < $scope.categorias.length; index++) {
-                var element = $scope.categorias[index];
-                if (item == element.id) {
-                    return element.nome;
-                }
-            }
-            return "-";
-
-        }
+        $scope.getLabelCategoria = UtilsService.getLabelCategoria;
         $scope.isInCategoria = function (categoriaGrid) {
             return function (item) {
 
@@ -454,12 +500,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
     })
 
-    .controller('RankingCtrl', function ($scope, $stateParams, $localStorage, RankingService, EquipesService) {
+    .controller('RankingCtrl', function ($scope, $stateParams, $localStorage, RankingService, EquipesService, UtilsService) {
 
         $scope.doRefresh = function (forceClean) {
             if (forceClean == true) {
                 RankingService.clear();
-                EquipesService.clear();
             }
             RankingService.query().then(function (data) {
                 $scope.results = data;
@@ -476,20 +521,17 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 $scope.allCompetidores[element.id_Equipe].push(element);
             }
         });
+
         $scope.carregaCompetidores = function (equipe) {
 
             return $scope.allCompetidores[equipe.id_Equipe];
         }
-        $scope.doRefresh();
-        $scope.categorias = [
-            { nome: "Pró", id: 4 },
-            { nome: "Graduados", id: 3 },
-            { nome: "Trekkers", id: 2 },
-            { nome: "Turismo", id: 1 }
-        ];
 
+        $scope.doRefresh();
+
+        $scope.categorias = UtilsService.getCategorias();
         $scope.getLastSelectedCat = function () {
-            var selectedCat = $scope.categorias[0].id;
+            var selectedCat = UtilsService.getCategorias()[0].id;
             if ($localStorage.lastSelectedCat) {
                 selectedCat = $localStorage.lastSelectedCat;
             }

@@ -2,16 +2,62 @@
 
     <ion-content class="scroll-bg">
 
-        <div class="list card">
+        <div class="list card" ng-if="user!=null">
             <h2>{{equipe.nome}}</h2>
             <div class="item ">
-                <img class="avatarImage" style="float:right;" ng-repeat="integante in info.integrantes" ng-src="http://graph.facebook.com/{{integante.fbId}}/picture?width=128&height=128">
+                <img class="avatarImage" style="float:right;" ng-repeat="integante in info.integrantes|orderBy:['fbId']" ng-src="http://graph.facebook.com/{{integante.fbId}}/picture?width=128&height=128">
 
                 <h2><small>Equipe</small> {{info.equipe.nome}}</h2>
                 <p>{{info.equipe.descricao}}</p>
             </div>
+            <div class="item ">
+                Ranking {{getLabelCategoria(info.equipe.id_Categoria)}} 2016:
+                <div  class="item " style="text-align:center"><span style="font-size: 24px;font-weight:bold;
+            color: #F5A81C; ">{{rankingAtual.colocacao}}º</span> com {{rankingAtual.pontos}} pontos
+                </div>
+                <div class="row">
+                    <small>Logo atrás da equipe {{proximo.nome}}, {{proximo.pontos}} pts</small>
+                </div>
+                <div class="row">
+                    <small>Logo a frente da equipe  {{anterior.nome}}, {{anterior.pontos}} pts</small>
+                </div>
+            </div>
+
+
+            <div class="row titTabela">
+                <div class="col col-top col-50">Etapa</div>
+                <div class="col col-top col-30 ">Col</div>
+                <div class="col col-top col-20 ">Pts</div>
+            </div>
+            <div class="row item" ng-repeat="resultado in results| orderBy:['etapa']">
+
+                <div class="col col-demo col-50 " style="text-align:center; ">{{resultado.etapa.nome}}
+                </div>
+                <div class="col col-demo col-30 " style="text-align:center; "><span style="font-size: 24px;font-weight:bold;
+            color: #F5A81C; ">{{resultado.colocacao}}º</span>
+                </div>
+                <div class="col col-demo col-20 " style="text-align:center; ">{{resultado.pontos_ranking}}
+
+
+                </div>
+
+            </div>
+
+
+
+
+
 
         </div>
+        <div class="list card" ng-if="user==null">
+            <div class="item ">
+                Conecte-se para visualizar sua equipe.
+
+                <button class="button button-balanced button-block" ng-show="user.id==null" ng-click="irPerfil()">Ir para Meu Perfil</button>
+
+            </div>
+        </div>
+
 
     </ion-content>
 </ion-view>
