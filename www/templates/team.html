@@ -3,12 +3,12 @@
     <ion-content class="scroll-bg">
         <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh(true)">
         </ion-refresher>
-        <div class="list card" ng-if="user!=null && equipe==null">
+        <div class="list card" ng-if="user!=null && info.equipe==null">
             <h2>Não encontramos nenhuma inscrição em equipes com seus dados.</h2>
         </div>
-        <div class="list card" ng-if="user!=null && equipe!=null">
+        <div class="list card" ng-if="user!=null && info.equipe!=null">
 
-            <h2>{{equipe.nome}}</h2>
+            
             <div class="item ">
                 <img class="avatarImage" style="float:right;" ng-repeat="integante in info.integrantes|orderBy:['fbId']" ng-src="http://graph.facebook.com/{{integante.fbId}}/picture?width=128&height=128">
 
