@@ -44,63 +44,67 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
     .controller('TeamCtrl', function ($scope, EquipesService, loginService, $location, EtapasService, RankingService, UtilsService) {
         $scope.user = loginService.getUser();
-// $scope.user = {id:3249}
-        if ($scope.user != null) {
+        $scope.doRefresh = function () {
+            // $scope.user = {id:3249}
+            if ($scope.user != null) {
 
-            EquipesService.getMyEquipe({ id: $scope.user.id }, function (data) {
-                $scope.info = data;
-                $scope.ranking = [];
-                RankingService.query().then(function (data) {
-                    for (var index = 0; index < data.length; index++) {
-                        var element = data[index];
-                        if (element.id_Categoria == $scope.info.equipe.id_Categoria) {
-                            $scope.ranking.push(element);
-                        }
-                    }
-                    console.log($scope.ranking)
-                    $scope.ranking.sort(function (p1, p2) {
-                        var a = p1.pontos;
-                        var b = p2.pontos;
-                        return a < b ? -1 : (a > b ? 1 : 0);
-                    });
-                    for (var index = $scope.ranking.length - 1; index >= 0; index--) {
-                        var eRanking = $scope.ranking[index];
-                        console.log(($scope.ranking.length - index), eRanking.id_Equipe)
-                        if (eRanking.id_Equipe == $scope.info.equipe.id) {
-                            $scope.rankingAtual = eRanking;
-                            $scope.rankingAtual.colocacao = $scope.ranking.length - index;
-                            $scope.proximo = $scope.ranking[index - 1];
-                            $scope.anterior = $scope.ranking[index + 1];
-                            break;
-                        }
-                    }
-
-                }
-                    );
-                EquipesService.getResultados({ id: data.equipe.id }).then(function (results) {
-                    $scope.results = results;
-                    for (var index = 0; index < results.length; index++) {
-                        var element = results[index];
-
-                        EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
-
-                            for (var index = 0; index < $scope.results.length; index++) {
-                                var element = $scope.results[index];
-
-
-                                if (element.id_Etapa == etapa.id) {
-                                    element.etapa = etapa;
-                                    break;
-                                }
+                EquipesService.getMyEquipe({ id: $scope.user.id }, function (data) {
+                    $scope.info = data;
+                    $scope.ranking = [];
+                    RankingService.query().then(function (data) {
+                        for (var index = 0; index < data.length; index++) {
+                            var element = data[index];
+                            if (element.id_Categoria == $scope.info.equipe.id_Categoria) {
+                                $scope.ranking.push(element);
                             }
-                        }, function (etapa) {
-                            console.log("Error", etapa)
-                        })
+                        }
+
+                        $scope.ranking.sort(function (p1, p2) {
+                            var a = p1.pontos;
+                            var b = p2.pontos;
+                            return a < b ? -1 : (a > b ? 1 : 0);
+                        });
+                        for (var index = $scope.ranking.length - 1; index >= 0; index--) {
+                            var eRanking = $scope.ranking[index];
+                            console.log(($scope.ranking.length - index), eRanking.id_Equipe)
+                            if (eRanking.id_Equipe == $scope.info.equipe.id) {
+                                $scope.rankingAtual = eRanking;
+                                $scope.rankingAtual.colocacao = $scope.ranking.length - index;
+                                $scope.proximo = $scope.ranking[index - 1];
+                                $scope.anterior = $scope.ranking[index + 1];
+                                break;
+                            }
+                        }
+                        $scope.$broadcast('scroll.refreshComplete');
+
                     }
-                })
-            });
+                        );
+                    EquipesService.getResultados({ id: data.equipe.id }).then(function (results) {
+                        $scope.results = results;
+                        for (var index = 0; index < results.length; index++) {
+                            var element = results[index];
+
+                            EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
+
+                                for (var index = 0; index < $scope.results.length; index++) {
+                                    var element = $scope.results[index];
+
+
+                                    if (element.id_Etapa == etapa.id) {
+                                        element.etapa = etapa;
+                                        break;
+                                    }
+                                }
+                            }, function (etapa) {
+                                console.log("Error", etapa)
+                            })
+                        }
+                    })
+                });
+            }
         }
 
+        $scope.doRefresh();
         $scope.irPerfil = function () {
             $location.path("/app/profile");
         }
@@ -457,13 +461,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
     })
     .controller('EtapasCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $anchorScroll,$ionicScrollDelegate) {
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $anchorScroll, $ionicScrollDelegate) {
 
         $scope.doRefresh = function () {
             EtapasService.clear();
             $scope.loadData();
         }
-        
+
         $scope.loadData = function () {
             EtapasService.query().then(function (data) {
                 $scope.etapas = data;
@@ -489,15 +493,15 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         });
                     }
                 }
-console.log("scroll anchor");
+                console.log("scroll anchor");
                 $location.hash($scope.etapa.id);
                 // $anchorScroll();
-$ionicScrollDelegate.anchorScroll()
+                $ionicScrollDelegate.anchorScroll()
             }, function () {
                 $scope.$broadcast('scroll.refreshComplete');
             });
         }
-console.log("Entrou no etapas");
+        console.log("Entrou no etapas");
         $scope.loadData();
 
     })
