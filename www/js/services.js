@@ -313,6 +313,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     }
                 }
             },
+            
             getMembers:{
                  isArray: true,
                  url: appConfigs.openRestBackend + '/Competidor/:id',
@@ -342,6 +343,15 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     .service('LocationService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
         return $cachedResource(appConfigs.openRestBackend + '/Local/:id', {},
         {
+             get: {
+                cache: true,
+                cr: {
+                    cacheName: function (params) {
+                        return params.id + "_get"
+                    },
+                    timeout: 24 * 60 * 60 * 1000
+                }
+            },
             query: {
                 isArray: true,
                 cache: true,
