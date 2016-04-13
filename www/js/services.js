@@ -448,7 +448,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     method: "POST",
                     isArray: false,
                     url: appConfigs.secureEndpointBackend + '/Register'
-                    // url: 'http://localhost/northServer/userRegister.php'
+
                 },
                 rememberPwd: {
                     method: "POST",

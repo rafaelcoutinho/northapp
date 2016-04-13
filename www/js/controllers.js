@@ -368,8 +368,9 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.getLabelCategoria = UtilsService.getLabelCategoria;
         $scope.isInCategoria = function (categoriaGrid) {
             return function (item) {
-
-                if ((item.id_Categoria == 1 || item.id_Categoria == 0)) {
+                console.log("item",item.id_Categoria," ",categoriaGrid)
+                if ((item.id_Categoria == 1 || item.id_Categoria == 2)) {
+                    console.log("ok!")
                     return categoriaGrid.id_Config == 1;
                 }
                 return categoriaGrid.id_Config == item.id_Categoria;
