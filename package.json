@@ -30,7 +30,9 @@
         "APP_ID": "228398097493749",
         "APP_NAME": "NorthApp"
       }
-    }
+    },
+    "uk.co.workingedge.phonegap.plugin.launchnavigator",
+    "cordova-plugin-actionsheet"
   ],
   "cordovaPlatforms": [
     "android",
