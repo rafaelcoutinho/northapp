@@ -446,9 +446,9 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
             if (ionic.Platform.isIOS()) {
                 if (etapa.location.latitude != null) {
-                    window.open('waze://?ll=' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)) + '&navigate=yes');
+                     launchnavigator.navigate([(etapa.location.latitude / 1000000),(etapa.location.longitude / 1000000)]);
                 } else {
-                    window.open('waze://?q=' + encodeURI(etapa.location.endereco) + '&navigate=yes');
+                    launchnavigator.navigate(etapa.location.endereco);
                 }
             } else if (ionic.Platform.isAndroid()) {
                 console.log("android");
