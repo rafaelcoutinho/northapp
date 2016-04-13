@@ -554,3 +554,73 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             }
         };
     })
+    // Customized for Android and desktop
+  .service('$cordovaLaunchNavigator', ['$q','$cordovaInAppBrowser', function ($q,$cordovaInAppBrowser) {
+    "use strict";
+
+    var $cordovaLaunchNavigator = {};
+    $cordovaLaunchNavigator.navigate = function (destination, options) {
+        if (!options) {
+            options = {};
+        }
+        var q = $q.defer();
+        
+        try {
+            // if(isRealDevice){
+            //      if (destination instanceof Array) {
+            //         $cordovaInAppBrowser.open("https://www.google.com.br/maps/search/"+encodeURI(destination[0]) + "," + encodeURI(destination[1])+"", "_system");
+            //      }else{
+            //          $cordovaInAppBrowser.open("https://www.google.com.br/maps/search/"+encodeURI(destination), "_system");
+            //      }
+            //     q.resolve();
+            // }else 
+            if (ionic.Platform.isAndroid()) {
+                console.log("Plataforma android");
+                var ref = null;
+                if (destination instanceof Array) {
+                    console.log("Latitude");
+                    ref = $cordovaInAppBrowser.open('geo:' + encodeURI(destination[0]) + "," + encodeURI(destination[1]), "_system");
+                    q.resolve();
+                } else {
+                    console.log("Endereço");
+                    ref = $cordovaInAppBrowser.open('geo:?&q=' + destination, "_system");
+
+                }
+                if (ref) {
+                    ref.addEventListener('loadstart', function (event) { q.resolve(); });
+                    ref.addEventListener('loaderror', function (event) { q.reject(event); });
+                } else {
+                    q.reject("Fail to open");
+                }
+
+            } else {
+console.log("Plataforma other");
+                var
+                    successFn = options.successCallBack || function () {
+                    },
+                    errorFn = options.errorCallback || function () {
+                    },
+                    _successFn = function () {
+                        successFn();
+                        q.resolve();
+                    },
+                    _errorFn = function (err) {
+                        errorFn(err);
+                        q.reject(err);
+                    };
+
+                options.successCallBack = _successFn;
+                options.errorCallback = _errorFn;
+
+                launchnavigator.navigate(destination, options);
+
+
+            }
+        } catch (e) {
+            q.reject("Exception: " + e.message);
+        }
+        return q.promise;
+    };
+
+    return $cordovaLaunchNavigator;
+  }])
