@@ -604,7 +604,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 }
 
             } else {
-console.log("Plataforma other");
+
                 var
                     successFn = options.successCallBack || function () {
                     },
