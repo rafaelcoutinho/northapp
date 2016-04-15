@@ -31,8 +31,11 @@
         "APP_NAME": "NorthApp"
       }
     },
-    "uk.co.workingedge.phonegap.plugin.launchnavigator",
-    "cordova-plugin-actionsheet"
+    "cordova-plugin-actionsheet",
+    {
+      "locator": "https://github.com/rafaelcoutinho/phonegap-launch-navigator",
+      "id": "uk.co.workingedge.phonegap.plugin.launchnavigator"
+    }
   ],
   "cordovaPlatforms": [
     "android",

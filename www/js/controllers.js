@@ -449,7 +449,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             if (etapa.location.latitude != null) {
                 var lat = (etapa.location.latitude / 1000000);
                 var lng = (etapa.location.longitude / 1000000);
-                $cordovaLaunchNavigator.navigate([lat,lng],{lat:lat,lng:lng})
+                $cordovaLaunchNavigator.navigate([lat,lng])
                     .then(
                         function () {
                             console.log("chamou roteador");

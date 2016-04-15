@@ -621,7 +621,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
                 options.successCallBack = _successFn;
                 options.errorCallback = _errorFn;
-
+                                       options.avoidReverseGeocoding=true;
                 launchnavigator.navigate(destination, options);
 
 
