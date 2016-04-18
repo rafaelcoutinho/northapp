@@ -491,9 +491,10 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 try {
                     
                     var userId = null;
-                    if (!user) {
+                    if (user) {
                         userId = user.id;
                     }
+                    console.log($localStorage.associateRegId+" u="+userId+" ass="+($localStorage.associateRegId == userId)+" gcm="+this.gcmInited);
                     if (this.gcmInited == true && $localStorage.associateRegId == userId) {
 
                         return;
@@ -519,7 +520,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                         // data.registrationId
                         
                         console.log("Registrou " + JSON.stringify(data));
-                        console.log($localStorage.registrationId + "==" + data.registrationId);
+                        console.log($localStorage.registrationId + "==" + data.registrationId+ " "+userId);
                         if ($localStorage.registrationId != data.registrationId || $localStorage.associateRegId != userId) {
                             var platform = "ios";
                             if (ionic.Platform.isAndroid()) {
@@ -530,8 +531,9 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                             console.log("Needs to save registration id " + JSON.stringify({ d: data.registrationId, uId: userId }));
                             var params = { d: data.registrationId, p: platform, action: "registergcm" };
                             pushResource.save({ id: userId }, params, function (data2) {
+                                console.log("Registration saved on the server");
                                 $localStorage.registrationId = data.registrationId;
-                                $localStorage.associateRegId = userId != null;
+                                $localStorage.associateRegId = userId;
                             }, function (data) {
                                 console.log("falhou " + JSON.stringify(data));
                             });
@@ -553,9 +555,11 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
                     this.push.on('error', function (e) {
                         // e.message
+                        this.gcmInited = false;
                         console.log("Erro push notification " + e.message)
                     });
                 } catch (e) {
+                    this.gcmInited = false;
                     console.log("Erro init gcm " + e)
                 }
             }
