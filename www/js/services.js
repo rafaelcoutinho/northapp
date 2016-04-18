@@ -482,14 +482,14 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
         }
     })
-    .service('PushNotService', function ($http, $localStorage, $resource, $q, $log,appConfigs,loginService) {
+    .service('PushNotService', function ($http, $localStorage, $resource, $q, $log,appConfigs) {
         var pushResource = $resource(appConfigs.enhancedRestBackend + "/Msg/:id");
         return {
             gcmInited: false,
             push: null,
-            initGCM: function () {
+            initGCM: function (user) {
                 try {
-                    var user = loginService.getUser();
+                    
                     var userId = null;
                     if (!user) {
                         userId = user.id;
@@ -601,7 +601,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             setUserLocally: function (aUser) {
                 
                 $localStorage.northApp_user = aUser;
-                PushNotService.initGCM();                
+                PushNotService.initGCM($localStorage.northApp_user);
             },
             validateNewUser: function (aUser, headers) {
                 var deferred = $q.defer();
