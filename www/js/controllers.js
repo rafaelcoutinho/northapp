@@ -1,6 +1,6 @@
 angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services', 'rcCachedResource'])
 
-    .controller('AppCtrl', function ($scope, $ionicModal, $timeout, $cordovaLocalNotification, $cordovaInAppBrowser) {
+    .controller('AppCtrl', function ($scope, $ionicModal, $timeout, $cordovaLocalNotification, $cordovaInAppBrowser,PushNotService) {
 
         if ($scope.shide != true) {
             if (navigator && navigator.splashscreen) {
@@ -18,7 +18,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 }, 3000);
             }
         }
-
+        PushNotService.initGCM();
 
 
     })

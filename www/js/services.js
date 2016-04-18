@@ -482,7 +482,87 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
         }
     })
-    .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService, $log) {
+    .service('PushNotService', function ($http, $localStorage, $resource, $q, $log,appConfigs,loginService) {
+        var pushResource = $resource(appConfigs.enhancedRestBackend + "/Msg/:id");
+        return {
+            gcmInited: false,
+            push: null,
+            initGCM: function () {
+                try {
+                    var user = loginService.getUser();
+                    var userId = null;
+                    if (!user) {
+                        userId = user.id;
+                    }
+                    if (this.gcmInited == true && $localStorage.associateRegId == userId) {
+
+                        return;
+                    }
+
+                    this.gcmInited = true;
+                    this.push = PushNotification.init({
+                        android: {
+                            senderID: "680357415246",
+                            icon: "noti",
+                            forceShow: true,
+                            vibrate: true
+                        },
+                        ios: {
+                            alert: "true",
+                            badge: "true",
+                            sound: "true"
+                        },
+                        windows: {}
+                    });
+
+                    this.push.on('registration', function (data) {
+                        // data.registrationId
+                        
+                        console.log("Registrou " + JSON.stringify(data));
+                        console.log($localStorage.registrationId + "==" + data.registrationId);
+                        if ($localStorage.registrationId != data.registrationId || $localStorage.associateRegId != userId) {
+                            var platform = "ios";
+                            if (ionic.Platform.isAndroid()) {
+                                platform = "android";
+                            }
+
+
+                            console.log("Needs to save registration id " + JSON.stringify({ d: data.registrationId, uId: userId }));
+                            var params = { d: data.registrationId, p: platform, action: "registergcm" };
+                            pushResource.save({ id: userId }, params, function (data2) {
+                                $localStorage.registrationId = data.registrationId;
+                                $localStorage.associateRegId = userId != null;
+                            }, function (data) {
+                                console.log("falhou " + JSON.stringify(data));
+                            });
+                        } else {
+                            console.log("resgistration id repetida");
+                        }
+                    });
+
+                    this.push.on('notification', function (data) {
+                        console.log("notification " + JSON.stringify(data));
+                        
+                        // data.message,
+                        // data.title,
+                        // data.count,
+                        // data.sound,
+                        // data.image,
+                        // data.additionalData
+                    });
+
+                    this.push.on('error', function (e) {
+                        // e.message
+                        console.log("Erro push notification " + e.message)
+                    });
+                } catch (e) {
+                    console.log("Erro init gcm " + e)
+                }
+            }
+        }
+        
+    })
+    .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService, $log,PushNotService) {
 
         return {
             startPwdRecovery: function (email) {
@@ -519,8 +599,9 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 return deferred.promise;
             },
             setUserLocally: function (aUser) {
-
-                $localStorage.northApp_user = aUser;                
+                
+                $localStorage.northApp_user = aUser;
+                PushNotService.initGCM();                
             },
             validateNewUser: function (aUser, headers) {
                 var deferred = $q.defer();
