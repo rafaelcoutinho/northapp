@@ -504,8 +504,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     this.push = PushNotification.init({
                         android: {
                             senderID: "680357415246",
-                            icon: "noti",
-                            forceShow: true,
+                            icon: "noti",                            
                             vibrate: true
                         },
                         ios: {
