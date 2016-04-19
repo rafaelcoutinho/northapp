@@ -1,6 +1,6 @@
 angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services', 'rcCachedResource'])
 
-    .controller('AppCtrl', function ($scope, $ionicModal, $timeout, $cordovaLocalNotification, $cordovaInAppBrowser,PushNotService, loginService) {
+    .controller('AppCtrl', function ($scope, $ionicModal, $timeout, $cordovaLocalNotification, $cordovaInAppBrowser, PushNotService, loginService) {
 
         if ($scope.shide != true) {
             if (navigator && navigator.splashscreen) {
@@ -128,20 +128,28 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
         $scope.doRefresh(true);
     })
-    .controller('MenuCtrl', function ($scope, $stateParams, EtapasService) {
+    .controller('MenuCtrl', function ($scope, $stateParams, EtapasService, $rootScope) {
         $scope.menuBtns = [];
-        $scope.$on('$routeChangeStart', function (next, current) {
-            console.log("changed")
-            //$scope.menuBtns = [];
+        console.log("menu...")
+
+        $rootScope.$on('hideRight', function () {
+            console.log("hideRight...", $scope.menuBtns)
+            $scope.menuBtns = [];
+
         });
-        $scope.$on('showRight', function (event, mass) {
-            console.log("showRight")
+
+        $rootScope.$on('showRight', function (event, mass) {
+            console.log("showRight...", $scope.menuBtns)
             $scope.menuBtns.push({ label: "Salvar" });
-            console.log("showRight ", $scope.menuBtns)
+
         });
+        $scope.showRightMenu = function () {
+            console.log("should showRight...", $scope.menuBtns != null, $scope.menuBtns.length)
+            return false;//$scope.menuBtns != null && $scope.menuBtns.length > 0;
+        }
     })
     .controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup) {
-        $rootScope.$broadcast('showRight', [1, 2, 3]);
+        
         $scope.user = loginService.getUser();
         if ($scope.user == null) {
             $scope.user = {};
@@ -192,7 +200,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
         };
         $scope.doShowForm = function () {
-            $rootScope.$broadcast('showRight', [1, 2, 3]);
+            
             $scope.showForm = true;
         }
 
@@ -402,7 +410,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         EtapasService.get({ id: $stateParams.id }).then(function (dadosEtapa) {
 
             $scope.etapa = dadosEtapa;
-            $scope.aconteceuEtapa = $scope.etapa.data < new Date().getTime();
+            $scope.etapaNotComplete = $scope.etapa.data < new Date().getTime();
             if (dadosEtapa.id_Local) {
                 LocationService.get({ id: $scope.etapa.id_Local }).then(function (location) {
                     $scope.etapa.location = location;
@@ -445,11 +453,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
         $scope.maps = function (etapa) {
 
-            
+
             if (etapa.location.latitude != null) {
                 var lat = (etapa.location.latitude / 1000000);
                 var lng = (etapa.location.longitude / 1000000);
-                $cordovaLaunchNavigator.navigate([lat,lng])
+                $cordovaLaunchNavigator.navigate([lat, lng])
                     .then(
                         function () {
                             console.log("chamou roteador");
@@ -498,7 +506,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         });
                     }
                 }
-                
+
                 $location.hash($scope.etapa.id);
                 // $anchorScroll();
                 $ionicScrollDelegate.anchorScroll()

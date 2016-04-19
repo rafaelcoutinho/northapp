@@ -84,6 +84,7 @@ angular.module('north', ['ionic',  'north.services', 'north.controllers', 'ngCor
         $rootScope.$on('$routeChangeSuccess', function (newRoute, oldRoute) {
             if ($location.hash()) $anchorScroll();
         });
+       
 
     })
 

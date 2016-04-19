@@ -5,7 +5,8 @@
     "ionic": "driftyco/ionic-bower#1.2.4",
     "ngCordova": "^0.1.24-alpha",
     "angular-resource": "^1.5.0",
-    "ngstorage": "^0.3.10"
+    "ngstorage": "^0.3.10",
+    "rc-cached-resource": "*"
   },
   "devDependencies": {
     "ionic": "driftyco/ionic-bower#1.2.4"

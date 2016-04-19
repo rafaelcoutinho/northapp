@@ -513,8 +513,8 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     this.gcmInited = true;
                     this.push = PushNotification.init({
                         android: {
-                            senderID: "680357415246",
-                            icon: "noti",                            
+                            senderID: "680357415246",                            
+                            iconColor: "#ff95a874",
                             vibrate: true
                         },
                         ios: {
@@ -550,10 +550,12 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                             console.log("resgistration id repetida");
                         }
                     });
-
+                    var me = this;
                     this.push.on('notification', function (data) {
                         console.log("notification " + JSON.stringify(data));
-                        
+                        me.push.finish(function () {
+                            console.log("processing of push data is finished");
+                        });
                         // data.message,
                         // data.title,
                         // data.count,

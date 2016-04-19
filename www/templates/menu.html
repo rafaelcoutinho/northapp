@@ -24,6 +24,7 @@
             </div>
         </ion-content>
     </ion-side-menu>
+    
     <ion-side-menu-content>
         <ion-nav-bar class=" bar-balanced">
             <ion-nav-back-button>
@@ -31,11 +32,15 @@
             <ion-nav-buttons side="left">
                 <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
             </ion-nav-buttons>
-            <ion-nav-buttons side="right" ng-controller="MenuCtrl">
-                <button class="button button-icon button-clear " ng-repeat="item in menuBtns"></button>
-            </ion-nav-buttons>
+            
+            <!--<ion-nav-buttons side="right" >
+                <button class="button button-icon button-clear ion-android-more-vertical" menu-toggle="right" ng-show="showRightMenu()" ng-controller="MenuCtrl"></button>
+                
+            </ion-nav-buttons>-->
         </ion-nav-bar>
         <ion-nav-view name="menuContent"></ion-nav-view>
     </ion-side-menu-content>
+    
+                    
 
 </ion-side-menus>
