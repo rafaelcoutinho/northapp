@@ -30,6 +30,11 @@
         "APP_ID": "228398097493749",
         "APP_NAME": "NorthApp"
       }
+    },
+    "cordova-plugin-actionsheet",
+    {
+      "locator": "https://github.com/rafaelcoutinho/phonegap-launch-navigator",
+      "id": "uk.co.workingedge.phonegap.plugin.launchnavigator"
     }
   ],
   "cordovaPlatforms": [

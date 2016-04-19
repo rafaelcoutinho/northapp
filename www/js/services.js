@@ -313,6 +313,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     }
                 }
             },
+            
             getMembers:{
                  isArray: true,
                  url: appConfigs.openRestBackend + '/Competidor/:id',
@@ -342,6 +343,15 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
     .service('LocationService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
         return $cachedResource(appConfigs.openRestBackend + '/Local/:id', {},
         {
+             get: {
+                cache: true,
+                cr: {
+                    cacheName: function (params) {
+                        return params.id + "_get"
+                    },
+                    timeout: 24 * 60 * 60 * 1000
+                }
+            },
             query: {
                 isArray: true,
                 cache: true,
@@ -448,7 +458,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     method: "POST",
                     isArray: false,
                     url: appConfigs.secureEndpointBackend + '/Register'
-                    // url: 'http://localhost/northServer/userRegister.php'
+
                 },
                 rememberPwd: {
                     method: "POST",
@@ -638,3 +648,73 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             }
         };
     })
+    // Customized for Android and desktop
+  .service('$cordovaLaunchNavigator', ['$q','$cordovaInAppBrowser', function ($q,$cordovaInAppBrowser) {
+    "use strict";
+
+    var $cordovaLaunchNavigator = {};
+    $cordovaLaunchNavigator.navigate = function (destination, options) {
+        if (!options) {
+            options = {};
+        }
+        var q = $q.defer();
+        
+        try {
+            // if(isRealDevice){
+            //      if (destination instanceof Array) {
+            //         $cordovaInAppBrowser.open("https://www.google.com.br/maps/search/"+encodeURI(destination[0]) + "," + encodeURI(destination[1])+"", "_system");
+            //      }else{
+            //          $cordovaInAppBrowser.open("https://www.google.com.br/maps/search/"+encodeURI(destination), "_system");
+            //      }
+            //     q.resolve();
+            // }else 
+            if (ionic.Platform.isAndroid()) {
+                console.log("Plataforma android");
+                var ref = null;
+                if (destination instanceof Array) {
+                    console.log("Latitude");
+                    ref = $cordovaInAppBrowser.open('geo:' + encodeURI(destination[0]) + "," + encodeURI(destination[1]), "_system");
+                    q.resolve();
+                } else {
+                    console.log("Endereço");
+                    ref = $cordovaInAppBrowser.open('geo:?&q=' + destination, "_system");
+
+                }
+                if (ref) {
+                    ref.addEventListener('loadstart', function (event) { q.resolve(); });
+                    ref.addEventListener('loaderror', function (event) { q.reject(event); });
+                } else {
+                    q.reject("Fail to open");
+                }
+
+            } else {
+
+                var
+                    successFn = options.successCallBack || function () {
+                    },
+                    errorFn = options.errorCallback || function () {
+                    },
+                    _successFn = function () {
+                        successFn();
+                        q.resolve();
+                    },
+                    _errorFn = function (err) {
+                        errorFn(err);
+                        q.reject(err);
+                    };
+
+                options.successCallBack = _successFn;
+                options.errorCallback = _errorFn;
+                                       options.avoidReverseGeocoding=true;
+                launchnavigator.navigate(destination, options);
+
+
+            }
+        } catch (e) {
+            q.reject("Exception: " + e.message);
+        }
+        return q.promise;
+    };
+
+    return $cordovaLaunchNavigator;
+  }])

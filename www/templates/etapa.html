@@ -131,9 +131,9 @@
                     <div class="col col-demo titTabela ">Equipe</div>
 
                 </div>
-
-                <div class="row " ng-repeat="entry in inscricaoInfo.preGrid|filter:isInCategoria(categoriaGrid) |orderBy:'equipe' " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
-                    <div class="col col-demo  ">{{entry.equipe}}</div>
+                <div class="row " ng-repeat="entry in inscricaoInfo.preGrid|filter:isInCategoria(categoriaGrid) |orderBy:['data','nome'] " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                    <div class="col col-demo  ">{{entry.nome}} {{entry.descricao}}</div>
+                    <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1">{{entry.nome_Categoria}}</div>
                 </div>
 
 

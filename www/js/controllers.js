@@ -64,11 +64,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                             var b = p2.pontos;
                             return a < b ? -1 : (a > b ? 1 : 0);
                         });
-			var posicao = 0;
+                        var posicao = 0;
                         for (var index = $scope.ranking.length - 1; index >= 0; index--) {
-		            posicao++;
+                            posicao++;
                             var eRanking = $scope.ranking[index];
-                            console.log(posicao+" "+ eRanking.nome+" "+eRanking.pontos)
+                            console.log(posicao + " " + eRanking.nome + " " + eRanking.pontos)
                             if (eRanking.id_Equipe == $scope.info.equipe.id) {
                                 $scope.rankingAtual = eRanking;
                                 $scope.rankingAtual.colocacao = posicao;
@@ -123,7 +123,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 HighlightService.clear();
             }
             HighlightService.query().then(
-                function (data) { console.log("Carregou " + data); $scope.highlights = data; $scope.$broadcast('scroll.refreshComplete'); },
+                function (data) { $scope.highlights = data; $scope.$broadcast('scroll.refreshComplete'); },
                 function (data) { console.log("Falhou " + JSON.stringify(data)); $scope.$broadcast('scroll.refreshComplete'); });
         }
         $scope.doRefresh(true);
@@ -329,7 +329,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService) {
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator) {
         $scope.currTab = "details";
         $scope.tabstemplate = "templates/etapa.tabs.html";
         $scope.etapaNotComplete = true;
@@ -368,8 +368,9 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.getLabelCategoria = UtilsService.getLabelCategoria;
         $scope.isInCategoria = function (categoriaGrid) {
             return function (item) {
-
-                if ((item.id_Categoria == 1 || item.id_Categoria == 0)) {
+                console.log("item", item.id_Categoria, " ", categoriaGrid)
+                if ((item.id_Categoria == 1 || item.id_Categoria == 2)) {
+                    console.log("ok!")
                     return categoriaGrid.id_Config == 1;
                 }
                 return categoriaGrid.id_Config == item.id_Categoria;
@@ -444,22 +445,24 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
         $scope.maps = function (etapa) {
 
-            if (ionic.Platform.isIOS()) {
-                if (etapa.location.latitude != null) {
-                    window.open('waze://?ll=' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)) + '&navigate=yes');
-                } else {
-                    window.open('waze://?q=' + encodeURI(etapa.location.endereco) + '&navigate=yes');
-                }
-            } else if (ionic.Platform.isAndroid()) {
-                console.log("android");
-                if (etapa.location.latitude != null) {
-                    $cordovaInAppBrowser.open('geo:' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)), "_system");
-                } else {
-                    $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.endereco, "_system");
-                }
+            
+            if (etapa.location.latitude != null) {
+                var lat = (etapa.location.latitude / 1000000);
+                var lng = (etapa.location.longitude / 1000000);
+                $cordovaLaunchNavigator.navigate([lat,lng])
+                    .then(
+                        function () {
+                            console.log("chamou roteador");
+                        }, function (error) {
+                            console.log("erro " + error);
+                        }
+
+                        )
+
             } else {
-                window.open('geo:' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)) + '?&q=' + encodeURI(etapa.location.endereco));
+                $cordovaLaunchNavigator.navigate(etapa.location.endereco);
             }
+
         }
     })
     .controller('EtapasCtrl', function (
@@ -495,7 +498,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         });
                     }
                 }
-                console.log("scroll anchor");
+                
                 $location.hash($scope.etapa.id);
                 // $anchorScroll();
                 $ionicScrollDelegate.anchorScroll()
