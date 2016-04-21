@@ -55,7 +55,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     EquipesService.clear();
                 }
 
-                EquipesService.getMyEquipe({ id: loginService.getUserID()} ).then(function (data) {
+                EquipesService.getMyEquipe({ id: loginService.getUserID() }).then(function (data) {
                     $scope.info = data;
                     $scope.ranking = [];
                     RankingService.query().then(function (data) {
@@ -404,7 +404,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator) {
+        $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator, $ionicLoading) {
 
 
         console.log($stateParams, tab);
@@ -448,7 +448,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         ];
         $scope.getLabelCategoria = UtilsService.getLabelCategoria;
         $scope.isInCategoria = function (categoriaGrid) {
-            return function (item) {                
+            return function (item) {
                 if ((item.id_Categoria == 1 || item.id_Categoria == 2)) {
                     return categoriaGrid.id_Config == 1;
                 }
@@ -513,22 +513,31 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             if (!website.startsWith("http")) {
                 website = "http://" + website;
             }
+            $ionicLoading.show({
+                template: 'Abrindo navegador...'
+            });
             $cordovaInAppBrowser.open(website, '_blank')
                 .then(function (event) {
-                    // success
+                    $ionicLoading.hide();
                 })
                 .catch(function (event) {
-                    // error
+                    $ionicLoading.hide();
                 });
 
         }
         $scope.openInscricao = function () {
-            $cordovaInAppBrowser.open("http://cumeqetrekking.appspot.com/open/index.html", '_blank', 'location=no')
+            $ionicLoading.show({
+                template: 'Abrindo navegador...'
+            });
+            $cordovaInAppBrowser.open("http://cumeqetrekking.appspot.com/open/index.html", '_blank', { 'location': 'yes' })
                 .then(function (event) {
                     // success
+                    $ionicLoading.hide();
                 })
                 .catch(function (event) {
                     // error
+                    console.log("falhou " + event)
+                    $ionicLoading.hide();
                 });
         }
         $scope.maps = function (etapa) {
