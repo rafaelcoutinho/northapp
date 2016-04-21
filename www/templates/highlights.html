@@ -1,6 +1,6 @@
 <ion-view view-title="Destaque">
     <ion-content class="scroll-bg">
-        <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh()">
+        <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh(true)">
         </ion-refresher>
         <div class="list card ">
             <div ng-if="highlights==null">

@@ -42,13 +42,20 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             };
         };
     })
-    .controller('TeamCtrl', function ($scope, EquipesService, loginService, $location, EtapasService, RankingService, UtilsService) {
+    .controller('TeamCtrl', function ($scope, EquipesService, loginService, $location, EtapasService, RankingService, UtilsService, $rootScope) {
         $scope.user = loginService.getUser();
-        $scope.doRefresh = function () {
-            // $scope.user = {id:3249}
-            if ($scope.user != null) {
+        $rootScope.$on("userLogged", function (userData) {
+            $scope.user = loginService.getUser();
+            $scope.doRefresh(true);
+        });
+        $scope.doRefresh = function (force) {
+            $scope.user = loginService.getUser();
+            if (loginService.getUser() != null) {
+                if (force == true) {
+                    EquipesService.clear();
+                }
 
-                EquipesService.getMyEquipe({ id: $scope.user.id }, function (data) {
+                EquipesService.getMyEquipe({ id: loginService.getUserID()} ).then(function (data) {
                     $scope.info = data;
                     $scope.ranking = [];
                     RankingService.query().then(function (data) {
@@ -68,7 +75,6 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         for (var index = $scope.ranking.length - 1; index >= 0; index--) {
                             posicao++;
                             var eRanking = $scope.ranking[index];
-                            console.log(posicao + " " + eRanking.nome + " " + eRanking.pontos)
                             if (eRanking.id_Equipe == $scope.info.equipe.id) {
                                 $scope.rankingAtual = eRanking;
                                 $scope.rankingAtual.colocacao = posicao;
@@ -97,8 +103,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                                         break;
                                     }
                                 }
-                            }, function (etapa) {
-                                console.log("Error", etapa)
+                                $scope.$broadcast('scroll.refreshComplete');
+                            }, function (erro) {
+                                console.log("Error", erro);
+                                $scope.$broadcast('scroll.refreshComplete');
                             })
                         }
                     })
@@ -116,43 +124,101 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
 
     })
-    .controller('HighlightCtrl', function ($scope, HighlightService) {
-        $scope.doRefresh = function (avoidClear) {
-            if (!avoidClear || avoidClear == false) {
-
+    .controller('HighlightCtrl', function ($scope, HighlightService, $state) {
+        $scope.doRefresh = function (force) {
+            if (force == true) {
                 HighlightService.clear();
             }
             HighlightService.query().then(
-                function (data) { $scope.highlights = data; $scope.$broadcast('scroll.refreshComplete'); },
-                function (data) { console.log("Falhou " + JSON.stringify(data)); $scope.$broadcast('scroll.refreshComplete'); });
+                function (data) {
+                    $scope.highlights = data;
+                    $scope.$broadcast('scroll.refreshComplete');
+                },
+                function (data) {
+                    console.log("Falhou " + JSON.stringify(data));
+                    $scope.$broadcast('scroll.refreshComplete');
+                });
         }
-        $scope.doRefresh(true);
+
+        $scope.doRefresh();
     })
-    .controller('MenuCtrl', function ($scope, $stateParams, EtapasService, $rootScope) {
+    .controller('MenuCtrl', function ($scope, $stateParams, $state, EtapasService, $rootScope) {
         $scope.menuBtns = [];
-        console.log("menu...")
-
-        $rootScope.$on('hideRight', function () {
-            console.log("hideRight...", $scope.menuBtns)
-            $scope.menuBtns = [];
-
-        });
-
-        $rootScope.$on('showRight', function (event, mass) {
-            console.log("showRight...", $scope.menuBtns)
-            $scope.menuBtns.push({ label: "Salvar" });
+        $rootScope.rightMenuButtons = [];
+        $scope.$on('$stateChangeSuccess', function (next, current) {
+            if (current && $rootScope.rightMenuButtons) {
+                $scope.menuBtns = $rootScope.rightMenuButtons[current.name];
+                $scope.nome = current.name;
+            }
 
         });
-        $scope.showRightMenu = function () {
-            console.log("should showRight...", $scope.menuBtns != null, $scope.menuBtns.length)
-            return false;//$scope.menuBtns != null && $scope.menuBtns.length > 0;
+        $rootScope.$on('addRight', function (event, obj) {
+
+            $rootScope.addBtns(obj.state, obj.btns);
+        })
+        $rootScope.addBtns = function (stateName, btns) {
+
+            console.log("adding", stateName, $rootScope.rightMenuButtons[stateName], btns, $stateParams, $state, $stateParams.current);
+            $rootScope.rightMenuButtons[stateName] = btns;
+            if ($state.current && $state.current.name == stateName) {
+                $scope.menuBtns = btns;
+            }
         }
+
     })
-    .controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup) {
-        
+    .controller('MudaSenhaCtrl', function ($scope, $state, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup) {
+        $scope.user = loginService.getUser();
+        $scope.pwdForm = {};
+        $scope.doUpdatePwd = function () {
+            if ($scope.pwdForm.newPwd != $scope.pwdForm.newPwdVerify) {
+                $scope.errorMsg = "Confirmação de senha diferente.";
+                return;
+            }
+            UserService.updatePwd({}, { id: loginService.getUserID(), oldPwd: $scope.pwdForm.oldPwd, newPwd: $scope.pwdForm.newPwd }, function () {
+                $state.go('app.profile');
+            }, function (response) {
+                if (response.data.error) {
+                    switch (response.data.errorCode) {
+                        case 804:
+                            $scope.errorMsg = "Senha atual inválida.";
+                            break;
+                        case 803:
+                            $scope.errorMsg = "Você não possui senha atualmente, por favor utilize o botão para resetar e gerar uma nova senha.";
+                            break;
+
+                        default:
+                            $scope.errorMsg = "Houve um problema para atualizar sua senha. Confirme sua senha anterior. A senha nova deve ter pelo menos 2 caracteres.";
+                    }
+
+                } else {
+                    $scope.errorMsg = "Houve um problema para atualizar sua senha. Confirme sua senha anterior. A senha nova deve ter pelo menos 2 caracteres.";
+                }
+            });
+        }
+        $scope.resetPassword = function () {
+            var confirmPopup = $ionicPopup.confirm({
+                title: 'Lembrar senha',
+                template: 'Um e-mail será enviado para executar o reset de sua senha. Desenha continuar?'
+            });
+
+            confirmPopup.then(function (res) {
+                if (res) {
+                    loginService.startPwdRecovery($scope.user.email);
+                } else {
+
+                }
+            });
+        };
+    })
+    .controller('ProfileCtrl', function ($scope, $cordovaFacebook, $state, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup, EquipesService) {
+        $scope.mudarSenha = function () {
+            $state.go('app.mudarsenha');
+        }
         $scope.user = loginService.getUser();
         if ($scope.user == null) {
             $scope.user = {};
+        } else {
+            $rootScope.$emit("addRight", { state: "app.profile", btns: [{ icon: "ion-android-more-vertical", callback: $scope.mudarSenha }] });
         }
 
         $scope.haschange = false;
@@ -200,7 +266,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
         };
         $scope.doShowForm = function () {
-            
+
             $scope.showForm = true;
         }
 
@@ -210,7 +276,6 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             $scope.loginData.errorMsg = "";
             loginService.login($scope.loginData.username, $scope.loginData.password).then(
                 function (userInfo) {
-                    console.log(userInfo);
                     $scope.closeLogin();
                     $scope.user = userInfo;
                     loginService.setUserLocally($scope.user);
@@ -269,6 +334,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             } catch (e) {
 
             }
+            EquipesService.clear();
+
         };
 
         $scope.getfbinfo = function () {
@@ -337,8 +404,14 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator) {
+        $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator) {
+
+
+        console.log($stateParams, tab);
         $scope.currTab = "details";
+        if (tab) {
+            $scope.currTab = tab;
+        }
         $scope.tabstemplate = "templates/etapa.tabs.html";
         $scope.etapaNotComplete = true;
 
@@ -375,10 +448,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         ];
         $scope.getLabelCategoria = UtilsService.getLabelCategoria;
         $scope.isInCategoria = function (categoriaGrid) {
-            return function (item) {
-                console.log("item", item.id_Categoria, " ", categoriaGrid)
+            return function (item) {                
                 if ((item.id_Categoria == 1 || item.id_Categoria == 2)) {
-                    console.log("ok!")
                     return categoriaGrid.id_Config == 1;
                 }
                 return categoriaGrid.id_Config == item.id_Categoria;
@@ -451,6 +522,15 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 });
 
         }
+        $scope.openInscricao = function () {
+            $cordovaInAppBrowser.open("http://cumeqetrekking.appspot.com/open/index.html", '_blank', 'location=no')
+                .then(function (event) {
+                    // success
+                })
+                .catch(function (event) {
+                    // error
+                });
+        }
         $scope.maps = function (etapa) {
 
 
@@ -485,11 +565,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             EtapasService.query().then(function (data) {
                 $scope.etapas = data;
                 $scope.$broadcast('scroll.refreshComplete');
-                var twoDaysAgo = new Date().getTime() - (24 * 60 * 60 * 1000 * 2);
+
                 for (var index = 0; index < $scope.etapas.length; index++) {
                     var element = $scope.etapas[index];
                     //até 2 dias seguintes a etapa deve-se centralizar nela
-                    if (!$scope.etapa && element.data > twoDaysAgo) {
+                    if (element.active == 1) {
                         $scope.etapa = element;
                     }
                     if (element.id_Local) {

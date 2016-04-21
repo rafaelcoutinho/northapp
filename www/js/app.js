@@ -26,7 +26,7 @@ var jsonTransformQuery = function (data, headers) {
 
     return resp;
 }
-angular.module('north', ['ionic',  'north.services', 'north.controllers', 'ngCordova', 'ngResource'])
+angular.module('north', ['ionic', 'north.services', 'north.controllers', 'ngCordova', 'ngResource'])
     .constant("appConfigs", {
         "backendSecure": "https://cumeqetrekking.appspot.com/",
         "backend": "http://cumeqetrekking.appspot.com/",
@@ -64,14 +64,14 @@ angular.module('north', ['ionic',  'north.services', 'north.controllers', 'ngCor
             $rootScope.$on('loading:hide', function () {
                 $ionicLoading.hide()
             });
-          
-            $ionicPlatform.registerBackButtonAction(function (event) {              
-               event.preventDefault();
-               
+
+            $ionicPlatform.registerBackButtonAction(function (event) {
+                event.preventDefault();
+
                 if ($ionicHistory.backView() == null) {
                     if ($ionicSideMenuDelegate.isOpen()) {
                         navigator.app.exitApp(); //<-- remove this line to disable the exit
-                    }else{
+                    } else {
                         $ionicSideMenuDelegate.toggleLeft();
                     }
                 }
@@ -84,7 +84,7 @@ angular.module('north', ['ionic',  'north.services', 'north.controllers', 'ngCor
         $rootScope.$on('$routeChangeSuccess', function (newRoute, oldRoute) {
             if ($location.hash()) $anchorScroll();
         });
-       
+
 
     })
 
@@ -134,8 +134,13 @@ angular.module('north', ['ionic',  'north.services', 'north.controllers', 'ngCor
             })
 
             .state('app.etapa', {
-                url: '/etapa/:id',
-
+                url: '/etapa/:id?t=:tab',
+                resolve: {
+                    tab:
+                    function ($http, $stateParams) {
+                        return $stateParams.t;
+                    }
+                },
                 views: {
                     'menuContent': {
                         controller: 'EtapaCtrl',
@@ -166,6 +171,9 @@ angular.module('north', ['ionic',  'north.services', 'north.controllers', 'ngCor
 
             .state('app.profile', {
                 url: '/profile',
+                params: {
+                    btns: "oi"
+                },
                 views: {
                     'menuContent': {
                         templateUrl: 'templates/profile.html',
@@ -173,7 +181,15 @@ angular.module('north', ['ionic',  'north.services', 'north.controllers', 'ngCor
                     }
                 }
             })
-
+            .state('app.mudarsenha', {
+                url: "/mudarsenha",
+                views: {
+                    'menuContent': {
+                        templateUrl: "templates/mudar.senha.html",
+                        controller: 'MudaSenhaCtrl'
+                    }
+                }
+            })
             .state('app.home', {
                 url: '/home',
                 views: {

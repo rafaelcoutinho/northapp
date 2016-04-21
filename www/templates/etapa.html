@@ -23,6 +23,9 @@
                 <div class="item item-icon-right" ng-click="tempo(weather)" ng-if="weather!=null">
                     Previsão: {{weather.description}} <img class="icon" ng-if="weather.wicon!=null" ng-src="{{weather.wicon}}">
                 </div>
+                 <a href="# " class="item item-icon-left " ng-click="openInscricao()" ng-if="etapa.active==1">
+                    <i class="icon ion-android-open "></i> Inscrição
+                </a>
 
             </div>
 
@@ -148,9 +151,9 @@
         <ion-content class="scroll-bg ">
 
             <div class="list card " style="margin-top: 50px ">
-                <a href="# " class="item ">
+                <div class="item ">
                     <h2>{{etapa.location.nome}}</h2>
-                </a>
+                </div>
 
                 <a href="# " class="item item-icon-left " ng-click="tel(etapa.location.telefone) " ng-if="etapa.location.telefone!=null">
                     <i class="icon ion-ios-telephone "></i> {{etapa.location.telefone}}

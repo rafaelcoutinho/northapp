@@ -136,7 +136,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             },
             getGrid: {
                 isArray: false,
-                methdo: "GET",
+                method: "GET",
                 cr: {
                     cacheName: function (params) {
                         return params.id + "_grid"
@@ -158,13 +158,14 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             },
             getResultados: {
                 isArray: true,
+                 method: "GET",
                 url: appConfigs.enhancedRestBackend + '/Etapa/:id/Resultado',
                 cr: {
                     cacheName: function (params) {
                         return params.id + "_resultados"
                     },
                     isCacheValid: function (cacheEntry) {
-
+                        console.log("cache entry",cacheEntry)
                         if (cacheEntry.date > (new Date().getTime() - (1 * 60 * 60 * 1000))) {
                             
                             return true;//avoid keeping requesting..
@@ -176,128 +177,6 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             }
         }, { cacheTimeout: 10, name: "Etapa" });
     })
-    .factory('EtapasService2', function ($localStorage, $resource, appConfigs, $q) {
-
-        var etapaResource = $resource(appConfigs.enhancedRestBackend + "/Etapa/:id", {}, {
-            query: {
-                isArray: true,
-                cache: true,
-                // transformResponse: jsonTransformQuery
-            },
-            get: {
-                cache: true
-            },
-            getGrid: {
-                isArray: false,
-                methdo: "GET",
-                url: appConfigs.enhancedRestBackend + "/Etapa/:id/GridInfo"
-
-            },
-            getResultados: {
-                isArray: true,
-                url: appConfigs.enhancedRestBackend + '/Etapa/:id/Resultado'
-                // url: "http://localhost/northServer/app.php/Etapa/:id/Resultado"
-            }
-        });
-
-
-
-        return {
-            clear: function () {
-                delete $localStorage.northApp_etapas;
-                delete $localStorage.northApp_etapas_details;
-            },
-            getResultados: function (etapa) {
-
-                var deferred = $q.defer();
-                if (!$localStorage.northApp_etapas_resultados) {
-                    $localStorage.northApp_etapas_resultados = {};
-                }
-
-                if ($localStorage.northApp_etapas_resultados && $localStorage.northApp_etapas_resultados[etapa.id] && $localStorage.northApp_etapas_resultados[etapa.id].updated > etapa.data) {
-                    deferred.resolve($localStorage.northApp_etapas_resultados[etapa.id].data);
-                } else {
-                    
-                    etapaResource.getResultados({ id: etapa.id }, function (response) {
-                        $localStorage.northApp_etapas_resultados[etapa.id] = {
-                            data: response,
-                            updated: new Date().getTime()
-                        }
-                        deferred.resolve($localStorage.northApp_etapas_resultados[etapa.id].data);
-                    }, function (error) {
-                        deferred.reject(error);
-                    })
-                }
-                return deferred.promise;
-            },
-            getGrid: function (etapa) {
-
-                var deferred = $q.defer();
-                if (!$localStorage.northApp_etapas_grids) {
-                    $localStorage.northApp_etapas_grids = {};
-                }
-
-                if ($localStorage.northApp_etapas_grids && $localStorage.northApp_etapas_grids[etapa.id] && $localStorage.northApp_etapas_grids[etapa.id].updated > etapa.data) {
-                    deferred.resolve($localStorage.northApp_etapas_grids[etapa.id].data);
-                } else {
-                    
-                    etapaResource.getGrid({ id: etapa.id }, function (response) {
-                        $localStorage.northApp_etapas_grids[etapa.id] = {
-                            data: response,
-                            updated: new Date().getTime()
-                        }
-                        deferred.resolve($localStorage.northApp_etapas_grids[etapa.id].data);
-                    }, function (error) {
-                        deferred.reject(error);
-                    })
-                }
-                return deferred.promise;
-            },
-            query: etapaResource.query,
-            queryCached: function () {
-                var deferred = $q.defer();
-
-                if ($localStorage.northApp_etapas && !isTooOld($localStorage.northApp_etapas)) {
-                    deferred.resolve($localStorage.northApp_etapas.data);
-                } else {
-                    etapaResource.query({}, function (response) {
-                        $localStorage.northApp_etapas = {
-                            data: response,
-                            updated: new Date().getTime()
-                        }
-                        deferred.resolve($localStorage.northApp_etapas.data);
-                    }, function (error) {
-                        deferred.reject(error);
-                    })
-                }
-                return deferred.promise;
-            },
-
-            get: function (obj) {
-                if (!$localStorage.northApp_etapas_details) {
-                    $localStorage.northApp_etapas_details = {};
-                }
-                var deferred = $q.defer();
-                var l = $localStorage.northApp_etapas_details[obj.id];
-                if (l && !isTooOld(l)) {
-                    deferred.resolve(l.data);
-                } else {
-                    etapaResource.get(obj, function (resp) {
-                        if (resp.id_Local && resp.id_Local != -1) {
-                            //só cacheia se estiver ok
-                            $localStorage.northApp_etapas_details[obj.id] = { data: resp, updated: new Date().getTime() };
-                        }
-                        deferred.resolve(resp);
-                    }, function (resp) {
-                        deferred.reject(resp);
-                    });
-                }
-                return deferred.promise;
-            }
-        }
-
-
-    })
     .service('EquipesService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
         return $cachedResource(appConfigs.openRestBackend + '/Equipe/:id', {}, {
             query: {
@@ -306,16 +185,19 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             },
             getMyEquipe: {
                 isArray: false,
+                method:"GET",
                 url: appConfigs.enhancedRestBackend + '/Competidor/:id/Equipe',
                 cr: {
                     cacheName: function (params) {
                         return params.id + "_getEquipe"
-                    }
+                    },
+                    timeout: 7*24 * 60 * 60 * 1000
                 }
             },
             
             getMembers:{
                  isArray: true,
+                 method:"GET",
                  url: appConfigs.openRestBackend + '/Competidor/:id',
                   cr: {
                    cacheName: function (params) {
@@ -327,6 +209,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             }, 
             getResultados:{
                  isArray: true,
+                 method:"GET",
                  url: appConfigs.openRestBackend + '/Resultado?filter0=id_Equipe,eq,:id',
                   transformResponse: jsonTransformQuery,
                   cr: {
@@ -412,44 +295,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 }
             }},{name:"HL"});
     }])
-    .service('HighlightService2', ['$http', '$q', '$resource', 'appConfigs', '$localStorage', function ($http, $q, $resource, appConfigs, $localStorage) {
-        var resourceVar = $resource(appConfigs.openRestBackend + '/Destaque/:id', {}, {
-            query: {
-                isArray: true,
-                cache: true,
-                transformResponse: jsonTransformQuery
-            }
-        });
-        return {
-            clear: function () {
-                delete $localStorage.northApp_highlights;
-            },
-            query: resourceVar.query,
-            queryCached: function () {
-                var deferred = $q.defer();
-
-                if ($localStorage.northApp_highlights && !isTooOld($localStorage.northApp_highlights)) {
-
-                    deferred.resolve($localStorage.northApp_highlights.data);
-
-                } else {
-                    resourceVar.query({}, function (response) {
-                        $localStorage.northApp_highlights = {
-                            data: response,
-                            updated: new Date().getTime()
-                        }
-                        deferred.resolve($localStorage.northApp_highlights.data);
-                    }, function (error) {
-                        deferred.reject(error);
-                    })
-                }
-                return deferred.promise;
-            }
-        }
-
-
-    }])
-
+   
     .service('UserService', function ($http, $localStorage, appConfigs, $resource, $q) {
         return $resource(appConfigs.secureEndpointBackend + '/User', {},
             {
@@ -459,6 +305,12 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     isArray: false,
                     url: appConfigs.secureEndpointBackend + '/Register'
 
+                },
+                updatePwd: {
+                    method: "POST",
+                    isArray: false,
+                    url: appConfigs.secureEndpointBackend + "/senha/Alterar"
+                    // url: "http://localhost/northServer/senha.php/Alterar"
                 },
                 rememberPwd: {
                     method: "POST",
@@ -492,7 +344,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
         }
     })
-    .service('PushNotService', function ($http, $localStorage, $resource, $q, $log,appConfigs) {
+    .service('PushNotService', function ($http, $localStorage, $resource, $q, $log,appConfigs, $state,EtapasService) {
         var pushResource = $resource(appConfigs.enhancedRestBackend + "/Msg/:id");
         return {
             gcmInited: false,
@@ -515,6 +367,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                         android: {
                             senderID: "680357415246",                            
                             iconColor: "#ff95a874",
+                            icon:'noti',
                             vibrate: true
                         },
                         ios: {
@@ -552,16 +405,31 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     });
                     var me = this;
                     this.push.on('notification', function (data) {
-                        console.log("notification " + JSON.stringify(data));
+                        console.log("recebeu notificacao " + JSON.stringify(data));
+                        if(data.additionalData && data.additionalData.action){
+                            console.log(data.additionalData.action+ "=" + data.additionalData);
+                            switch(data.additionalData.action){
+                                case "etapa":
+                                if(data.additionalData.idEtapa){
+                                    $state.go("app.etapa",{id:data.additionalData.idEtapa,t:"details"});
+                                }
+                                
+                                break;
+                                case "results":
+                                $state.go("app.etapa",{id:data.additionalData.idEtapa,t:"results"});
+                                break;
+                                default:
+                                console.log("acao desconhecida "+data.additionalData.action);
+                                break;
+                            }
+                            
+
+                        }
                         me.push.finish(function () {
                             console.log("processing of push data is finished");
                         });
-                        // data.message,
-                        // data.title,
-                        // data.count,
-                        // data.sound,
-                        // data.image,
-                        // data.additionalData
+                        
+                        
                     });
 
                     this.push.on('error', function (e) {
@@ -577,7 +445,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
         }
         
     })
-    .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService, $log,PushNotService) {
+    .service('loginService', function ($http, $localStorage, appConfigs, $resource, $q, UserService, $log,PushNotService,$rootScope) {
 
         return {
             startPwdRecovery: function (email) {
@@ -617,6 +485,8 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 
                 $localStorage.northApp_user = aUser;
                 PushNotService.initGCM($localStorage.northApp_user);
+                $rootScope.$emit("userLogged", aUser);
+                
             },
             validateNewUser: function (aUser, headers) {
                 var deferred = $q.defer();
