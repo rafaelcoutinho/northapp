@@ -26,7 +26,7 @@ var jsonTransformQuery = function (data, headers) {
 
     return resp;
 }
-angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north.controllers', 'ionic.service.push', 'ngCordova', 'ngResource'])
+angular.module('north', ['ionic', 'north.services', 'north.controllers', 'ngCordova', 'ngResource'])
     .constant("appConfigs", {
         "backendSecure": "https://cumeqetrekking.appspot.com/",
         "backend": "http://cumeqetrekking.appspot.com/",
@@ -34,6 +34,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
         "openRestBackend": "http://cumeqetrekking.appspot.com/app/rest",
         "secureEndpointBackend": "https://cumeqetrekking.appspot.com/endpoints"
         
+        // "enhancedRestBackend": "http://localhost/northServer/app.php",
         // "backendSecure": "http://192.168.33.105/northServer/apiPub.php",
         // "backend": "http://192.168.33.105/northServer/",
         // "restBackend": "http://192.168.33.105/northServer/apiPub.php",
@@ -46,7 +47,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
             // bar above the keyboard
             // for form inputs)
             if (window.cordova && window.cordova.plugins.Keyboard) {
-                cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+                // cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
                 cordova.plugins.Keyboard.disableScroll(true);
 
             }
@@ -63,38 +64,14 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
             $rootScope.$on('loading:hide', function () {
                 $ionicLoading.hide()
             });
-            // kick off the platform web client
-            try {
-                Ionic.io();
-                console.log("vai registrar pushes");
-                var push = new Ionic.Push({
-                    "debug": false,
-                    "onNotification": function (notification) {
-                        var payload = notification.payload;
-                        console.log(notification, payload);
-                    },
-                    "onRegister": function (token) {
-                        console.log("Device token: '" + token.token);
-                        push.saveToken(token);
-                    }
-                });
 
-                push.register(function (token) {
+            $ionicPlatform.registerBackButtonAction(function (event) {
+                event.preventDefault();
 
-                });
-
-
-            } catch (e) {
-                console.log("erro Ionic.Push " + e.message);
-
-            }
-            $ionicPlatform.registerBackButtonAction(function (event) {              
-               event.preventDefault();
-               console.log($ionicSideMenuDelegate.isOpenLeft())
                 if ($ionicHistory.backView() == null) {
                     if ($ionicSideMenuDelegate.isOpen()) {
                         navigator.app.exitApp(); //<-- remove this line to disable the exit
-                    }else{
+                    } else {
                         $ionicSideMenuDelegate.toggleLeft();
                     }
                 }
@@ -107,6 +84,7 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
         $rootScope.$on('$routeChangeSuccess', function (newRoute, oldRoute) {
             if ($location.hash()) $anchorScroll();
         });
+
 
     })
 
@@ -156,8 +134,13 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
             })
 
             .state('app.etapa', {
-                url: '/etapa/:id',
-
+                url: '/etapa/:id?t=:tab',
+                resolve: {
+                    tab:
+                    function ($http, $stateParams) {
+                        return $stateParams.t;
+                    }
+                },
                 views: {
                     'menuContent': {
                         controller: 'EtapaCtrl',
@@ -188,6 +171,9 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
 
             .state('app.profile', {
                 url: '/profile',
+                params: {
+                    btns: "oi"
+                },
                 views: {
                     'menuContent': {
                         templateUrl: 'templates/profile.html',
@@ -195,7 +181,15 @@ angular.module('north', ['ionic', 'ionic.service.core', 'north.services', 'north
                     }
                 }
             })
-
+            .state('app.mudarsenha', {
+                url: "/mudarsenha",
+                views: {
+                    'menuContent': {
+                        templateUrl: "templates/mudar.senha.html",
+                        controller: 'MudaSenhaCtrl'
+                    }
+                }
+            })
             .state('app.home', {
                 url: '/home',
                 views: {

@@ -1,7 +1,9 @@
 <ion-view view-title="Destaque">
-    <ion-content class="scroll-bg">        
+    <ion-content class="scroll-bg">
+        <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh(true)">
+        </ion-refresher>
         <div class="list card ">
-            <div ng-if="highlights==null" >
+            <div ng-if="highlights==null">
                 Carregando
             </div>
             <div ng-repeat="highlight in highlights | orderBy:'-id'" ng-cloak>
@@ -11,7 +13,7 @@
 
                     <p>{{highlight.descricao}}</p>
                 </div>
-               
+
             </div>
 
         </div>

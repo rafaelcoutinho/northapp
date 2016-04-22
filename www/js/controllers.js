@@ -1,6 +1,6 @@
-angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services'])
+angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.services', 'rcCachedResource'])
 
-    .controller('AppCtrl', function ($scope, $ionicModal, $ionicPlatform, $timeout, $ionicPush, $cordovaLocalNotification, $cordovaInAppBrowser) {
+    .controller('AppCtrl', function ($scope, $ionicModal, $timeout, $cordovaLocalNotification, $cordovaInAppBrowser, PushNotService, loginService, $ionicPlatform) {
 
         if ($scope.shide != true) {
             if (navigator && navigator.splashscreen) {
@@ -18,11 +18,15 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 }, 3000);
             }
         }
+        $ionicPlatform.ready(function () {
 
+            PushNotService.initGCM(loginService.getUser());
+        });
 
 
     })
-    .controller('BreveCtrl', function ($scope, $cordovaInAppBrowser) {
+    .controller('BreveCtrl', function ($scope, $cordovaInAppBrowser, $resource, appConfigs) {
+
         $scope.openGitHub = function () {
             $cordovaInAppBrowser.open('https://github.com/rafaelcoutinho/northapp', '_blank')
         }
@@ -41,35 +45,183 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             };
         };
     })
-    .controller('TeamCtrl', function ($scope, EquipesService, loginService) {
+    .controller('TeamCtrl', function ($scope, EquipesService, loginService, $location, EtapasService, RankingService, UtilsService, $rootScope) {
         $scope.user = loginService.getUser();
-        if ($scope.user != null) {
-            $scope.info = EquipesService.getMyEquipe({ id: $scope.user.id });
+        $rootScope.$on("userLogged", function (userData) {
+            $scope.user = loginService.getUser();
+            $scope.doRefresh(true);
+        });
+        $scope.doRefresh = function (force) {
+            $scope.user = loginService.getUser();
+            if (loginService.getUser() != null) {
+                if (force == true) {
+                    EquipesService.clear();
+                }
+
+                EquipesService.getMyEquipe({ id: loginService.getUserID() }).then(function (data) {
+                    $scope.info = data;
+                    $scope.ranking = [];
+                    RankingService.query().then(function (data) {
+                        for (var index = 0; index < data.length; index++) {
+                            var element = data[index];
+                            if (element.id_Categoria == $scope.info.equipe.id_Categoria) {
+                                $scope.ranking.push(element);
+                            }
+                        }
+
+                        $scope.ranking.sort(function (p1, p2) {
+                            var a = p1.pontos;
+                            var b = p2.pontos;
+                            return a < b ? -1 : (a > b ? 1 : 0);
+                        });
+                        var posicao = 0;
+                        for (var index = $scope.ranking.length - 1; index >= 0; index--) {
+                            posicao++;
+                            var eRanking = $scope.ranking[index];
+                            if (eRanking.id_Equipe == $scope.info.equipe.id) {
+                                $scope.rankingAtual = eRanking;
+                                $scope.rankingAtual.colocacao = posicao;
+                                $scope.proximo = $scope.ranking[index + 1];
+                                $scope.anterior = $scope.ranking[index - 1];
+                                break;
+                            }
+                        }
+                        $scope.$broadcast('scroll.refreshComplete');
+
+                    }
+                        );
+                    EquipesService.getResultados({ id: data.equipe.id }).then(function (results) {
+                        $scope.results = results;
+                        for (var index = 0; index < results.length; index++) {
+                            var element = results[index];
+
+                            EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
+
+                                for (var index = 0; index < $scope.results.length; index++) {
+                                    var element = $scope.results[index];
+
+
+                                    if (element.id_Etapa == etapa.id) {
+                                        element.etapa = etapa;
+                                        break;
+                                    }
+                                }
+                                $scope.$broadcast('scroll.refreshComplete');
+                            }, function (erro) {
+                                console.log("Error", erro);
+                                $scope.$broadcast('scroll.refreshComplete');
+                            })
+                        }
+                    })
+                });
+            }
+        }
+
+        $scope.doRefresh();
+        $scope.irPerfil = function () {
+            $location.path("/app/profile");
+        }
+        $scope.getLabelCategoria = function (id) {
+            return UtilsService.getLabelCategoria(id);
         }
 
 
     })
-    .controller('HighlightCtrl', function ($scope, HighlightService) {
-        $scope.highlights = HighlightService.query(function (data) { console.log("Carregou " + data) }, function (data) { console.log("Falhou " + JSON.stringify(data)) });
+    .controller('HighlightCtrl', function ($scope, HighlightService, $state) {
+        $scope.doRefresh = function (force) {
+            if (force == true) {
+                HighlightService.clear();
+            }
+            HighlightService.query().then(
+                function (data) {
+                    $scope.highlights = data;
+                    $scope.$broadcast('scroll.refreshComplete');
+                },
+                function (data) {
+                    console.log("Falhou " + JSON.stringify(data));
+                    $scope.$broadcast('scroll.refreshComplete');
+                });
+        }
+
+        $scope.doRefresh();
+    })
+    .controller('MenuCtrl', function ($scope, $stateParams, $state, EtapasService, $rootScope) {
+        $scope.menuBtns = [];
+        $rootScope.rightMenuButtons = [];
+        $scope.$on('$stateChangeSuccess', function (next, current) {
+            if (current && $rootScope.rightMenuButtons) {
+                $scope.menuBtns = $rootScope.rightMenuButtons[current.name];
+                $scope.nome = current.name;
+            }
+
+        });
+        $rootScope.$on('addRight', function (event, obj) {
+
+            $rootScope.addBtns(obj.state, obj.btns);
+        })
+        $rootScope.addBtns = function (stateName, btns) {
+
+            console.log("adding", stateName, $rootScope.rightMenuButtons[stateName], btns, $stateParams, $state, $stateParams.current);
+            $rootScope.rightMenuButtons[stateName] = btns;
+            if ($state.current && $state.current.name == stateName) {
+                $scope.menuBtns = btns;
+            }
+        }
 
     })
-    .controller('MenuCtrl', function ($scope, $stateParams, EtapasService) {
-        $scope.menuBtns = [];
-        $scope.$on('$routeChangeStart', function (next, current) {
-            console.log("changed")
-            //$scope.menuBtns = [];
-        });
-        $scope.$on('showRight', function (event, mass) {
-            console.log("showRight")
-            $scope.menuBtns.push({ label: "Salvar" });
-            console.log("showRight ", $scope.menuBtns)
-        });
+    .controller('MudaSenhaCtrl', function ($scope, $state, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup) {
+        $scope.user = loginService.getUser();
+        $scope.pwdForm = {};
+        $scope.doUpdatePwd = function () {
+            if ($scope.pwdForm.newPwd != $scope.pwdForm.newPwdVerify) {
+                $scope.errorMsg = "Confirmação de senha diferente.";
+                return;
+            }
+            UserService.updatePwd({}, { id: loginService.getUserID(), oldPwd: $scope.pwdForm.oldPwd, newPwd: $scope.pwdForm.newPwd }, function () {
+                $state.go('app.profile');
+            }, function (response) {
+                if (response.data.error) {
+                    switch (response.data.errorCode) {
+                        case 804:
+                            $scope.errorMsg = "Senha atual inválida.";
+                            break;
+                        case 803:
+                            $scope.errorMsg = "Você não possui senha atualmente, por favor utilize o botão para resetar e gerar uma nova senha.";
+                            break;
+
+                        default:
+                            $scope.errorMsg = "Houve um problema para atualizar sua senha. Confirme sua senha anterior. A senha nova deve ter pelo menos 2 caracteres.";
+                    }
+
+                } else {
+                    $scope.errorMsg = "Houve um problema para atualizar sua senha. Confirme sua senha anterior. A senha nova deve ter pelo menos 2 caracteres.";
+                }
+            });
+        }
+        $scope.resetPassword = function () {
+            var confirmPopup = $ionicPopup.confirm({
+                title: 'Lembrar senha',
+                template: 'Um e-mail será enviado para executar o reset de sua senha. Desenha continuar?'
+            });
+
+            confirmPopup.then(function (res) {
+                if (res) {
+                    loginService.startPwdRecovery($scope.user.email);
+                } else {
+
+                }
+            });
+        };
     })
-    .controller('ProfileCtrl', function ($scope, $cordovaFacebook, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup) {
-        $rootScope.$broadcast('showRight', [1, 2, 3]);
+    .controller('ProfileCtrl', function ($scope, $cordovaFacebook, $state, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup, EquipesService) {
+        $scope.mudarSenha = function () {
+            $state.go('app.mudarsenha');
+        }
         $scope.user = loginService.getUser();
         if ($scope.user == null) {
             $scope.user = {};
+        } else {
+            $rootScope.$emit("addRight", { state: "app.profile", btns: [{ icon: "ion-android-more-vertical", callback: $scope.mudarSenha }] });
         }
 
         $scope.haschange = false;
@@ -117,7 +269,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             }
         };
         $scope.doShowForm = function () {
-            $rootScope.$broadcast('showRight', [1, 2, 3]);
+
             $scope.showForm = true;
         }
 
@@ -127,7 +279,6 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             $scope.loginData.errorMsg = "";
             loginService.login($scope.loginData.username, $scope.loginData.password).then(
                 function (userInfo) {
-                    console.log(userInfo);
                     $scope.closeLogin();
                     $scope.user = userInfo;
                     loginService.setUserLocally($scope.user);
@@ -186,6 +337,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             } catch (e) {
 
             }
+            EquipesService.clear();
+
         };
 
         $scope.getfbinfo = function () {
@@ -254,24 +407,52 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser) {
+        $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator, $ionicLoading) {
+
+
+        console.log($stateParams, tab);
         $scope.currTab = "details";
+        if (tab) {
+            $scope.currTab = tab;
+        }
         $scope.tabstemplate = "templates/etapa.tabs.html";
-        $scope.categorias = [
+        $scope.etapaNotComplete = true;
+
+        $scope.categorias = UtilsService.getCategorias();
+        $scope.getLastSelectedCat = function () {
+            var selectedCat = UtilsService.getCategorias()[0].id;
+            if ($localStorage.lastSelectedCat) {
+                selectedCat = $localStorage.lastSelectedCat;
+            }
+
+            return { id_Categoria: selectedCat };
+        }
+        $scope.getLastSelectedGrid = function () {
+            var grid = $scope.categoriasGrid[0].id;
+            if ($localStorage.lastSelectedGrid) {
+                grid = $localStorage.lastSelectedGrid;
+            }
+
+            return { id_Config: grid };
+        }
+        $scope.updatePrefCategoria = function (idCat, idGrid) {
+            if (idCat != null) {
+                $localStorage.lastSelectedCat = idCat;
+            }
+            if (idGrid != null) {
+                $localStorage.lastSelectedGrid = idGrid;
+            }
+        }
+
+        $scope.categoriasGrid = [
             { nome: "Pró", id_Config: 4 },
             { nome: "Graduados", id_Config: 3 },
             { nome: "Trekkers / Turismo", id_Config: 1 }
         ];
-        $scope.getLabelCategoria = function (item) {
-            //hardcoded
-            var categorias = ["", "Turismo", "Trekker", "Graduado", "Pró"];
-
-            return categorias[item];
-        }
+        $scope.getLabelCategoria = UtilsService.getLabelCategoria;
         $scope.isInCategoria = function (categoriaGrid) {
             return function (item) {
-
-                if ((item.id_Categoria == 1 || item.id_Categoria == 0)) {
+                if ((item.id_Categoria == 1 || item.id_Categoria == 2)) {
                     return categoriaGrid.id_Config == 1;
                 }
                 return categoriaGrid.id_Config == item.id_Categoria;
@@ -281,7 +462,15 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.setTab = function (tabName) {
             $scope.currTab = tabName;
             if ($scope.currTab == "grid" && !$scope.inscricaoInfo) {
-                $scope.inscricaoInfo = EtapasService.getGrid({ id: $stateParams.id });
+                EtapasService.getGrid($scope.etapa).then(function (data) {
+                    $scope.inscricaoInfo = data;
+                });
+            } else if ($scope.currTab == "results") {
+                EtapasService.getResultados($scope.etapa).then(function (data) {
+                    $scope.resultados = data;
+                }, function (error) {
+
+                });
             }
         }
         $scope.isTab = function (val) {
@@ -292,29 +481,30 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             return "";
         }
 
-        console.log("Vai carregar etapa $stateParams.id ");
-        EtapasService.get({ id: $stateParams.id }).then(function (data) {
-            console.log("CArregou etapa", data);
-            $scope.etapa = data;
-            if (data.id_Local) {
-                $scope.etapa.location = LocationService.get({ id: $scope.etapa.id_Local }, function (location) {
+        EtapasService.get({ id: $stateParams.id }).then(function (dadosEtapa) {
+
+            $scope.etapa = dadosEtapa;
+            $scope.etapaNotComplete = $scope.etapa.data < new Date().getTime();
+            if (dadosEtapa.id_Local) {
+                LocationService.get({ id: $scope.etapa.id_Local }).then(function (location) {
+                    $scope.etapa.location = location;
                     if (location.latitude != null) {
                         var lat = parseFloat(location.latitude) / 1000000;
                         var lng = parseFloat(location.latitude) / 1000000;
 
-                        WeatherService.getPerCoords(lat, lng, data.data).then(function (weather) {
+                        WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(function (weather) {
                             $scope.weather = weather;
 
                         },
                             function (err) {
-                                console.log("erro carregando clima", err);
+                                $log.log("erro carregando clima", err);
                             });
                     }
                 })
             }
 
         }, function (error) {
-            console.log("Não carregou etapa");
+            $log.log("Não carregou etapa");
         });
 
 
@@ -326,139 +516,144 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             if (!website.startsWith("http")) {
                 website = "http://" + website;
             }
+            $ionicLoading.show({
+                template: 'Abrindo navegador...'
+            });
             $cordovaInAppBrowser.open(website, '_blank')
                 .then(function (event) {
-                    // success
+                    $ionicLoading.hide();
                 })
                 .catch(function (event) {
-                    // error
+                    $ionicLoading.hide();
                 });
 
         }
+        $scope.openInscricao = function () {
+            $ionicLoading.show({
+                template: 'Abrindo navegador...'
+            });
+            $cordovaInAppBrowser.open("http://cumeqetrekking.appspot.com/open/index.html", '_blank', { 'location': 'yes' })
+                .then(function (event) {
+                    // success
+                    $ionicLoading.hide();
+                })
+                .catch(function (event) {
+                    // error
+                    console.log("falhou " + event)
+                    $ionicLoading.hide();
+                });
+        }
         $scope.maps = function (etapa) {
 
-            if (ionic.Platform.isIOS()) {
-                console.log("ios");
-                window.open('waze://?ll=' + encodeURI(etapa.location.endereco) + '&navigate=yes');
-            } else if (ionic.Platform.isAndroid()) {
-                console.log("android");
-                if (etapa.location.latitude != null) {
-                    $cordovaInAppBrowser.open('geo:' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)), "_system");
-                } else {
-                    $cordovaInAppBrowser.open('geo:?&q=' + etapa.location.endereco, "_system");
-                }
+
+            if (etapa.location.latitude != null) {
+                var lat = (etapa.location.latitude / 1000000);
+                var lng = (etapa.location.longitude / 1000000);
+                $cordovaLaunchNavigator.navigate([lat, lng])
+                    .then(
+                        function () {
+                            console.log("chamou roteador");
+                        }, function (error) {
+                            console.log("erro " + error);
+                        }
+
+                        )
+
             } else {
-                window.open('geo:' + encodeURI((etapa.location.latitude / 1000000) + "," + (etapa.location.longitude / 1000000)) + '?&q=' + encodeURI(etapa.location.endereco));
+                $cordovaLaunchNavigator.navigate(etapa.location.endereco);
             }
+
         }
     })
     .controller('EtapasCtrl', function (
-        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $anchorScroll) {
+        $scope, $stateParams, WeatherService, EtapasService, LocationService, $location, $anchorScroll, $ionicScrollDelegate) {
 
         $scope.doRefresh = function () {
             EtapasService.clear();
             $scope.loadData();
         }
+
         $scope.loadData = function () {
-            EtapasService.queryCached({}).then(function (data) {
+            EtapasService.query().then(function (data) {
                 $scope.etapas = data;
-                console.log($scope.etapas);
-                var today = new Date().getTime();
+                $scope.$broadcast('scroll.refreshComplete');
+
                 for (var index = 0; index < $scope.etapas.length; index++) {
                     var element = $scope.etapas[index];
-                    if (!$scope.etapa && element.data > today) {
+                    //até 2 dias seguintes a etapa deve-se centralizar nela
+                    if (element.active == 1) {
                         $scope.etapa = element;
                     }
                     if (element.id_Local) {
-                        $scope.etapas[index].location = LocationService.get({ id: element.id_Local });
+                        LocationService.get({ id: element.id_Local }).then(function (data) {
+                            for (var index = 0; index < $scope.etapas.length; index++) {
+                                var element = $scope.etapas[index];
+                                if (element.id_Local == data.id) {
+                                    $scope.etapas[index].location = data;
+                                    return;
+                                }
+
+                            }
+
+                        });
                     }
                 }
+
                 $location.hash($scope.etapa.id);
-                $anchorScroll();
+                // $anchorScroll();
+                $ionicScrollDelegate.anchorScroll()
+            }, function () {
+                $scope.$broadcast('scroll.refreshComplete');
             });
         }
-
+        console.log("Entrou no etapas");
         $scope.loadData();
 
     })
 
-    .controller('RankingCtrl', function ($scope, $stateParams, EtapasService) {
-        $scope.etapas = EtapasService.query();
-        $scope.currEtapaIndex = 0;
-        $scope.expandedEquipe = -1;
-        $scope.showEquipeDetails = function (equipe) {
-            return $scope.expandedEquipe == equipe.name;
+    .controller('RankingCtrl', function ($scope, $stateParams, $localStorage, RankingService, EquipesService, UtilsService) {
+
+        $scope.doRefresh = function (forceClean) {
+            if (forceClean == true) {
+                RankingService.clear();
+            }
+            RankingService.query().then(function (data) {
+                $scope.results = data;
+                $scope.$broadcast('scroll.refreshComplete');
+            });
         }
-        $scope.expandDetails = function (equipe) {
-            $scope.expandedEquipe = equipe.name;
+        $scope.allCompetidores = {};
+        EquipesService.getMembers({}).then(function (data) {
+            for (var index = 0; index < data.length; index++) {
+                var element = data[index];
+                if (!$scope.allCompetidores[element.id_Equipe]) {
+                    $scope.allCompetidores[element.id_Equipe] = [];
+                }
+                $scope.allCompetidores[element.id_Equipe].push(element);
+            }
+        });
+
+        $scope.carregaCompetidores = function (equipe) {
+
+            return $scope.allCompetidores[equipe.id_Equipe];
         }
 
-        $scope.nextEtapa = function () {
-            $scope.currEtapaIndex++;
+        $scope.doRefresh();
+
+        $scope.categorias = UtilsService.getCategorias();
+        $scope.getLastSelectedCat = function () {
+            var selectedCat = UtilsService.getCategorias()[0].id;
+            if ($localStorage.lastSelectedCat) {
+                selectedCat = $localStorage.lastSelectedCat;
+            }
+
+            return { id_Categoria: selectedCat };
         }
-        $scope.previousEtapa = function () {
-            if ($scope.currEtapaIndex > 0) {
-                $scope.currEtapaIndex--;
+
+        $scope.updatePrefCategoria = function (idCat) {
+            if (idCat != null) {
+                $localStorage.lastSelectedCat = idCat;
             }
         }
-        $scope.getCurrentEtapa = function (equipe) {
-            return equipe.points[$scope.currEtapaIndex];
-        }
-        $scope.getCurrentEtapaName = function () {
-            return $scope.etapas[$scope.currEtapaIndex].title;
-        };
-        $scope.results = [{
-            "name": "Anta",
-            pics: ['spengler.jpg', 'venkman.jpg'],
-            points: [{
-                position: 20,
-                etapaId: 1,
-                points: 1.96
-            }, {
-                    position: 2,
-                    etapaId: 2,
-                    points: 17
-                }
-            ],
-            total: {
-                position: 1,
-                points: 102
-            }
-        }, {
-                "name": "TTT",
-                pics: ['stantz.jpg', 'winston.jpg', 'tully.jpg'],
-                points: [{
-                    position: 19,
-                    etapaId: 1,
-                    points: 2.0
-                }, {
-                        position: 3,
-                        etapaId: 2,
-                        points: 15
-                    }
-                ],
-                total: {
-                    position: 2,
-                    points: 100
-                }
-            }, {
-                "name": "CuméQé",
-                pics: ['slimer.jpg'],
-                points: [{
-                    position: 99,
-                    etapaId: 1,
-                    points: 0.0
-                }, {
-                        position: 98,
-                        etapaId: 2,
-                        points: 1.0
-                    }
-                ],
-                total: {
-                    position: 99,
-                    points: -1
-                }
-            }
-        ];
 
     });

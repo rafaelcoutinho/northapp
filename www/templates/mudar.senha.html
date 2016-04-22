@@ -1,0 +1,35 @@
+<ion-view view-title="Alterar Senha">
+    <ion-content>
+        <div>
+            <form name='form'>
+                <div ng-if="errorMsg" class="assertive">{{errorMsg}}</div>
+                <div ng-show="form.old_password.$error.required" class="assertive">Senha antiga é obrigatória!
+                </div>
+
+                <div ng-show="form.password.$error.required" class="assertive">Campo nova senha é obrigatório!
+                </div>
+                <div ng-show="form.confirm_password.$error.passwordVerify" class="assertive">Nova senha e confirmação não são iguais!</div>
+                <label class="item item-input"> <span class="input-label">Senha
+				Atual:</span>
+                    <input data-ng-model='pwdForm.oldPwd' type="password" name='old_password' placeholder='Senha Atual' required>
+                </label>
+                <label class="item item-input"> <span class="input-label">Nova
+				Senha:</span>
+                    <input data-ng-model='pwdForm.newPwd' type="password" name='password' placeholder='Nova senha' required>
+                </label>
+                <label class="item item-input"> <span class="input-label">Confirme
+				nova senha:</span>
+                    <input ng-model='pwdForm.newPwdVerify' type="password" name='confirm_password' placeholder='Confirme a nova senha'
+                    required data-password-verify="pwdForm.newPwd">
+                </label>
+                <div class="padding">
+                    <button class="button button-block button-balanced" ng-click="doUpdatePwd()">Alterar</button>
+                    <button class="button button-block button-balanced" ng-click="resetPassword()">Resetar senha</button>
+                     
+                </div>
+
+            </form>
+        </div>
+        <form>
+    </ion-content>
+</ion-view>
