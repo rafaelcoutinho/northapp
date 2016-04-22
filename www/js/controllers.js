@@ -21,7 +21,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $ionicPlatform.ready(function () {
 
             PushNotService.initGCM(loginService.getUser());
-        }
+        });
 
 
     })
