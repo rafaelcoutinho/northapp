@@ -41,7 +41,6 @@ Inicialize o SASS e restaure os plugins
 ```
 $ ionic setup sass
 $ ionic state restore
-$ ionic io init
 ```
 
 E teste o aplicativo no browser com:
