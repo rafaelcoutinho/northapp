@@ -492,10 +492,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         var lat = parseFloat(location.latitude) / 1000000;
                         var lng = parseFloat(location.latitude) / 1000000;
 
-                        WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(function (weather) {
-                            $scope.weather = weather;
+                        WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(
+                            function (weather) {
+                                 $scope.weather = weather;
 
-                        },
+                            },
                             function (err) {
                                 $log.log("erro carregando clima", err);
                             });
@@ -519,6 +520,9 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             $ionicLoading.show({
                 template: 'Abrindo navegador...'
             });
+            $timeout($ionicLoading.hide, 2000);
+
+
             $cordovaInAppBrowser.open(website, '_blank')
                 .then(function (event) {
                     $ionicLoading.hide();
@@ -532,6 +536,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             $ionicLoading.show({
                 template: 'Abrindo navegador...'
             });
+            $timeout($ionicLoading.hide, 2000);
             $cordovaInAppBrowser.open("http://cumeqetrekking.appspot.com/open/index.html", '_blank', { 'location': 'yes' })
                 .then(function (event) {
                     // success
