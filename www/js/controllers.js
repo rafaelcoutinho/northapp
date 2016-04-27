@@ -122,8 +122,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         $scope.$broadcast('scroll.refreshComplete');;
                     }
                 });
-            }else{
-                 $scope.$broadcast('scroll.refreshComplete');
+            } else {
+                $scope.$broadcast('scroll.refreshComplete');
             }
         }
 
@@ -615,6 +615,17 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.doRefresh = function () {
             EtapasService.clear();
             $scope.loadData();
+        }
+        $scope.getEtapaImg = function (etapa) {
+            if (etapa.active == true) {
+                return "img/etapa_atual.jpg"
+            } else {
+                if (etapa.data < new Date().getTime()) {
+                    return "img/etapa_completa.jpg"
+                } else {
+                    return "img/etapa_futura.jpg"
+                }
+            }
         }
 
         $scope.loadData = function () {
