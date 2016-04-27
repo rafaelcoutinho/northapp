@@ -122,6 +122,8 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         $scope.$broadcast('scroll.refreshComplete');;
                     }
                 });
+            }else{
+                 $scope.$broadcast('scroll.refreshComplete');
             }
         }
 
