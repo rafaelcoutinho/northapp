@@ -61,58 +61,66 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 EquipesService.getMyEquipe({ id: loginService.getUserID() }).then(function (data) {
                     $scope.info = data;
                     $scope.ranking = [];
-                    RankingService.query().then(function (data) {
-                        for (var index = 0; index < data.length; index++) {
-                            var element = data[index];
-                            if (element.id_Categoria == $scope.info.equipe.id_Categoria) {
-                                $scope.ranking.push(element);
-                            }
-                        }
-
-                        $scope.ranking.sort(function (p1, p2) {
-                            var a = p1.pontos;
-                            var b = p2.pontos;
-                            return a < b ? -1 : (a > b ? 1 : 0);
-                        });
-                        var posicao = 0;
-                        for (var index = $scope.ranking.length - 1; index >= 0; index--) {
-                            posicao++;
-                            var eRanking = $scope.ranking[index];
-                            if (eRanking.id_Equipe == $scope.info.equipe.id) {
-                                $scope.rankingAtual = eRanking;
-                                $scope.rankingAtual.colocacao = posicao;
-                                $scope.proximo = $scope.ranking[index + 1];
-                                $scope.anterior = $scope.ranking[index - 1];
-                                break;
-                            }
-                        }
-                        $scope.$broadcast('scroll.refreshComplete');
-
-                    }
-                        );
-                    EquipesService.getResultados({ id: data.equipe.id }).then(function (results) {
-                        $scope.results = results;
-                        for (var index = 0; index < results.length; index++) {
-                            var element = results[index];
-
-                            EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
-
-                                for (var index = 0; index < $scope.results.length; index++) {
-                                    var element = $scope.results[index];
+                    if (data.equipe != null) {
 
 
-                                    if (element.id_Etapa == etapa.id) {
-                                        element.etapa = etapa;
-                                        break;
-                                    }
+                        RankingService.query().then(function (data) {
+                            for (var index = 0; index < data.length; index++) {
+                                var element = data[index];
+                                if (element.id_Categoria == $scope.info.equipe.id_Categoria) {
+                                    $scope.ranking.push(element);
                                 }
-                                $scope.$broadcast('scroll.refreshComplete');
-                            }, function (erro) {
-                                console.log("Error", erro);
-                                $scope.$broadcast('scroll.refreshComplete');
-                            })
+                            }
+
+                            $scope.ranking.sort(function (p1, p2) {
+                                var a = p1.pontos;
+                                var b = p2.pontos;
+                                return a < b ? -1 : (a > b ? 1 : 0);
+                            });
+                            var posicao = 0;
+                            for (var index = $scope.ranking.length - 1; index >= 0; index--) {
+                                posicao++;
+                                var eRanking = $scope.ranking[index];
+                                if (eRanking.id_Equipe == $scope.info.equipe.id) {
+                                    $scope.rankingAtual = eRanking;
+                                    $scope.rankingAtual.colocacao = posicao;
+                                    $scope.proximo = $scope.ranking[index + 1];
+                                    $scope.anterior = $scope.ranking[index - 1];
+                                    break;
+                                }
+                            }
+                            $scope.$broadcast('scroll.refreshComplete');
+
+                        }, function (error) {
+                            $scope.$broadcast('scroll.refreshComplete');
                         }
-                    })
+                            );
+                        EquipesService.getResultados({ id: data.equipe.id }).then(function (results) {
+                            $scope.results = results;
+                            for (var index = 0; index < results.length; index++) {
+                                var element = results[index];
+
+                                EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
+
+                                    for (var index = 0; index < $scope.results.length; index++) {
+                                        var element = $scope.results[index];
+
+
+                                        if (element.id_Etapa == etapa.id) {
+                                            element.etapa = etapa;
+                                            break;
+                                        }
+                                    }
+                                    $scope.$broadcast('scroll.refreshComplete');
+                                }, function (erro) {
+                                    console.log("Error", erro);
+                                    $scope.$broadcast('scroll.refreshComplete');
+                                })
+                            }
+                        });
+                    } else {
+                        $scope.$broadcast('scroll.refreshComplete');;
+                    }
                 });
             }
         }
@@ -408,12 +416,12 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
     .controller('EtapaCtrl', function (
         $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator, $ionicLoading) {
-        $scope.doRefresh=function(){
+        $scope.doRefresh = function () {
             switch ($scope.currTab) {
                 case 'grid':
                     EtapasService.clear();
                     break;
-            
+
                 default:
                     break;
             }
@@ -472,7 +480,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         $scope.setTab = function (tabName) {
             $scope.currTab = tabName;
             if ($scope.currTab == "grid") {
-                EtapasService.getGrid({id:$scope.etapa.id}).then(function (data) {
+                EtapasService.getGrid({ id: $scope.etapa.id }).then(function (data) {
                     $scope.inscricaoInfo = data;
                     $scope.$broadcast('scroll.refreshComplete');;
                 });
@@ -506,7 +514,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
                         WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(
                             function (weather) {
-                                 $scope.weather = weather;
+                                $scope.weather = weather;
 
                             },
                             function (err) {
