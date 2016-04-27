@@ -294,7 +294,24 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 },
                 function (error) {
                     console.log(error);
-                    $scope.loginData.errorMsg = "Usuário ou senha incorretos."
+
+                    switch (error.status) {
+                        case 404:
+                            $scope.loginData.errorMsg = "Usuário não encontrado. Crie uma conta com este e-mail para se conectar.";
+                            break;
+                        case 403:
+                            $scope.loginData.errorMsg = "Usuário ou senha incorreto.";
+                            break;
+                        case 401:
+                            $scope.loginData.errorMsg = "Sua conta está associada ao Facebook. Utilize a conexão com Facebook OU reset sua senha com o botão lembrar senha abaixo.";
+                            break;
+
+                        default:
+                            $scope.loginData.errorMsg = "Usuário ou senha incorretos.";
+                            break;
+                    }
+
+
 
                 }
                 );
