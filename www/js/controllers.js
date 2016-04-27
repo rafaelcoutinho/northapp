@@ -408,7 +408,17 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
     .controller('EtapaCtrl', function (
         $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator, $ionicLoading) {
-
+        $scope.doRefresh=function(){
+            switch ($scope.currTab) {
+                case 'grid':
+                    EtapasService.clear();
+                    break;
+            
+                default:
+                    break;
+            }
+            $scope.setTab($scope.currTab);
+        }
 
         console.log($stateParams, tab);
         $scope.currTab = "details";
@@ -461,13 +471,15 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
         $scope.setTab = function (tabName) {
             $scope.currTab = tabName;
-            if ($scope.currTab == "grid" && !$scope.inscricaoInfo) {
-                EtapasService.getGrid($scope.etapa).then(function (data) {
+            if ($scope.currTab == "grid") {
+                EtapasService.getGrid({id:$scope.etapa.id}).then(function (data) {
                     $scope.inscricaoInfo = data;
+                    $scope.$broadcast('scroll.refreshComplete');;
                 });
             } else if ($scope.currTab == "results") {
                 EtapasService.getResultados($scope.etapa).then(function (data) {
                     $scope.resultados = data;
+                    $scope.$broadcast('scroll.refreshComplete');;
                 }, function (error) {
 
                 });

@@ -141,6 +141,11 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     cacheName: function (params) {
                         return params.id + "_grid"
                     },
+                    // cacheHalfLife: function (cacheEntry) {
+                    //      if (cacheEntry.data.etapa.data < cacheEntry.date) {
+                    //         return true;
+                    //     }
+                    // },
                     isCacheValid: function (cacheEntry) {
                         if (cacheEntry.data.etapa.data < cacheEntry.date) {
                             return true;
