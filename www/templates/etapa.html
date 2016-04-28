@@ -14,7 +14,7 @@
                     <h2>{{etapa.titulo}}</h2>
                     <p>{{etapa.data|date:'shortDate'}}</p>
                 </div>
-<a href="# " class="item item-icon-left " ng-click="openInscricao()" ng-if="etapa.active==1">
+                <a href="#" class="item item-icon-left " ng-click="openInscricao()" ng-if="etapa.active==1">
                     <i class="icon ion-android-open "></i> Inscrição
                 </a>
                 <div class="item item-body">
@@ -26,7 +26,7 @@
                 <div class="item item-icon-right" ng-click="tempo(weather)" ng-if="weather!=null">
                     Previsão: {{weather.description}} <img class="icon" ng-if="weather.wicon!=null" ng-src="{{weather.wicon}}">
                 </div>
-                
+
             </div>
 
         </ion-content>

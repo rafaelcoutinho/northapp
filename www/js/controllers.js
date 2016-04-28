@@ -137,7 +137,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
 
     })
-    .controller('HighlightCtrl', function ($scope, HighlightService, $state) {
+    .controller('HighlightCtrl', function ($scope, HighlightService, $state, EtapasService) {
         $scope.doRefresh = function (force) {
             if (force == true) {
                 HighlightService.clear();
@@ -148,9 +148,40 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     $scope.$broadcast('scroll.refreshComplete');
                 },
                 function (data) {
-                    console.log("Falhou " + JSON.stringify(data));
+
                     $scope.$broadcast('scroll.refreshComplete');
                 });
+        }
+        $scope.executeAction = function (item) {
+            if (item.acao && item.acao != 'none') {
+                switch (item.acao) {
+                    case 'etapa':
+                        EtapasService.query({}).then(function (data) {
+                            for (var index = 0; index < data.length; index++) {
+                                var etapa = data[index];
+                                if (etapa.active == true) {
+                                    $state.go("app.etapa", { id: etapa.id, t: "details" });
+                                    return;
+                                }
+                            }
+                        })
+
+                        break;
+                    case 'results':
+                        EtapasService.query({}).then(function (data) {
+                            for (var index = 0; index < data.length; index++) {
+                                var etapa = data[index];
+                                if (etapa.active == true) {
+                                    $state.go("app.etapa", { id: etapa.id, t: "results" });
+                                    return;
+                                }
+                            }
+
+                        })
+
+                        break;
+                }
+            }
         }
 
         $scope.doRefresh();

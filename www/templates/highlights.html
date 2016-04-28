@@ -6,14 +6,13 @@
             <div ng-if="highlights==null">
                 Carregando
             </div>
-            <div ng-repeat="highlight in highlights | orderBy:'-id'" ng-cloak>
+            <div ng-repeat="highlight in highlights | orderBy:'-id'" ng-cloak ng-click="executeAction(highlight)">
                 <div class="item item-divider">{{highlight.titulo}}</div>
                 <div class="item item-body">
                     <img class="item item-image" ng-src="{{highlight.imgUrl}}">
-
                     <p>{{highlight.descricao}}</p>
                 </div>
-
+                
             </div>
 
         </div>
