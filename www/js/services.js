@@ -411,21 +411,24 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                     var me = this;
                     this.push.on('notification', function (data) {
                         console.log("recebeu notificacao " + JSON.stringify(data));
-                        if(data.additionalData && data.additionalData.action){
-                            console.log(data.additionalData.action+ "=" + data.additionalData);
-                            switch(data.additionalData.action){
+                        if (data.additionalData && data.additionalData.action) {
+                            console.log(data.additionalData.action + "=" + data.additionalData);
+                            switch (data.additionalData.action) {
                                 case "etapa":
-                                if(data.additionalData.idEtapa){
-                                    $state.go("app.etapa",{id:data.additionalData.idEtapa,t:"details"});
-                                }
-                                
-                                break;
+                                    if (data.additionalData.idEtapa) {
+                                        $state.go("app.etapa", { id: data.additionalData.idEtapa, t: "details" });
+                                    }
+
+                                    break;
                                 case "results":
-                                $state.go("app.etapa",{id:data.additionalData.idEtapa,t:"results"});
-                                break;
+                                    $state.go("app.etapa", { id: data.additionalData.idEtapa, t: "results" });
+                                    break;
+                                case "grid":
+                                    $state.go("app.etapa", { id: data.additionalData.idEtapa, t: "grid" });
+                                    break;
                                 default:
-                                console.log("acao desconhecida "+data.additionalData.action);
-                                break;
+                                    console.log("acao desconhecida " + data.additionalData.action);
+                                    break;
                             }
                             
 
