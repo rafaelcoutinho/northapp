@@ -345,6 +345,170 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                 }
                 return "-";
 
+            },
+            getUnTieReasons:function(){
+                var razoes =["conseguiu melhor colocação","conseguiu mais vezes melhor colocação","teve mais participações","empatados até nos critérios de desempate"];
+                return razoes;
+            },
+            getUnTieReasonsMsg:function(equipe){
+                var msg="";
+                if(!equipe.tieInfo){
+                    return msg;
+                }
+                for(var i =0;i<equipe.tieInfo.length;i++){
+                    var info = equipe.tieInfo[i];
+                    
+                    if(info.inverse==true){
+                        msg+= info.contra.nome+" "+this.getUnTieReasons()[info.razao]+"\n";    
+                    }else{
+                        msg+= equipe.nome+" "+this.getUnTieReasons()[info.razao]+" que "+info.contra.nome+"\n";
+                    }
+                }
+                return msg;
+                
+            },
+            sortRanking:function(ranking){
+                function getContraInfo(e){
+                    return {nome:e.nome,id_Equipe:e.id_Equipe};
+                }
+                
+                function compare(a, b) {
+                    if (a.id_Categoria < b.id_Categoria) {
+                        return -1;
+                    }
+                    else if (a.id_Categoria > b.id_Categoria) {
+                        return 1;
+                    }
+                    else {
+                        if (a.pontos > b.pontos)
+                            return -1;
+                        else if (a.pontos < b.pontos)
+                            return 1;
+                        else {
+                            if (!a.tieInfo) {
+                                a.tieInfo = [];
+                            }
+                            if (!b.tieInfo) {
+                                b.tieInfo = [];
+                            }
+                            if (a.col && b.col) {
+                                var ja = 0;
+                                var jb = 0;
+                                while (ja < a.col.length && jb < b.col.length) {
+                                    if (a.col[ja].colocacao < b.col[jb].colocacao) {
+                                        console.debug(a.nome + " ficou melhor colocado " + b.nome, a.col[ja], b.col[jb]);
+
+                                        a.tieInfo.push({
+                                            contra: getContraInfo(b),
+                                            razao: 0,
+                                            inverse: false
+                                        });
+                                        b.tieInfo.push({
+                                            contra: getContraInfo(a),
+                                            razao: 0,
+                                            inverse: true
+                                        });
+
+                                        return -1;
+                                    } else if (a.col[ja].colocacao > b.col[jb].colocacao) {
+                                        console.debug(a.nome + " ficou pior colocado " + b.nome, a.col[ja], b.col[jb]);
+                                        a.tieInfo.push({
+                                            contra: getContraInfo(b),
+                                            razao: 0,
+                                            inverse: true
+                                        });
+                                        b.tieInfo.push({
+                                            contra: getContraInfo(a),
+                                            razao: 0,
+                                            inverse: false
+                                        });
+                                        return 1;
+                                    } else {
+                                        if (a.col[ja].vezes > b.col[jb].vezes) {
+                                            console.debug(a.nome + " ficou mais vezes que " + b.nome, a.col[ja], b.col[jb]);
+                                            a.tieInfo.push({
+                                                contra: getContraInfo(b),
+                                                razao: 1,
+                                                inverse: false
+                                            });
+                                            b.tieInfo.push({
+                                                contra: getContraInfo(a),
+                                                razao: 1,
+                                                inverse: true
+                                            });
+
+                                            return -1;
+                                        } else if (a.col[ja].vezes < b.col[jb].vezes) {
+                                            console.ldebugog(a.nome + " ficou menos vezes que " + b.nome, a.col[ja], b.col[jb]);
+                                            a.tieInfo.push({
+                                                contra: getContraInfo(b),
+                                                razao: 1,
+                                                inverse: true
+                                            });
+                                            b.tieInfo.push({
+                                                contra: getContraInfo(a),
+                                                razao: 1,
+                                                inverse: false
+                                            });
+                                            return 1;//b foi mais vezes, fica mais para cima no ranking
+                                        } else {
+                                            ja++;
+                                            jb++;
+                                        }
+                                    }
+
+                                }
+                                if (a.col.length > b.col.length) {
+                                    console.debug(a.nome + " participou mais que  " + b.nome + " em ", a.col.length, b.col.length);
+                                    a.tieInfo.push({
+                                        contra: getContraInfo(b),
+                                        razao: 2,
+                                        inverse: false
+                                    });
+                                    b.tieInfo.push({
+                                        contra: getContraInfo(a),
+                                        razao: 2,
+                                        inverse: true
+                                    });
+                                    return -1;//a teve mais participacoes
+                                } else if (a.col.length < b.col.length) {
+                                    console.debug(b.nome + " participou mais que  " + a.nome + " em ", a.col.length, b.col.length);
+                                    a.tieInfo.push({
+                                        contra: getContraInfo(b),
+                                        razao: 2,
+                                        inverse: true
+                                    });
+                                    b.tieInfo.push({
+                                        contra: getContraInfo(a),
+                                        razao: 2,
+                                        inverse: false
+                                    });
+                                    return 1;//b teve mais participacoes
+                                } else {
+                                    a.tieInfo.push({
+                                        contra: getContraInfo(b),
+                                        razao: 3,
+                                        inverse: false
+                                    });
+                                    b.tieInfo.push({
+                                        contra: getContraInfo(a),
+                                        razao: 3,
+                                        inverse: false
+                                    });
+
+                                    console.error("Realmente empatados " + a.nome + " e " + b.nome, a.col, b.col);
+                                    return 0;
+                                }
+
+                            } else {
+                                console.log("Erro! nao carregou colocacoes de dois empatados" + a.nome + " e " + b.nome);
+                            }
+                            return 0;
+                        }
+                    }
+                }
+                    
+                    return ranking.sort(compare);
             }
 
         }

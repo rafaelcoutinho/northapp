@@ -25,10 +25,10 @@
                 <div class="item " style="text-align:center"><span style="font-size: 24px;font-weight:bold;
             color: #F5A81C; ">{{rankingAtual.colocacao}}º</span> com {{rankingAtual.pontos}} pontos
                 </div>
-                <div class="row">
+                <div class="row" ng-if="proximo!=null">
                     <small>Logo atrás da equipe {{proximo.nome}}, {{proximo.pontos}} pts</small>
                 </div>
-                <div class="row">
+                <div class="row"  ng-if="anterior!=null">
                     <small>Logo à frente da equipe  {{anterior.nome}}, {{anterior.pontos}} pts</small>
                 </div>
             </div>

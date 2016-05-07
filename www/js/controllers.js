@@ -58,34 +58,38 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     EquipesService.clear();
                 }
 
-                EquipesService.getMyEquipe({ id: loginService.getUserID() }).then(function (data) {
-                    $scope.info = data;
+                EquipesService.getMyEquipe({ id: loginService.getUserID() }).then(function (dataInfo) {
+                    $scope.info = dataInfo;
                     $scope.ranking = [];
-                    if (data.equipe != null) {
+                    if (dataInfo.equipe != null) {
 
 
                         RankingService.query().then(function (data) {
-                            for (var index = 0; index < data.length; index++) {
-                                var element = data[index];
-                                if (element.id_Categoria == $scope.info.equipe.id_Categoria) {
-                                    $scope.ranking.push(element);
-                                }
-                            }
+                            $scope.ranking = UtilsService.sortRanking(data);
 
-                            $scope.ranking.sort(function (p1, p2) {
-                                var a = p1.pontos;
-                                var b = p2.pontos;
-                                return a < b ? -1 : (a > b ? 1 : 0);
-                            });
                             var posicao = 0;
-                            for (var index = $scope.ranking.length - 1; index >= 0; index--) {
-                                posicao++;
+                            for (var index = 0; index < $scope.ranking.length; index++) {
+
+
                                 var eRanking = $scope.ranking[index];
+                                if (eRanking.id_Categoria != $scope.info.equipe.id_Categoria) {
+                                    continue;
+                                }
+                                posicao++;
                                 if (eRanking.id_Equipe == $scope.info.equipe.id) {
                                     $scope.rankingAtual = eRanking;
                                     $scope.rankingAtual.colocacao = posicao;
-                                    $scope.proximo = $scope.ranking[index + 1];
-                                    $scope.anterior = $scope.ranking[index - 1];
+                                    if (index < $scope.ranking.length) {
+                                        if ($scope.ranking[index - 1].id_Categoria == $scope.info.equipe.id_Categoria) {
+                                            $scope.proximo = $scope.ranking[index - 1];
+                                        }
+                                    }
+                                    if (index > 0) {
+                                        if ($scope.ranking[index + 1].id_Categoria == $scope.info.equipe.id_Categoria) {
+                                            $scope.anterior = $scope.ranking[index + 1];
+                                        }
+
+                                    }
                                     break;
                                 }
                             }
@@ -95,7 +99,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                             $scope.$broadcast('scroll.refreshComplete');
                         }
                             );
-                        EquipesService.getResultados({ id: data.equipe.id }).then(function (results) {
+                        EquipesService.getResultados({ id: dataInfo.equipe.id }).then(function (results) {
                             $scope.results = results;
                             for (var index = 0; index < results.length; index++) {
                                 var element = results[index];
@@ -704,7 +708,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 RankingService.clear();
             }
             RankingService.query().then(function (data) {
-                $scope.results = data;
+                $scope.results = UtilsService.sortRanking(data);
                 $scope.$broadcast('scroll.refreshComplete');
             });
         }

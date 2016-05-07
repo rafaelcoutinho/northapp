@@ -23,7 +23,7 @@
                 <div class="col col-top col-20 ">#</div>
                 <div class="col col-top col-80">Equipe</div>
             </div>
-            <a class="item " style="padding:2px" ng-repeat="equipe in results|filter:filterCat| orderBy:['-pontos']" >
+            <a class="item " style="padding:2px" ng-repeat="equipe in results|filter:filterCat" >
                 <div class="row " ng-init="carregaCompetidores(equipe) ">
                     <div class="col col-demo col-20 "style="text-align:center; "><span style="font-size: 24px;font-weight:bold;
             color: #F5A81C; ">{{$index+1}}º</span>
