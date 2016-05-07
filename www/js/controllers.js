@@ -302,6 +302,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     $scope.user = user;
                     $scope.haschange = false;
                     $scope.showForm = false;
+                    $rootScope.$emit("addRight", { state: "app.profile", btns: [{ icon: "ion-android-more-vertical", callback: $scope.mudarSenha }] });
                 }, function (fail) {
                     switch (fail.errorCode) {
                         case 800:
@@ -318,7 +319,6 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             } else {
                 loginService.saveUser($scope.user).then(
                     function () {
-                        console.log("salvou")
                         $scope.haschange = false;
                     })
 
@@ -339,6 +339,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     $scope.user = userInfo;
                     loginService.setUserLocally($scope.user);
                     $scope.showForm = false;
+                    $rootScope.$emit("addRight", { state: "app.profile", btns: [{ icon: "ion-android-more-vertical", callback: $scope.mudarSenha }] });
                 },
                 function (error) {
                     console.log(error);
