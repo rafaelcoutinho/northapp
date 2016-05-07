@@ -79,16 +79,16 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                                 if (eRanking.id_Equipe == $scope.info.equipe.id) {
                                     $scope.rankingAtual = eRanking;
                                     $scope.rankingAtual.colocacao = posicao;
-                                    if (index < $scope.ranking.length) {
+
+                                    if (index > 0) {
                                         if ($scope.ranking[index - 1].id_Categoria == $scope.info.equipe.id_Categoria) {
                                             $scope.proximo = $scope.ranking[index - 1];
                                         }
                                     }
-                                    if (index > 0) {
+                                    if (index < $scope.ranking.length) {
                                         if ($scope.ranking[index + 1].id_Categoria == $scope.info.equipe.id_Categoria) {
                                             $scope.anterior = $scope.ranking[index + 1];
                                         }
-
                                     }
                                     break;
                                 }
@@ -327,7 +327,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     $scope.closeLogin();
                     $scope.user = userInfo;
                     loginService.setUserLocally($scope.user);
-
+                    $scope.showForm = false;
                 },
                 function (error) {
                     console.log(error);
