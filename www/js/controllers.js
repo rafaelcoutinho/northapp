@@ -260,7 +260,18 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
     .controller('ProfileCtrl', function ($scope, $cordovaFacebook, $state, loginService, $ionicModal, UserService, $log, $rootScope, $ionicPopup, EquipesService) {
         $scope.mudarSenha = function () {
-            $state.go('app.mudarsenha');
+            if ($scope.user != null && $scope.user.id != null) {
+                $state.go('app.mudarsenha');
+            } else {
+                var confirmPopup = $ionicPopup.alert({
+                    title: 'Menu indisponível',
+                    template: 'Para acessar o menu de configuração de perfil você deve estar logado.'
+                });
+
+                confirmPopup.then(function (res) {
+
+                });
+            }
         }
         $scope.user = loginService.getUser();
         if ($scope.user == null) {
