@@ -491,14 +491,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 default:
                     break;
             }
+
             $scope.setTab($scope.currTab);
         }
 
-        console.log($stateParams, tab);
-        $scope.currTab = "details";
-        if (tab) {
-            $scope.currTab = tab;
-        }
+
+
+
         $scope.tabstemplate = "templates/etapa.tabs.html";
         $scope.etapaNotComplete = true;
 
@@ -549,16 +548,46 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 EtapasService.getGrid({ id: $scope.etapa.id }).then(function (data) {
                     $scope.inscricaoInfo = data;
                     $scope.$broadcast('scroll.refreshComplete');;
+                }, function () {
+                    $scope.$broadcast('scroll.refreshComplete');
                 });
             } else if ($scope.currTab == "results") {
                 EtapasService.getResultados($scope.etapa).then(function (data) {
                     $scope.resultados = data;
                     $scope.$broadcast('scroll.refreshComplete');;
                 }, function (error) {
+                    $scope.$broadcast('scroll.refreshComplete');
+                });
+            } else if ($scope.currTab == "details") {
+                EtapasService.get({ id: $stateParams.id }).then(function (dadosEtapa) {
 
+                    $scope.etapa = dadosEtapa;
+                    $scope.etapaNotComplete = $scope.etapa.data < new Date().getTime();
+                    if (dadosEtapa.id_Local) {
+                        LocationService.get({ id: $scope.etapa.id_Local }).then(function (location) {
+                            $scope.etapa.location = location;
+                            if (location.latitude != null) {
+                                var lat = parseFloat(location.latitude) / 1000000;
+                                var lng = parseFloat(location.latitude) / 1000000;
+
+                                WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(
+                                    function (weather) {
+                                        $scope.weather = weather;
+                                    },
+                                    function (err) {
+                                        
+                                        $log.log("erro carregando clima", err);
+                                    });
+                            }
+                        });
+                    }
+
+                }, function (error) {
+                    $log.log("Não carregou etapa");
+                    $scope.$broadcast('scroll.refreshComplete');
                 });
             }
-        }
+        };
         $scope.isTab = function (val) {
 
             if ($scope.currTab == val) {
@@ -567,32 +596,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             return "";
         }
 
-        EtapasService.get({ id: $stateParams.id }).then(function (dadosEtapa) {
+        $scope.currTab = "details";
+        if (tab) {
+            $scope.currTab = tab;
+        }
+        $scope.setTab($scope.currTab);
 
-            $scope.etapa = dadosEtapa;
-            $scope.etapaNotComplete = $scope.etapa.data < new Date().getTime();
-            if (dadosEtapa.id_Local) {
-                LocationService.get({ id: $scope.etapa.id_Local }).then(function (location) {
-                    $scope.etapa.location = location;
-                    if (location.latitude != null) {
-                        var lat = parseFloat(location.latitude) / 1000000;
-                        var lng = parseFloat(location.latitude) / 1000000;
 
-                        WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(
-                            function (weather) {
-                                $scope.weather = weather;
-
-                            },
-                            function (err) {
-                                $log.log("erro carregando clima", err);
-                            });
-                    }
-                })
-            }
-
-        }, function (error) {
-            $log.log("Não carregou etapa");
-        });
 
 
 
