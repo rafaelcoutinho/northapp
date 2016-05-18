@@ -342,7 +342,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     $rootScope.$emit("addRight", { state: "app.profile", btns: [{ icon: "ion-android-more-vertical", callback: $scope.mudarSenha }] });
                 },
                 function (error) {
-                    console.log(error);
+
 
                     switch (error.status) {
                         case 404:
@@ -356,6 +356,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                             break;
 
                         default:
+                            console.log(error);
                             $scope.loginData.errorMsg = "Usuário ou senha incorretos.";
                             break;
                     }
@@ -373,8 +374,25 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
             confirmPopup.then(function (res) {
                 if (res) {
-                    loginService.startPwdRecovery($scope.loginData.username);
-                    $scope.closeLogin();
+                    loginService.startPwdRecovery($scope.loginData.username).then(
+                        function () {
+                            $scope.closeLogin();
+                        },
+                        function (error) {
+                            switch (error.status) {
+                                case 404:
+                                    $scope.loginData.errorMsg = "Usuário não encontrado. Crie uma conta com este e-mail para se conectar.";
+                                    break;
+
+
+                                default:
+                                    console.log(error);
+                                    $scope.loginData.errorMsg = "Erro ao executar lembrar senha, confirme que você utilizou este mesmo e-mail anteriormente.";
+                                    break;
+                            }
+                        }
+                        );
+
                 } else {
 
                 }
@@ -575,7 +593,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                                         $scope.weather = weather;
                                     },
                                     function (err) {
-                                        
+
                                         $log.log("erro carregando clima", err);
                                     });
                             }

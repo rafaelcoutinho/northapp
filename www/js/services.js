@@ -250,13 +250,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             }
         },
         {name:"LocSvc"});
-        // return $resource(appConfigs.openRestBackend + '/Local/:id', {}, {
-        //     query: {
-        //         isArray: true,
-        //         transformResponse: jsonTransformQuery
-        //     }
-        // });
-
+      
     }])
     .service('RankingService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
         return $cachedResource(appConfigs.enhancedRestBackend + '/Ranking', {},
@@ -621,7 +615,14 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
         return {
             startPwdRecovery: function (email) {
-                UserService.rememberPwd({}, { email: email });
+                var deferred = $q.defer();
+                UserService.rememberPwd({}, { email: email },function(response){
+                     deferred.resolve(response.data);
+                },
+                function(error){
+                     deferred.reject(error);
+                });
+                return deferred.promise;
             },
             saveUser: function (user) {
                 var deferred = $q.defer();
