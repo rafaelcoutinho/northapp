@@ -103,7 +103,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                             $scope.results = results;
                             for (var index = 0; index < results.length; index++) {
                                 var element = results[index];
-
+                                
                                 EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
 
                                     for (var index = 0; index < $scope.results.length; index++) {
@@ -112,7 +112,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
                                         if (element.id_Etapa == etapa.id) {
                                             element.etapa = etapa;
-                                            break;
+                                          
                                         }
                                     }
                                     $scope.$broadcast('scroll.refreshComplete');
@@ -499,7 +499,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator, $ionicLoading) {
+        $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator, $ionicLoading, loginService) {
         $scope.doRefresh = function () {
             switch ($scope.currTab) {
                 case 'grid':
@@ -525,8 +525,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             if ($localStorage.lastSelectedCat) {
                 selectedCat = $localStorage.lastSelectedCat;
             }
-
-            return { id_Categoria: selectedCat };
+            if ($scope.defaultNomeResultado == null) {
+                 return { id_Categoria: selectedCat};
+            } else {
+                return { id_Categoria: selectedCat, nomeResultado: $scope.defaultNomeResultado };
+            }
         }
         $scope.getLastSelectedGrid = function () {
             var grid = $scope.categoriasGrid[0].id;
@@ -559,7 +562,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 return categoriaGrid.id_Config == item.id_Categoria;
             };
         }
-
+        $scope.defaultNomeResultado = "Final"
         $scope.setTab = function (tabName) {
             $scope.currTab = tabName;
             if ($scope.currTab == "grid") {
@@ -570,8 +573,33 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     $scope.$broadcast('scroll.refreshComplete');
                 });
             } else if ($scope.currTab == "results") {
-                EtapasService.getResultados($scope.etapa).then(function (data) {
-                    $scope.resultados = data;
+
+                EtapasService.getResultados({ id: $scope.etapa.id }).then(function (data) {
+                    $scope.resultados = [];
+                    $scope.nomesResultados = [];
+
+                    if (data.length > 0) {
+                        if (data[0].nomeResultado) {
+                            $scope.nomesResultados = data;
+                            var found = false;
+                            for (var i = 0; i < data.length; i++) {
+                                var element = data[i];
+                                $scope.resultados = $scope.resultados.concat(element.resultados);
+                                if (element.nomeResultado == "Final") {
+                                    found = true;
+                                }
+                            }
+                            if (found == false) {
+                                $scope.defaultNomeResultado = data[0].nomeResultado;
+                            } else {
+                                $scope.defaultNomeResultado = "Final";
+                            }
+                        } else {
+                            $scope.resultados = data;
+                            $scope.defaultNomeResultado = null;
+                        }
+                    }
+
                     $scope.$broadcast('scroll.refreshComplete');;
                 }, function (error) {
                     $scope.$broadcast('scroll.refreshComplete');
@@ -580,6 +608,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 EtapasService.get({ id: $stateParams.id }).then(function (dadosEtapa) {
 
                     $scope.etapa = dadosEtapa;
+                    if ($scope.etapa.active == true && loginService.getUser() != null) {
+                        //checar inscricao
+                        EtapasService.getInscricao({ idEtapa: $stateParams.id, idTrekker: loginService.getUserID() }, function (inscricao) {
+                            $scope.inscricao = inscricao;
+                        })
+
+                    }
                     $scope.etapaNotComplete = $scope.etapa.data < new Date().getTime();
                     if (dadosEtapa.id_Local) {
                         LocationService.get({ id: $scope.etapa.id_Local }).then(function (location) {
@@ -620,7 +655,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
         $scope.setTab($scope.currTab);
 
-
+        $scope.inscricao = {};
 
 
 
@@ -736,7 +771,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 $scope.$broadcast('scroll.refreshComplete');
             });
         }
-        console.log("Entrou no etapas");
+
         $scope.loadData();
 
     })
