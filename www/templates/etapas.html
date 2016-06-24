@@ -5,9 +5,9 @@
         <div class="list card">
 
             <a id="{{etapa.id}}" class="item item-thumbnail-left" ng-repeat="etapa in etapas| orderBy:'data'" href="#/app/etapa/{{etapa.id}}?results">
-                <img src="{{getEtapaImg(etapa)}}">
+                <img ng-src="{{getEtapaImg(etapa)}}">
                 
-                <p class="etapaDate">{{etapa.data|date:'shortDate'}}</p>
+                <p class="etapaDate">{{etapa.data|date:'dd/MM'}}</p>
                 <h2 class="etapaTitle">{{etapa.titulo}}</h2>
                 <p class="etapaDescription">{{etapa.descricao}}</p>
                 <p class="etapaLocation"><span ng-show="etapa.id_Local==null">Local a definir</span><span ng-hide="etapa.id_Local==null">{{etapa.location.nome}}</span></p>

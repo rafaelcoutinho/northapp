@@ -111,10 +111,28 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             return etapa.data < cacheEntry.date;//TODO uns 5 dias;
         }
         return $cachedResource(appConfigs.enhancedRestBackend + "/Etapa/:id", {}, {
+            getInscricao: {
+                isArray: false,
+                cache: true,
+                method: "GET",
+                url: appConfigs.enhancedRestBackend + "/InscricaoCompetidor/:idEtapa/:idTrekker",
+                cr: {
+                    cacheName: function (params) {
+                        return params.id + "_inscricao"
+                    },
+                    timeout: 30 * 60 * 1000,
+                    cacheHalfLife: function (cacheEntry) {
+                        if (cacheEntry.date < (new Date().getTime() - (this.timeout / 1.5))) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+            },
             query: {
                 isArray: true,
                 cache: true,
-                cr: {
+                cr: {                    
                     timeout: 7 * 60 * 60 * 1000,
                     cacheHalfLife: function (cacheEntry) {
                         if (cacheEntry.date < (new Date().getTime() - (this.timeout / 1.5))) {
@@ -250,13 +268,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
             }
         },
         {name:"LocSvc"});
-        // return $resource(appConfigs.openRestBackend + '/Local/:id', {}, {
-        //     query: {
-        //         isArray: true,
-        //         transformResponse: jsonTransformQuery
-        //     }
-        // });
-
+      
     }])
     .service('RankingService', ['$http', '$q', '$resource', 'appConfigs','$cachedResource', function ($http, $q, $resource, appConfigs,$cachedResource) {
         return $cachedResource(appConfigs.enhancedRestBackend + '/Ranking', {},
@@ -496,7 +508,7 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
                                         inverse: false
                                     });
 
-                                    console.error("Realmente empatados " + a.nome + " e " + b.nome, a.col, b.col);
+                                    console.warn("Realmente empatados " + a.nome + " e " + b.nome, a.col, b.col);
                                     return 0;
                                 }
 
@@ -621,7 +633,14 @@ angular.module('north.services', ['ionic', 'ngCordova', 'ngStorage', 'ngResource
 
         return {
             startPwdRecovery: function (email) {
-                UserService.rememberPwd({}, { email: email });
+                var deferred = $q.defer();
+                UserService.rememberPwd({}, { email: email },function(response){
+                     deferred.resolve(response.data);
+                },
+                function(error){
+                     deferred.reject(error);
+                });
+                return deferred.promise;
             },
             saveUser: function (user) {
                 var deferred = $q.defer();

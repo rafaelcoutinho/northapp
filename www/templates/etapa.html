@@ -2,6 +2,15 @@
     <div>
         <ng-include src="tabstemplate" />
     </div>
+    <style>
+        .text-green {
+            color: #7FA332;
+        }
+        
+        .text-yellow {
+            color: #F7E232;
+        }
+    </style>
 
     <ion-view view-title="Etapa" ng-if="currTab == 'details'" ng-cloak>
         <ion-content class="scroll-bg">
@@ -14,68 +23,83 @@
                     <h2>{{etapa.titulo}}</h2>
                     <p>{{etapa.data|date:'shortDate'}}</p>
                 </div>
-                <a href="#" class="item item-icon-left " ng-click="openInscricao()" ng-if="etapa.active==1">
+                <a href="#" class="item item-icon-left " ng-click="openInscricao()" ng-if="etapa.active==1 && inscricao.ins_Data==null">
                     <i class="icon ion-android-open "></i> Inscrição
                 </a>
-                <div class="item item-body">
+                <div class="item item-icon-left" " ng-if="etapa.active==1 && inscricao.ins_Data!=null ">
+                    <i class="icon " ng-class="{ 'ion-alert-circled text-yellow':inscricao.paga==0,
+                'ion-checkmark-circled text-green':inscricao.paga==1} "></i><p> Inscrito na equipe {{inscricao.ins_EquipeNome}}</p>
+                    <p ng-if="inscricao.paga==1 ">Confirmado no Grid</p>
+                    <p ng-if="inscricao.paga==0 ">Já no Pré-Grid, aguardando pagamento</p>
+                    
+                </div>
+                <div class="item item-body ">
 
-                    <img class="full-image" ng-src="{{etapa.imgBig}}" ng-show="etapa.imgBig!=null" ng-if="etapa.imgBig!=null">
+                    <img class="full-image " ng-src="{{etapa.imgBig}} " ng-show="etapa.imgBig!=null " ng-if="etapa.imgBig!=null ">
                     <p>{{etapa.descricao}}</p>
 
                 </div>
-                <div class="item item-icon-right" ng-click="tempo(weather)" ng-if="weather!=null">
-                    Previsão: {{weather.description}} <img class="icon" ng-if="weather.wicon!=null" ng-src="{{weather.wicon}}">
+                <div class="item item-icon-right " ng-click="tempo(weather) " ng-if="weather!=null ">
+                    Previsão: {{weather.description}} <img class="icon " ng-if="weather.wicon!=null " ng-src="{{weather.wicon}} ">
                 </div>
 
             </div>
 
         </ion-content>
     </ion-view>
-    <ion-view view-title="Etapa" ng-if="currTab == 'pictures'" ng-cloak>
-        <ion-content class="scroll-bg" style="margin-top: 50px">
-            <ng-include src="'templates/breve.html'" />
+    <ion-view view-title="Etapa " ng-if="currTab=='pictures' " ng-cloak>
+        <ion-content class="scroll-bg " style="margin-top: 50px ">
+            <ng-include src=" 'templates/breve.html' " />
         </ion-content>
 
-        <ion-content class="scroll-bg" ng-show="false">
+        <ion-content class="scroll-bg " ng-show="false ">
 
 
         </ion-content>
     </ion-view>
-    <ion-view view-title="Resultados" ng-if="currTab == 'results'" ng-cloak>
+    <ion-view view-title="Resultados " ng-if="currTab=='results' " ng-cloak>
 
-        <ion-content class="scroll-bg" style="margin-top: 50px">
-            <div ng-show="etapaNotComplete==false">
+        <ion-content class="scroll-bg " style="margin-top: 50px ">
+            <ion-refresher ng-if="etapaNotComplete!=false " pulling-text="Puxe para atualizar... " on-refresh="doRefresh() ">
+            </ion-refresher>
+            <div ng-show="etapaNotComplete==false ">
                 <h3>Está cedo ainda para termos resultados.</h3>
 
             </div>
-            <div ng-show="etapaNotComplete==true">
+            <div ng-show="etapaNotComplete==true ">
 
-
-                <label class="item item-input item-select ">
+                <label class="item item-input item-select " ng-if="nomesResultados.length>1">
                     <div class="input-label ">
-
-
-                        <select class="form-control " ng-change="updatePrefCategoria(filterCat.id_Categoria,null)" ng-model="filterCat.id_Categoria"
-                        ng-options="cat.id as cat.nome for cat in categorias" ng-init="filterCat = getLastSelectedCat()">
-
-
-                        </select>
+                        <select class="form-control " ng-model="filterCat.nomeResultado" ng-options="option.nomeResultado as option.nomeResultado for option in nomesResultados "></select>
                     </div>
 
-                </label>
-                <div class="list card">
-                    <div class="list card ">
+                    </label>
+                    <label class="item item-input item-select ">
+                        <div class="input-label ">
 
-                        <div class="row titTabela">
-                            <div class="col col-demo col-10  ">Col</div>
-                            <div class="col col-demo col-33  ">Equipe</div>
-                            <div class="col col-demo col-33  ">Cidade</div>
-                            <div class="col col-demo col-20  ">Total</div>
+
+                            <select class="form-control " ng-change="updatePrefCategoria(filterCat.id_Categoria,null) " ng-model="filterCat.id_Categoria "
+                            ng-options="cat.id as cat.nome for cat in categorias " ng-init="filterCat=getLastSelectedCat() ">
+
+
+                            </select>
 
                         </div>
 
-                        <div class="row" ng-repeat="entry in resultados|filter:filterCat| orderBy:['colocacao']" ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
-                            <div class="col col-demo col-10 ">{{entry.colocacao}}</div>
+                    </label>
+
+
+                    <div class="list card ">
+                        <div class="row titTabela ">
+                            <div class="col col-demo col-10 " style="white-space: nowrap; ">Col</div>
+                            <div class="col col-demo col-33 ">Equipe</div>
+                            <div class="col col-demo col-33 ">Cidade</div>
+                            <div class="col col-demo col-20 ">Total</div>
+
+                        </div>
+
+                        <div class="row " ng-repeat="entry in resultados|filter:filterCat| orderBy:[ 'colocacao']" ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                            <div class="col col-demo col-10 " style="white-space: nowrap; ">{{entry.colocacao}}</div>
                             <div class="col col-demo col-33 ">{{entry.nome}} </div>
                             <div class="col col-demo col-33 ">{{entry.descricao}} </div>
                             <div class="col col-demo col-20 ">{{entry.pontos_perdidos}}</div>
@@ -83,8 +107,8 @@
                         </div>
                     </div>
 
+
                 </div>
-            </div>
         </ion-content>
 
     </ion-view>
@@ -92,14 +116,14 @@
     <ion-view view-title="Grid de Largada " ng-if="currTab=='grid' " ng-cloak>
 
         <ion-content class="scroll-bg " style="margin-top: 50px ">
-            <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh()">
+            <ion-refresher pulling-text="Puxe para atualizar... " on-refresh="doRefresh() ">
             </ion-refresher>
             <label class="item item-input item-select ">
                 <div class="input-label ">
 
                 </div>
-                <select class="form-control " ng-change="updatePrefCategoria(null,categoriaGrid.id_Config)" ng-model="categoriaGrid.id_Config"
-                ng-options="cat.id_Config as cat.nome for cat in categoriasGrid" ng-init="categoriaGrid = getLastSelectedGrid()">
+                <select class="form-control" ng-change="updatePrefCategoria(null,categoriaGrid.id_Config) " ng-model="categoriaGrid.id_Config "
+                ng-options="cat.id_Config as cat.nome for cat in categoriasGrid " ng-init="categoriaGrid=getLastSelectedGrid() ">
 
                 </select>
 
@@ -113,18 +137,18 @@
                 </div>
                 <div class="row ">
                     <div class="col col-demo col-25 titTabela ">Horário</div>
-                    <div class="col col-demo col-75 titTabela " ng-hide="categoriaGrid.id_Config==1">Equipe</div>
-                    <div class="col col-demo col-50 titTabela " ng-show="categoriaGrid.id_Config==1">Equipe</div>
-                    <div class="col col-demo col-25 titTabela " ng-show="categoriaGrid.id_Config==1">Categoria</div>
+                    <div class="col col-demo col-75 titTabela " ng-hide="categoriaGrid.id_Config==1 ">Equipe</div>
+                    <div class="col col-demo col-50 titTabela " ng-show="categoriaGrid.id_Config==1 ">Equipe</div>
+                    <div class="col col-demo col-25 titTabela " ng-show="categoriaGrid.id_Config==1 ">Categoria</div>
 
                 </div>
 
-                <div class="row " ng-repeat="entry in inscricaoInfo.grid|filter:{id_Config:categoriaGrid.id_Config}|orderBy:['hora','minuto'] "
-                ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                <div class="row " ng-repeat="entry in inscricaoInfo.grid|filter:{id_Config:categoriaGrid.id_Config}|orderBy:[
+                'hora', 'minuto'] " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
                     <div class="col col-demo col-25 ">{{entry.hora|leadingZero}}:{{entry.minuto|leadingZero}}</div>
-                    <div class="col col-demo col-75 " ng-hide="categoriaGrid.id_Config==1">{{entry.nome_Equipe}} </div>
-                    <div class="col col-demo col-50 " ng-show="categoriaGrid.id_Config==1">{{entry.nome_Equipe}} </div>
-                    <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1">{{getLabelCategoria(entry.categoria_Equipe)}}</div>
+                    <div class="col col-demo col-75 " ng-hide="categoriaGrid.id_Config==1 ">{{entry.nome_Equipe}} </div>
+                    <div class="col col-demo col-50 " ng-show="categoriaGrid.id_Config==1 ">{{entry.nome_Equipe}} </div>
+                    <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1 ">{{getLabelCategoria(entry.categoria_Equipe)}}</div>
 
                 </div>
             </div>
@@ -136,10 +160,10 @@
                     <div class="col col-demo titTabela ">Equipe</div>
 
                 </div>
-                <div class="row " ng-repeat="entry in inscricaoInfo.preGrid|filter:isInCategoria(categoriaGrid) |orderBy:['data','nome'] "
-                ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
-                    <div class="col col-demo  ">{{entry.nome}} {{entry.descricao}}</div>
-                    <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1">{{entry.nome_Categoria}}</div>
+                <div class="row " ng-repeat="entry in inscricaoInfo.preGrid|filter:isInCategoria(categoriaGrid) |orderBy:[
+                'data', 'nome'] " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                    <div class="col col-demo ">{{entry.nome}} {{entry.descricao}}</div>
+                    <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1 ">{{entry.nome_Categoria}}</div>
                 </div>
 
 
@@ -158,7 +182,7 @@
                     <h2>{{etapa.location.nome}}</h2>
                 </div>
 
-                <a href="# " class="item item-icon-left " ng-click="tel(etapa.location.telefone) " ng-if="etapa.location.telefone!=null">
+                <a href="# " class="item item-icon-left " ng-click="tel(etapa.location.telefone) " ng-if="etapa.location.telefone!=null ">
                     <i class="icon ion-ios-telephone "></i> {{etapa.location.telefone}}
                 </a>
 
@@ -166,7 +190,7 @@
                     <i class="icon ion-navigate "></i> {{etapa.location.endereco}}
                 </a>
 
-                <a href="# " class="item item-icon-left " ng-click="web(etapa.location.website) " ng-if="etapa.location.website!=''">
+                <a href="# " class="item item-icon-left " ng-click="web(etapa.location.website) " ng-if="etapa.location.website!='' ">
                     <i class="icon ion-link "></i> {{etapa.location.website}}
                 </a>
                 <div class="item item-body " ng-bind-html="etapa.location.descricao ">

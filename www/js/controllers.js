@@ -103,7 +103,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                             $scope.results = results;
                             for (var index = 0; index < results.length; index++) {
                                 var element = results[index];
-
+                                
                                 EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
 
                                     for (var index = 0; index < $scope.results.length; index++) {
@@ -112,7 +112,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
                                         if (element.id_Etapa == etapa.id) {
                                             element.etapa = etapa;
-                                            break;
+                                          
                                         }
                                     }
                                     $scope.$broadcast('scroll.refreshComplete');
@@ -342,7 +342,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                     $rootScope.$emit("addRight", { state: "app.profile", btns: [{ icon: "ion-android-more-vertical", callback: $scope.mudarSenha }] });
                 },
                 function (error) {
-                    console.log(error);
+
 
                     switch (error.status) {
                         case 404:
@@ -356,6 +356,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                             break;
 
                         default:
+                            console.log(error);
                             $scope.loginData.errorMsg = "Usuário ou senha incorretos.";
                             break;
                     }
@@ -373,8 +374,25 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
             confirmPopup.then(function (res) {
                 if (res) {
-                    loginService.startPwdRecovery($scope.loginData.username);
-                    $scope.closeLogin();
+                    loginService.startPwdRecovery($scope.loginData.username).then(
+                        function () {
+                            $scope.closeLogin();
+                        },
+                        function (error) {
+                            switch (error.status) {
+                                case 404:
+                                    $scope.loginData.errorMsg = "Usuário não encontrado. Crie uma conta com este e-mail para se conectar.";
+                                    break;
+
+
+                                default:
+                                    console.log(error);
+                                    $scope.loginData.errorMsg = "Erro ao executar lembrar senha, confirme que você utilizou este mesmo e-mail anteriormente.";
+                                    break;
+                            }
+                        }
+                        );
+
                 } else {
 
                 }
@@ -481,7 +499,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('EtapaCtrl', function (
-        $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator, $ionicLoading) {
+        $scope, $stateParams, WeatherService, tab, EtapasService, LocationService, $location, $ionicBackdrop, $timeout, $rootScope, $ionicHistory, $cordovaInAppBrowser, $localStorage, $log, UtilsService, $cordovaLaunchNavigator, $ionicLoading, loginService) {
         $scope.doRefresh = function () {
             switch ($scope.currTab) {
                 case 'grid':
@@ -491,14 +509,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 default:
                     break;
             }
+
             $scope.setTab($scope.currTab);
         }
 
-        console.log($stateParams, tab);
-        $scope.currTab = "details";
-        if (tab) {
-            $scope.currTab = tab;
-        }
+
+
+
         $scope.tabstemplate = "templates/etapa.tabs.html";
         $scope.etapaNotComplete = true;
 
@@ -508,8 +525,11 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             if ($localStorage.lastSelectedCat) {
                 selectedCat = $localStorage.lastSelectedCat;
             }
-
-            return { id_Categoria: selectedCat };
+            if ($scope.defaultNomeResultado == null) {
+                 return { id_Categoria: selectedCat};
+            } else {
+                return { id_Categoria: selectedCat, nomeResultado: $scope.defaultNomeResultado };
+            }
         }
         $scope.getLastSelectedGrid = function () {
             var grid = $scope.categoriasGrid[0].id;
@@ -542,23 +562,85 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 return categoriaGrid.id_Config == item.id_Categoria;
             };
         }
-
+        $scope.defaultNomeResultado = "Final"
         $scope.setTab = function (tabName) {
             $scope.currTab = tabName;
             if ($scope.currTab == "grid") {
                 EtapasService.getGrid({ id: $scope.etapa.id }).then(function (data) {
                     $scope.inscricaoInfo = data;
                     $scope.$broadcast('scroll.refreshComplete');;
+                }, function () {
+                    $scope.$broadcast('scroll.refreshComplete');
                 });
             } else if ($scope.currTab == "results") {
-                EtapasService.getResultados($scope.etapa).then(function (data) {
-                    $scope.resultados = data;
+
+                EtapasService.getResultados({ id: $scope.etapa.id }).then(function (data) {
+                    $scope.resultados = [];
+                    $scope.nomesResultados = [];
+
+                    if (data.length > 0) {
+                        if (data[0].nomeResultado) {
+                            $scope.nomesResultados = data;
+                            var found = false;
+                            for (var i = 0; i < data.length; i++) {
+                                var element = data[i];
+                                $scope.resultados = $scope.resultados.concat(element.resultados);
+                                if (element.nomeResultado == "Final") {
+                                    found = true;
+                                }
+                            }
+                            if (found == false) {
+                                $scope.defaultNomeResultado = data[0].nomeResultado;
+                            } else {
+                                $scope.defaultNomeResultado = "Final";
+                            }
+                        } else {
+                            $scope.resultados = data;
+                            $scope.defaultNomeResultado = null;
+                        }
+                    }
+
                     $scope.$broadcast('scroll.refreshComplete');;
                 }, function (error) {
+                    $scope.$broadcast('scroll.refreshComplete');
+                });
+            } else if ($scope.currTab == "details") {
+                EtapasService.get({ id: $stateParams.id }).then(function (dadosEtapa) {
 
+                    $scope.etapa = dadosEtapa;
+                    if ($scope.etapa.active == true && loginService.getUser() != null) {
+                        //checar inscricao
+                        EtapasService.getInscricao({ idEtapa: $stateParams.id, idTrekker: loginService.getUserID() }, function (inscricao) {
+                            $scope.inscricao = inscricao;
+                        })
+
+                    }
+                    $scope.etapaNotComplete = $scope.etapa.data < new Date().getTime();
+                    if (dadosEtapa.id_Local) {
+                        LocationService.get({ id: $scope.etapa.id_Local }).then(function (location) {
+                            $scope.etapa.location = location;
+                            if (location.latitude != null) {
+                                var lat = parseFloat(location.latitude) / 1000000;
+                                var lng = parseFloat(location.latitude) / 1000000;
+
+                                WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(
+                                    function (weather) {
+                                        $scope.weather = weather;
+                                    },
+                                    function (err) {
+
+                                        $log.log("erro carregando clima", err);
+                                    });
+                            }
+                        });
+                    }
+
+                }, function (error) {
+                    $log.log("Não carregou etapa");
+                    $scope.$broadcast('scroll.refreshComplete');
                 });
             }
-        }
+        };
         $scope.isTab = function (val) {
 
             if ($scope.currTab == val) {
@@ -567,32 +649,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
             return "";
         }
 
-        EtapasService.get({ id: $stateParams.id }).then(function (dadosEtapa) {
+        $scope.currTab = "details";
+        if (tab) {
+            $scope.currTab = tab;
+        }
+        $scope.setTab($scope.currTab);
 
-            $scope.etapa = dadosEtapa;
-            $scope.etapaNotComplete = $scope.etapa.data < new Date().getTime();
-            if (dadosEtapa.id_Local) {
-                LocationService.get({ id: $scope.etapa.id_Local }).then(function (location) {
-                    $scope.etapa.location = location;
-                    if (location.latitude != null) {
-                        var lat = parseFloat(location.latitude) / 1000000;
-                        var lng = parseFloat(location.latitude) / 1000000;
-
-                        WeatherService.getPerCoords(lat, lng, dadosEtapa.data).then(
-                            function (weather) {
-                                $scope.weather = weather;
-
-                            },
-                            function (err) {
-                                $log.log("erro carregando clima", err);
-                            });
-                    }
-                })
-            }
-
-        }, function (error) {
-            $log.log("Não carregou etapa");
-        });
+        $scope.inscricao = {};
 
 
 
@@ -708,7 +771,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 $scope.$broadcast('scroll.refreshComplete');
             });
         }
-        console.log("Entrou no etapas");
+
         $scope.loadData();
 
     })
