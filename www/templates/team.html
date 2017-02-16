@@ -4,9 +4,10 @@
         <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh(true)">
         </ion-refresher>
         <div class="list card" ng-if="user!=null && info.equipe==null">
-            <div class="item item-text-wrap" >
+            <div class="item item-text-wrap">
                 <h2>Não encontramos sua equipe </h2><br>
-                <p><i class="ion-help-circled"> </i> Para se associar a uma equipe faça uma inscrição em alguma etapa da CopaNorth em uma equipe. Quando sua inscrição for confirmada você será associado à equipe.</p>
+                <p><i class="ion-help-circled"> </i> Para se associar a uma equipe faça uma inscrição em alguma etapa da CopaNorth
+                    em uma equipe. Quando sua inscrição for confirmada você será associado à equipe.</p>
                 <br>
                 <small>Garanta que sua inscrição foi feita com o mesmo e-mail utilizado para se conectar no aplicativo</small>
             </div>
@@ -17,33 +18,37 @@
             <div class="item ">
                 <h2><small>Equipe</small> {{info.equipe.nome}}</h2>
                 <p>{{info.equipe.descricao}}</p>
-                 <img class="avatarImage" style="float:right;" ng-repeat="integante in info.integrantes|orderBy:['fbId']" ng-src="http://graph.facebook.com/{{integante.fbId}}/picture?width=128&height=128">
+                <img class="avatarImage" style="float:right;" ng-repeat="integante in info.integrantes|orderBy:['fbId']" ng-src="http://graph.facebook.com/{{integante.fbId}}/picture?width=128&height=128">
             </div>
-            
-            <div class="item ">
-                Ranking {{getLabelCategoria(info.equipe.id_Categoria)}} 2016:
-                <div class="item " style="text-align:center"><span style="font-size: 24px;font-weight:bold;
+            <div class="item " ng-if="ranking.length==0">
+                Novo ranking em aberto!
+            </div>
+            <div class="item " ng-if="ranking.length>0">
+                Ranking {{getLabelCategoria(info.equipe.id_Categoria)}} 2017:
+                <div class="item " style="text-align:center">
+                    <span style="font-size: 24px;font-weight:bold;
             color: #F5A81C; ">{{rankingAtual.colocacao}}º</span> com {{rankingAtual.pontos}} pontos
                 </div>
                 <div class="row" ng-if="proximo!=null">
                     <small>Logo atrás da equipe {{proximo.nome}}, {{proximo.pontos}} pts</small>
                 </div>
-                <div class="row"  ng-if="anterior!=null">
+                <div class="row" ng-if="anterior!=null">
                     <small>Logo à frente da equipe  {{anterior.nome}}, {{anterior.pontos}} pts</small>
                 </div>
             </div>
 
 
-            <div class="row titTabela">
+            <div class="row titTabela" ng-if="results.length>0">
                 <div class="col col-top col-50">Etapa</div>
                 <div class="col col-top col-30 ">Col</div>
                 <div class="col col-top col-20 ">Pts</div>
             </div>
-            <div class="row item" ng-repeat="resultado in results| orderBy:['etapa']">
+            <div class="row item" ng-repeat="resultado in results| orderBy:['etapa']" ng-if="results.length>0">
 
                 <div class="col col-demo col-50 " style="text-align:center; ">{{resultado.etapa.nome}} <small>{{resultado.nomeResultado}}</small>
                 </div>
-                <div class="col col-demo col-30 " style="text-align:center; "><span style="font-size: 24px;font-weight:bold;
+                <div class="col col-demo col-30 " style="text-align:center; ">
+                    <span style="font-size: 24px;font-weight:bold;
             color: #F5A81C; ">{{resultado.colocacao}}º</span>
                 </div>
                 <div class="col col-demo col-20 " style="text-align:center; ">{{resultado.pontos_ranking}}

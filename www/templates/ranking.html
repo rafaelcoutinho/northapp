@@ -3,7 +3,10 @@
     <ion-content class="scroll-bg">
         <ion-refresher pulling-text="Puxe para atualizar..." on-refresh="doRefresh(true)">
         </ion-refresher>
-        <label class="item item-input item-select ">
+        <div class="item" ng-if="results.length==0">
+            Aguarde a primeira etapa do ano!
+        </div>
+        <label class="item item-input item-select " ng-if="results.length>0">
             <div class="input-label ">
 
 
@@ -17,26 +20,28 @@
         </label>
 
 
-        <div class="list card">
+        <div class="list card" ng-if="results.length>0">
 
             <div class="row titTabela">
                 <div class="col col-top col-20 ">#</div>
                 <div class="col col-top col-80">Equipe</div>
             </div>
-            <a class="item " style="padding:2px" ng-repeat="equipe in results|filter:filterCat" >
+            <a class="item " style="padding:2px" ng-repeat="equipe in results|filter:filterCat">
                 <div class="row " ng-init="carregaCompetidores(equipe) ">
-                    <div class="col col-demo col-20 "style="text-align:center; "><span style="font-size: 24px;font-weight:bold;
-            color: #F5A81C; ">{{$index+1}}º</span>
+                    <div class="col col-demo col-20 " style="text-align:center; ">
+                        <span style="font-size: 24px;font-weight:bold;color: #F5A81C; ">{{$index+1}}º</span>
                     </div>
-                    
-                    <div class="col col-demo col-80 " style="font-size: 18px; color: #F5A81C; ">{{equipe.nome}}                    
+
+                    <div class="col col-demo col-80 " style="font-size: 18px; color: #F5A81C; ">{{equipe.nome}}
                     </div>
                 </div>
                 <div class="row ">
-                <div class="col col-demo col-20 "style="text-align:center; ">
-                    {{equipe.pontos}}pts
-                </div>
-                <div class="col col-demo col-80 "><img class="avatarImage"  ng-repeat="membro in carregaCompetidores(equipe)|limitTo:6|orderBy:['fbId']" style="float:right; " ng-src="http://graph.facebook.com/{{membro.fbId}}/picture?width=128&height=128 "></div>
+                    <div class="col col-demo col-20 " style="text-align:center; ">
+                        {{equipe.pontos}}pts
+                    </div>
+                    <div class="col col-demo col-80 ">
+                        <img class="avatarImage" ng-repeat="membro in carregaCompetidores(equipe)|limitTo:6|orderBy:['fbId']" style="float:right; "
+                            ng-src="http://graph.facebook.com/{{membro.fbId}}/picture?width=128&height=128 "></div>
                 </div>
 
             </a>

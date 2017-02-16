@@ -26,12 +26,13 @@
                 <a href="#" class="item item-icon-left " ng-click="openInscricao()" ng-if="etapa.active==1 && inscricao.ins_Data==null">
                     <i class="icon ion-android-open "></i> Inscrição
                 </a>
-                <div class="item item-icon-left" " ng-if="etapa.active==1 && inscricao.ins_Data!=null ">
-                    <i class="icon " ng-class="{ 'ion-alert-circled text-yellow':inscricao.paga==0,
-                'ion-checkmark-circled text-green':inscricao.paga==1} "></i><p> Inscrito na equipe {{inscricao.ins_EquipeNome}}</p>
+                <div class="item item-icon-left" ng-if="etapa.active==1 && inscricao.ins_Data!=null">
+                    <i class="icon " ng-class="{ 'ion-alert-circled text-yellow':inscricao.paga==0,'ion-checkmark-circled text-green':inscricao.paga==1} "></i>
+                    <p>
+                    Inscrito na equipe {{inscricao.ins_EquipeNome}}</p>
                     <p ng-if="inscricao.paga==1 ">Confirmado no Grid</p>
                     <p ng-if="inscricao.paga==0 ">Já no Pré-Grid, aguardando pagamento</p>
-                    
+
                 </div>
                 <div class="item item-body ">
 
@@ -74,7 +75,7 @@
                     </div>
 
                     </label>
-                    <label class="item item-input item-select ">
+                <label class="item item-input item-select ">
                         <div class="input-label ">
 
 
@@ -89,26 +90,26 @@
                     </label>
 
 
-                    <div class="list card ">
-                        <div class="row titTabela ">
-                            <div class="col col-demo col-10 " style="white-space: nowrap; ">Col</div>
-                            <div class="col col-demo col-33 ">Equipe</div>
-                            <div class="col col-demo col-33 ">Cidade</div>
-                            <div class="col col-demo col-20 ">Total</div>
+                <div class="list card ">
+                    <div class="row titTabela ">
+                        <div class="col col-demo col-10 " style="white-space: nowrap; ">Col</div>
+                        <div class="col col-demo col-33 ">Equipe</div>
+                        <div class="col col-demo col-33 ">Cidade</div>
+                        <div class="col col-demo col-20 ">Total</div>
 
-                        </div>
-
-                        <div class="row " ng-repeat="entry in resultados|filter:filterCat| orderBy:[ 'colocacao']" ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
-                            <div class="col col-demo col-10 " style="white-space: nowrap; ">{{entry.colocacao}}</div>
-                            <div class="col col-demo col-33 ">{{entry.nome}} </div>
-                            <div class="col col-demo col-33 ">{{entry.descricao}} </div>
-                            <div class="col col-demo col-20 ">{{entry.pontos_perdidos}}</div>
-
-                        </div>
                     </div>
 
+                    <div class="row " ng-repeat="entry in resultados|filter:filterCat| orderBy:[ 'colocacao']" ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
+                        <div class="col col-demo col-10 " style="white-space: nowrap; ">{{entry.colocacao}}</div>
+                        <div class="col col-demo col-33 ">{{entry.nome}} </div>
+                        <div class="col col-demo col-33 ">{{entry.descricao}} </div>
+                        <div class="col col-demo col-20 ">{{entry.pontos_perdidos}}</div>
 
+                    </div>
                 </div>
+
+
+            </div>
         </ion-content>
 
     </ion-view>
@@ -150,7 +151,7 @@
                     <div class="col col-demo col-50 " ng-show="categoriaGrid.id_Config==1 ">{{entry.nome_Equipe}} </div>
                     <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1 ">{{getLabelCategoria(entry.categoria_Equipe)}}</div>
 
-                </div>
+            </div>
             </div>
             <div class="list card ">
                 <div class="row subTituloTabela ">
@@ -164,7 +165,7 @@
                 'data', 'nome'] " ng-class="{ 'evenRow':($index%2==0), 'oddRow':($index%2==1)} ">
                     <div class="col col-demo ">{{entry.nome}} {{entry.descricao}}</div>
                     <div class="col col-demo col-25 " ng-show="categoriaGrid.id_Config==1 ">{{entry.nome_Categoria}}</div>
-                </div>
+            </div>
 
 
             </div>
