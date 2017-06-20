@@ -728,12 +728,12 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
         $scope.getEtapaImg = function (etapa) {
             if (etapa.active == true) {
-                return "img/etapa_atual.jpg"
+                return "img/etapa_atual.png"
             } else {
                 if (etapa.data < new Date().getTime()) {
-                    return "img/etapa_completa.jpg"
+                    return "img/etapa_completa.png"
                 } else {
-                    return "img/etapa_futura.jpg"
+                    return "img/etapa_futura.png"
                 }
             }
         }
