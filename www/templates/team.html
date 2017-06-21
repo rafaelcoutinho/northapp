@@ -18,7 +18,7 @@
             <div class="item ">
                 <h2><small>Equipe</small> {{info.equipe.nome}}</h2>
                 <p>{{info.equipe.descricao}}</p>
-                <img class="avatarImage" style="float:right;" ng-repeat="integante in info.integrantes|orderBy:['fbId']" ng-src="http://graph.facebook.com/{{integante.fbId}}/picture?width=128&height=128">
+                <img class="avatarImage" style="float:right;" ng-repeat="integante in info.integrantes|orderBy:['fbId']" onerror="this.src='img/etapa_futura.png';"  ng-src="http://graph.facebook.com/{{integante.fbId}}/picture?width=128&height=128">
             </div>
             <div class="item " ng-if="ranking.length==0">
                 Novo ranking em aberto!
@@ -26,8 +26,7 @@
             <div class="item " ng-if="ranking.length>0">
                 Ranking {{getLabelCategoria(info.equipe.id_Categoria)}} 2017:
                 <div class="item " style="text-align:center">
-                    <span style="font-size: 24px;font-weight:bold;
-            color: #F5A81C; ">{{rankingAtual.colocacao}}º</span> com {{rankingAtual.pontos}} pontos
+                    <span class="rankingEquipePosicao">{{rankingAtual.colocacao}}º</span> com {{rankingAtual.pontos}} pontos
                 </div>
                 <div class="row" ng-if="proximo!=null">
                     <small>Logo atrás da equipe {{proximo.nome}}, {{proximo.pontos}} pts</small>
@@ -48,8 +47,7 @@
                 <div class="col col-demo col-50 " style="text-align:center; ">{{resultado.etapa.nome}} <small>{{resultado.nomeResultado}}</small>
                 </div>
                 <div class="col col-demo col-30 " style="text-align:center; ">
-                    <span style="font-size: 24px;font-weight:bold;
-            color: #F5A81C; ">{{resultado.colocacao}}º</span>
+                    <span class="rankingEquipePosicao">{{resultado.colocacao}}º</span>
                 </div>
                 <div class="col col-demo col-20 " style="text-align:center; ">{{resultado.pontos_ranking}}
 

@@ -1,5 +1,5 @@
 {
-  "name": "NorthApp",
+  "name": "CBOApp",
   "private": "true",
   "dependencies": {
     "ionic": "driftyco/ionic-bower#1.2.4",

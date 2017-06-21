@@ -6,7 +6,7 @@ span {
 
 h1 {
 	font-weight: bold;
-	color: #fea203;
+	color: #3E428C;
 }
 .etapaTitle {
 	font-weight: bold;
@@ -16,4 +16,11 @@ h1 {
 .etapaLocation{
 	color: #7d5d43;
 	font-weight: bold;
+}
+
+.rankingEquipePosicao{
+	font-size: 24px;font-weight:bold;color: #3E428C;
+}
+.rankingEquipe{
+font-size: 18px; color: #3E428C; 
 }

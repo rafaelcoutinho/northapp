@@ -29,10 +29,10 @@
             <a class="item " style="padding:2px" ng-repeat="equipe in results|filter:filterCat">
                 <div class="row " ng-init="carregaCompetidores(equipe) ">
                     <div class="col col-demo col-20 " style="text-align:center; ">
-                        <span style="font-size: 24px;font-weight:bold;color: #F5A81C; ">{{$index+1}}º</span>
+                        <span class="rankingEquipePosicao">{{$index+1}}º</span>
                     </div>
 
-                    <div class="col col-demo col-80 " style="font-size: 18px; color: #F5A81C; ">{{equipe.nome}}
+                    <div class="col col-demo col-80 rankingEquipe">{{equipe.nome}}
                     </div>
                 </div>
                 <div class="row ">
@@ -41,7 +41,7 @@
                     </div>
                     <div class="col col-demo col-80 ">
                         <img class="avatarImage" ng-repeat="membro in carregaCompetidores(equipe)|limitTo:6|orderBy:['fbId']" style="float:right; "
-                            ng-src="http://graph.facebook.com/{{membro.fbId}}/picture?width=128&height=128 "></div>
+                            onerror="this.src='img/etapa_futura.png';"  ng-src="http://graph.facebook.com/{{membro.fbId}}/picture?width=128&height=128 "></div>
                 </div>
 
             </a>
