@@ -14,13 +14,13 @@ $assertive:                       #ef473a !default;
 $royal:                           #886aea !default;
 $dark:                            #444 !default;
 */
-$balanced:                        #7FA332 !default;
+$balanced:                        #3E428C !default;
 $button-balanced-text:            #fff !default;
 $menu-bg:                         #fff !default;
 $base-background-color:            $menu-bg; 
-$item-divider-bg:                   #F5A81C !default;
+$item-divider-bg:                   #4AB85C !default;
 $item-divider-color:              #fff;
-$card-body-bg:                      #7FA332;
+$card-body-bg:                      #3E428C;
 
 
 $big-bg:      'http://www.northbrasil.com.br/northbrasil/img/bgDestaque.gif';
@@ -35,7 +35,7 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
     width: 100%;
 }
 ion-side-menu a.item{
-    background-color: #7FA332;
+    background-color: #3E428C;
     color:#fff;
 }
  .avatarImage {
@@ -48,14 +48,12 @@ ion-side-menu a.item{
             .subTituloTabela {
         color: #FCF8F1;
         display: block;
-        background-color: #95A874;
         line-height: 15px;
         text-align: center;
     }
     
     .titTabela {
-        font-weight: bold;
-        background: #62832B;
+        font-weight: bold;        
         color: #FFFFFF;
         line-height: 15px;
         text-align: center;
@@ -71,3 +69,24 @@ ion-side-menu a.item{
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
 
+
+h1 {
+	font-weight: bold;
+	color: #3E428C;
+}
+.etapaTitle {
+	font-weight: bold;
+	color: #3E428C;
+}
+
+.etapaLocation{
+	color: #7d5d43;
+	font-weight: bold;
+}
+
+.rankingEquipePosicao{
+	font-size: 24px;font-weight:bold;color: #3E428C;
+}
+.rankingEquipe{
+font-size: 18px; color: #3E428C; 
+}
