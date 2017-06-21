@@ -686,7 +686,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 template: 'Abrindo navegador...'
             });
             $timeout($ionicLoading.hide, 2000);
-            $cordovaInAppBrowser.open("http://app.northbrasil.com.br/open/index.html", '_blank', { 'location': 'yes' })
+            $cordovaInAppBrowser.open("http://app.northbrasil.com.br/open/index.html", '_blank',
+                 //{ 'location': 'yes','toolbar': 'yes' })
+                 "location=yes,toolbar=yes")
+            
                 .then(function (event) {
                     // success
                     $ionicLoading.hide();

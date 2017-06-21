@@ -1,51 +1,79 @@
 {
-  "name": "northapp",
-  "version": "1.1.1",
-  "description": "CBOApp: Copa Brasil Outdoor",
-  "dependencies": {
-    "gulp": "^3.5.6",
-    "gulp-concat": "^2.2.0",
-    "gulp-install": "^0.6.0",
-    "gulp-minify-css": "^0.3.0",
-    "gulp-rename": "^1.2.0",
-    "gulp-sass": "^2.0.4"
-  },
-  "devDependencies": {
-    "@ionic/cli-plugin-cordova": "1.4.0",
-    "@ionic/cli-plugin-gulp": "1.0.1",
-    "@ionic/cli-plugin-ionic1": "2.0.0",
-    "bower": "^1.3.3",
-    "gulp-util": "^2.2.14",
-    "shelljs": "^0.3.0"
-  },
-  "cordovaPlugins": [
-    "cordova-plugin-device",
-    "cordova-plugin-whitelist",
-    "cordova-plugin-splashscreen",
-    "cordova-plugin-statusbar",
-    "ionic-plugin-keyboard",
-    "cordova-plugin-app-event",
-    "cordova-plugin-inappbrowser",
-    {
-      "id": "com.phonegap.plugins.facebookconnect",
-      "locator": "../Facebook",
-      "variables": {
-        "APP_ID": "228398097493749",
-        "APP_NAME": "NorthApp"
-      }
+    "name": "northapp",
+    "version": "1.1.1",
+    "description": "CBOApp: Copa Brasil Outdoor",
+    "dependencies": {
+        "cordova-ios": "^4.4.0",
+        "cordova-plugin-actionsheet": "^2.3.3",
+        "cordova-plugin-app-event": "^1.2.0",
+        "cordova-plugin-device": "^1.1.6",
+        "cordova-plugin-facebook4": "^1.9.1",
+        "cordova-plugin-inappbrowser": "^1.7.1",
+        "cordova-plugin-splashscreen": "^4.0.3",
+        "cordova-plugin-statusbar": "^2.2.3",
+        "gulp": "^3.5.6",
+        "gulp-concat": "^2.2.0",
+        "gulp-install": "^0.6.0",
+        "gulp-minify-css": "^0.3.0",
+        "gulp-rename": "^1.2.0",
+        "gulp-sass": "^2.0.4",
+        "ionic-plugin-keyboard": "^2.2.1",
+        "uk.co.workingedge.phonegap.plugin.launchnavigator": "git+https://github.com/rafaelcoutinho/phonegap-launch-navigator.git"
     },
-    "cordova-plugin-actionsheet",
-    {
-      "locator": "https://github.com/rafaelcoutinho/phonegap-launch-navigator",
-      "id": "uk.co.workingedge.phonegap.plugin.launchnavigator"
+    "devDependencies": {
+        "@ionic/cli-plugin-cordova": "1.4.0",
+        "@ionic/cli-plugin-gulp": "1.0.1",
+        "@ionic/cli-plugin-ionic1": "2.0.0",
+        "bower": "^1.3.3",
+        "gulp-util": "^2.2.14",
+        "shelljs": "^0.3.0"
+    },
+    "cordovaPlugins": [
+        "cordova-plugin-device",
+        "cordova-plugin-whitelist",
+        "cordova-plugin-splashscreen",
+        "cordova-plugin-statusbar",
+        "ionic-plugin-keyboard",
+        "cordova-plugin-app-event",
+        "cordova-plugin-inappbrowser",
+        {
+            "id": "com.phonegap.plugins.facebookconnect",
+            "locator": "../Facebook",
+            "variables": {
+                "APP_ID": "228398097493749",
+                "APP_NAME": "NorthApp"
+            }
+        },
+        "cordova-plugin-actionsheet",
+        {
+            "locator": "https://github.com/rafaelcoutinho/phonegap-launch-navigator",
+            "id": "uk.co.workingedge.phonegap.plugin.launchnavigator"
+        }
+    ],
+    "cordovaPlatforms": [
+        {
+            "platform": "ios",
+            "version": "4.4.0",
+            "locator": "ios@4.4.0"
+        },
+        "android"
+    ],
+    "cordova": {
+        "platforms": [
+            "ios"
+        ],
+        "plugins": {
+            "cordova-plugin-inappbrowser": {},
+            "cordova-plugin-device": {},
+            "cordova-plugin-splashscreen": {},
+            "cordova-plugin-statusbar": {},
+            "ionic-plugin-keyboard": {},
+            "uk.co.workingedge.phonegap.plugin.launchnavigator": {},
+            "cordova-plugin-app-event": {},
+            "cordova-plugin-facebook4": {
+                "APP_ID": "228398097493749",
+                "APP_NAME": "NorthApp"
+            }
+        }
     }
-  ],
-  "cordovaPlatforms": [
-    {
-      "platform": "ios",
-      "version": "4.1.0",
-      "locator": "ios@4.1.0"
-    },
-    "android"
-  ]
 }
