@@ -98,12 +98,12 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                         }, function (error) {
                             $scope.$broadcast('scroll.refreshComplete');
                         }
-                            );
+                        );
                         EquipesService.getResultados({ id: dataInfo.equipe.id }).then(function (results) {
                             $scope.results = results;
                             for (var index = 0; index < results.length; index++) {
                                 var element = results[index];
-                                
+
                                 EtapasService.get({ id: element.id_Etapa }).then(function (etapa) {
 
                                     for (var index = 0; index < $scope.results.length; index++) {
@@ -112,7 +112,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
                                         if (element.id_Etapa == etapa.id) {
                                             element.etapa = etapa;
-                                          
+
                                         }
                                     }
                                     $scope.$broadcast('scroll.refreshComplete');
@@ -364,7 +364,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
 
 
                 }
-                );
+            );
         }
         $scope.showConfirm = function () {
             var confirmPopup = $ionicPopup.confirm({
@@ -391,7 +391,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                                     break;
                             }
                         }
-                        );
+                    );
 
                 } else {
 
@@ -526,7 +526,7 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 selectedCat = $localStorage.lastSelectedCat;
             }
             if ($scope.defaultNomeResultado == null) {
-                 return { id_Categoria: selectedCat};
+                return { id_Categoria: selectedCat };
             } else {
                 return { id_Categoria: selectedCat, nomeResultado: $scope.defaultNomeResultado };
             }
@@ -686,10 +686,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 template: 'Abrindo navegador...'
             });
             $timeout($ionicLoading.hide, 2000);
-            $cordovaInAppBrowser.open("http://app.northbrasil.com.br/open/index.html", '_blank',
-                 //{ 'location': 'yes','toolbar': 'yes' })
-                 "location=yes,toolbar=yes")
-            
+            $cordovaInAppBrowser.open("https://copabrasil.com.br/inscricao/", '_blank',
+                { 'location': 'yes','toolbar': 'yes' })
+                //"location=yes,toolbar=yes")
+
                 .then(function (event) {
                     // success
                     $ionicLoading.hide();
@@ -708,13 +708,13 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
                 var lng = (etapa.location.longitude / 1000000);
                 $cordovaLaunchNavigator.navigate([lat, lng])
                     .then(
-                        function () {
-                            console.log("chamou roteador");
-                        }, function (error) {
-                            console.log("erro " + error);
-                        }
+                    function () {
+                        console.log("chamou roteador");
+                    }, function (error) {
+                        console.log("erro " + error);
+                    }
 
-                        )
+                    )
 
             } else {
                 $cordovaLaunchNavigator.navigate(etapa.location.endereco);
@@ -780,7 +780,9 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
     })
 
     .controller('RankingCtrl', function ($scope, $stateParams, $localStorage, RankingService, EquipesService, UtilsService) {
-
+        $scope.filterCat = {
+            id_Categoria: 1
+        }
         $scope.doRefresh = function (forceClean) {
             if (forceClean == true) {
                 RankingService.clear();
@@ -819,8 +821,10 @@ angular.module('north.controllers', ['ionic', 'ngCordova', 'ngStorage', 'north.s
         }
 
         $scope.updatePrefCategoria = function (idCat) {
+            console.log("auio",idCat)
             if (idCat != null) {
                 $localStorage.lastSelectedCat = idCat;
+                $scope.filterCat.id_Categoria=idCat;
             }
         }
 

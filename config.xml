@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget android-versionCode="1071" id="com.northbrasil.app" version="0.2.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget android-versionCode="1074" id="com.northbrasil.app" version="0.2.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>CBO App</name>
     <description>
 CBO - Copa Brasil Outdoor
     </description>
-    <author email="rafael.coutinho+north@gmail.com" href="http://www.northbrasil.com.br/northbrasil/index.html">
+    <author email="rafael.coutinho+north@gmail.com" href="http://www.copabrasil.com.br/">
    CBO - Copa Brasil Outdoor
   </author>
     <content src="index.html" />
@@ -21,6 +21,7 @@ CBO - Copa Brasil Outdoor
     <allow-navigation href="*://www.facebook.com/connect/ping*" />
     <allow-navigation href="*://m.facebook.com/v2.5/dialog/oauth*" />
     <allow-navigation href="*://app.northbrasil.com.br" />
+    <allow-navigation href="*://copabrasil.com.br" />
     <allow-intent href="tel:*" />
     <allow-intent href="geo:*" />
     <allow-intent href="maps:*" />
